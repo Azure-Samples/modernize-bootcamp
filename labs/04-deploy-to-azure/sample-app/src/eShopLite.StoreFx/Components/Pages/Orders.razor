@@ -1,0 +1,118 @@
+@page "/orders"
+@page "/order"
+@page "/order/index"
+@attribute [Authorize]
+@inject IOrderService OrderService
+
+<PageTitle>My orders - eShopLite</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page-head">
+            <div>
+                <h1>My orders</h1>
+                <p class="sub">Everything you have ordered, newest first.</p>
+            </div>
+        </div>
+
+        @if (_loading)
+        {
+            <div class="stat-grid">
+                <div class="skeleton" style="height: 104px;"></div>
+                <div class="skeleton" style="height: 104px;"></div>
+                <div class="skeleton" style="height: 104px;"></div>
+            </div>
+            <div class="panel p-3">
+                @for (var i = 0; i < 4; i++)
+                {
+                    <div class="skeleton skeleton-row"></div>
+                }
+            </div>
+        }
+        else
+        {
+            @if (_summary is not null)
+            {
+                <div class="stat-grid">
+                    <div class="stat">
+                        <div class="label">Orders placed</div>
+                        <div class="value">@_summary.OrderCount</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Lifetime total</div>
+                        <div class="value">USD @_summary.LifetimeTotal.ToString("N2")</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">First order</div>
+                        <div class="value">
+                            @(_summary.FirstOrderUtc.HasValue
+                                ? _summary.FirstOrderUtc.Value.ToString("dd MMM yyyy")
+                                : "\u2014")
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (_orders is null || _orders.Count == 0)
+            {
+                <EmptyState Icon="receipt"
+                            Title="No orders yet"
+                            Message="Once you check out, your receipts will collect here."
+                            ActionText="Browse products"
+                            ActionHref="/products" />
+            }
+            else
+            {
+                <div class="panel">
+                    <table class="table-app">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Placed (UTC)</th>
+                                <th class="mid">Items</th>
+                                <th class="num">Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in _orders)
+                            {
+                                <tr @key="order.Id">
+                                    <td class="fw-semibold">#@order.Id</td>
+                                    <td>@order.PlacedUtc.ToString("dd MMM yyyy, HH:mm")</td>
+                                    <td class="mid"><span class="badge-soft">@order.Lines.Sum(l => l.Quantity)</span></td>
+                                    <td class="num fw-semibold">USD @order.Total.ToString("N2")</td>
+                                    <td class="num">
+                                        <a href="@($"/orders/{order.Id}")" class="btn-ghost btn-sm">View receipt</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private IReadOnlyList<Order> _orders;
+    private OrderSummary _summary;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        // Always the signed-in user, never a route value.
+        var userName = state.User.Identity?.Name;
+
+        _summary = await OrderService.GetSummaryAsync(userName);
+        _orders = await OrderService.GetOrdersForUserAsync(userName);
+
+        _loading = false;
+    }
+}

@@ -3,6 +3,34 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+
+## Build output
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio / Rider / VS Code caches
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Test / coverage output
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+
+## Modernization & upgrade agent artifacts
+.github/modernize/
+.github/upgrades/
+
+## Holds the SQL password; use connectionStrings.config.example as the template
+connectionStrings.config
+
+## packages/ is ignored by the root .gitignore. Restore it with nuget.exe before
+## building -- the csproj HintPaths resolve into it. See each app's README.
+
 # User-specific files
 *.rsuser
 *.suo
@@ -427,3 +455,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+.fake

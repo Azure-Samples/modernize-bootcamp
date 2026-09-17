@@ -1,0 +1,55 @@
+@page "/stores"
+@page "/home/stores"
+@inject IStoreService StoreService
+
+<PageTitle>Stores - eShopLite</PageTitle>
+
+<div class="page-head">
+    <div>
+        <h1>Stores</h1>
+        <p class="sub">Where to find us, and when we are open.</p>
+    </div>
+</div>
+
+@if (_stores is null)
+{
+    <div class="panel p-3">
+        @for (var i = 0; i < 6; i++)
+        {
+            <div class="skeleton skeleton-row"></div>
+        }
+    </div>
+}
+else if (_stores.Count == 0)
+{
+    <EmptyState Icon="store" Title="No stores to show" Message="The store directory is empty right now." />
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var store in _stores)
+        {
+            <div class="col-sm-6 col-lg-4" @key="store.Id">
+                <div class="card-app is-hoverable h-100 p-4">
+                    <div class="feature-icon"><AppIcon Name="store" Size="20" /></div>
+                    <h3 class="h5 mb-2">@store.Name</h3>
+                    <p class="text-muted small mb-2 d-flex align-items-center gap-2">
+                        <AppIcon Name="pin" Size="15" /> @store.City, @store.State
+                    </p>
+                    <p class="text-muted small mb-0 d-flex align-items-center gap-2">
+                        <AppIcon Name="clock" Size="15" /> @store.Hours
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IReadOnlyList<StoreInfo> _stores;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _stores = await StoreService.GetStoresAsync();
+    }
+}

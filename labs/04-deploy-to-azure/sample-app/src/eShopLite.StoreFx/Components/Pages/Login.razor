@@ -1,0 +1,82 @@
+@page "/account/login"
+@layout MainLayout
+@inject NavigationManager Navigation
+
+<PageTitle>Sign in - eShopLite</PageTitle>
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <h1>Welcome back</h1>
+        <p class="sub">Sign in to check out and to see your order history.</p>
+
+        @if (Error == "invalid")
+        {
+            <div class="alert-app error">
+                <AppIcon Name="alert" Size="18" />
+                <span>Invalid user name or password.</span>
+            </div>
+        }
+        else if (Error == "expired")
+        {
+            <div class="alert-app warning">
+                <AppIcon Name="alert" Size="18" />
+                <span>That form expired. Please try again.</span>
+            </div>
+        }
+
+        @* Posts natively to the minimal API endpoint: issuing the authentication cookie needs a
+           real HTTP response, and the full reload gives the new circuit the signed-in identity. *@
+        <form method="post" action="/auth/login">
+            <AntiforgeryToken />
+            <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+
+            <div class="field">
+                <label for="userName">User name</label>
+                <input class="input-app" id="userName" name="userName" autocomplete="username"
+                       required autofocus @bind="_userName" @bind:event="oninput" />
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <input class="input-app" id="password" name="password" required
+                           type="@(_showPassword ? "text" : "password")" autocomplete="current-password"
+                           @bind="_password" @bind:event="oninput" />
+                    <button type="button" class="reveal" @onclick="TogglePassword"
+                            aria-label="@(_showPassword ? "Hide password" : "Show password")">
+                        <AppIcon Name="@(_showPassword ? "eye-off" : "eye")" Size="17" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="check">
+                    <input type="checkbox" name="rememberMe" value="true" />
+                    <span>Remember me</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-app w-100">
+                <AppIcon Name="lock" Size="16" /> Sign in
+            </button>
+        </form>
+
+        <p class="text-muted small text-center mt-4 mb-0">
+            Browsing and building a cart stay open to everyone &mdash; only checkout needs an account.
+        </p>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private string ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string Error { get; set; }
+
+    private string _userName = string.Empty;
+    private string _password = string.Empty;
+    private bool _showPassword;
+
+    private void TogglePassword() => _showPassword = !_showPassword;
+}

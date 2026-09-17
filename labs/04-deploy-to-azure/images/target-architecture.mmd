@@ -1,0 +1,33 @@
+flowchart TB
+    GH[GitHub Actions<br/>OIDC federation] -. scoped RBAC .-> UAMI[Deployment managed identity]
+    UAMI --> DEPLOY[Bicep deployments]
+    USER((HTTPS client)) --> AFD[Azure Front Door Premium<br/>Private Link origin]
+
+    subgraph APP[Central US by default - application VNet 10.20.0.0/20]
+        ACA[Internal, zone-redundant<br/>Container Apps environment]
+        APP01[Placeholder Container App<br/>port 8080 / min 2 / bounded HTTP scale]
+        ACA --> APP01
+    end
+
+    AFD == Private Link ==> APP01
+
+    subgraph DB1[North Central US database VNet 10.0.0.0/20]
+        BASTION[Azure Bastion]
+        WIN[Windows VM<br/>SQL Server / SSMS / SHIR<br/>no public IP]
+        LINUX[Ubuntu test VM<br/>no public IP]
+        SQLEP[Azure SQL private endpoint]
+        BASTION --> WIN
+        BASTION --> LINUX
+    end
+
+    subgraph DB2[Central US database VNet 10.1.0.0/20]
+        SQLMI[(Optional Azure SQL MI<br/>manual workflow)]
+    end
+
+    DB1 <-- VNet peering --> DB2
+    SQLDB[(Azure SQL Database<br/>Entra-only / public access disabled)] --- SQLEP
+    DMS[Azure Database Migration Service] -. SHIR registration .-> WIN
+    WIN --> SQLEP
+    WIN --> SQLMI
+    KV[Bootstrap Key Vault<br/>generated VM credentials] -. secure retrieval .-> DEPLOY
+    ACR[Azure Container Registry] --> APP01

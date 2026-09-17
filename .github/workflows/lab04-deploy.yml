@@ -1,0 +1,324 @@
+name: Lab 04 - Deploy Azure foundation
+
+on:
+  workflow_dispatch:
+    inputs:
+      implementation:
+        description: Infrastructure implementation to deploy
+        required: true
+        type: choice
+        default: student
+        options:
+          - student
+          - complete
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lab04-foundation
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Validate and preview
+    runs-on: ubuntu-latest
+    environment: lab04
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      iac-path: ${{ steps.implementation.outputs.path }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select allow-listed implementation
+        id: implementation
+        shell: bash
+        run: |
+          case "${{ inputs.implementation }}" in
+            student|complete)
+              echo "path=infra/lab04/${{ inputs.implementation }}" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "::error::Unsupported implementation selection."
+              exit 1
+              ;;
+          esac
+
+      - name: Sign in to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify deployment context
+        shell: bash
+        run: |
+          set -euo pipefail
+          az account show --query '{subscription:name, subscriptionId:id, tenantId:tenantId}' --output table
+          for name in \
+            "${{ vars.LAB04_BOOTSTRAP_RESOURCE_GROUP }}" \
+            "${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}" \
+            "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
+            "${{ vars.LAB04_GLOBAL_RESOURCE_GROUP }}"; do
+            az group show --name "$name" --query name --output tsv
+          done
+
+      - name: Build all Bicep entry points
+        shell: bash
+        env:
+          IAC_PATH: ${{ steps.implementation.outputs.path }}
+        run: |
+          set -euo pipefail
+          for entry in primary secondary global sqlmi; do
+            az bicep build --file "$IAC_PATH/$entry.bicep" --stdout > /dev/null
+          done
+
+      - name: Read secure VM parameters
+        id: vm-credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          vm_user="$(az keyvault secret show \
+            --vault-name "${{ vars.LAB04_KEY_VAULT_NAME }}" \
+            --name vm-admin-username \
+            --query value --output tsv)"
+          vm_password="$(az keyvault secret show \
+            --vault-name "${{ vars.LAB04_KEY_VAULT_NAME }}" \
+            --name vm-admin-password \
+            --query value --output tsv)"
+          echo "::add-mask::$vm_user"
+          echo "::add-mask::$vm_password"
+          echo "username=$vm_user" >> "$GITHUB_OUTPUT"
+          echo "password=$vm_password" >> "$GITHUB_OUTPUT"
+
+      - name: Validate primary deployment
+        shell: bash
+        env:
+          IAC_PATH: ${{ steps.implementation.outputs.path }}
+          VM_ADMIN_USERNAME: ${{ steps.vm-credentials.outputs.username }}
+          VM_ADMIN_PASSWORD: ${{ steps.vm-credentials.outputs.password }}
+        run: |
+          set -euo pipefail
+          az deployment group validate \
+            --resource-group "${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/primary.bicep" \
+            --parameters \
+              prefix="${{ vars.LAB04_PREFIX }}" \
+              suffix="${{ vars.LAB04_SUFFIX }}" \
+              location="${{ vars.LAB04_PRIMARY_LOCATION }}" \
+              codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}" \
+              sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
+              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+              vmAdminUsername="$VM_ADMIN_USERNAME" \
+              vmAdminPassword="$VM_ADMIN_PASSWORD" \
+            --output none
+
+      - name: Preview primary deployment
+        shell: bash
+        env:
+          IAC_PATH: ${{ steps.implementation.outputs.path }}
+          VM_ADMIN_USERNAME: ${{ steps.vm-credentials.outputs.username }}
+          VM_ADMIN_PASSWORD: ${{ steps.vm-credentials.outputs.password }}
+        run: |
+          set -euo pipefail
+          az deployment group what-if \
+            --resource-group "${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/primary.bicep" \
+            --parameters \
+              prefix="${{ vars.LAB04_PREFIX }}" \
+              suffix="${{ vars.LAB04_SUFFIX }}" \
+              location="${{ vars.LAB04_PRIMARY_LOCATION }}" \
+              codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}" \
+              sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
+              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+              vmAdminUsername="$VM_ADMIN_USERNAME" \
+              vmAdminPassword="$VM_ADMIN_PASSWORD"
+
+  deploy:
+    name: Deploy approved foundation
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: lab04-deploy
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Sign in to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read secure VM parameters
+        id: vm-credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          vm_user="$(az keyvault secret show \
+            --vault-name "${{ vars.LAB04_KEY_VAULT_NAME }}" \
+            --name vm-admin-username \
+            --query value --output tsv)"
+          vm_password="$(az keyvault secret show \
+            --vault-name "${{ vars.LAB04_KEY_VAULT_NAME }}" \
+            --name vm-admin-password \
+            --query value --output tsv)"
+          echo "::add-mask::$vm_user"
+          echo "::add-mask::$vm_password"
+          echo "username=$vm_user" >> "$GITHUB_OUTPUT"
+          echo "password=$vm_password" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy primary region
+        id: primary
+        shell: bash
+        env:
+          IAC_PATH: ${{ needs.plan.outputs.iac-path }}
+          VM_ADMIN_USERNAME: ${{ steps.vm-credentials.outputs.username }}
+          VM_ADMIN_PASSWORD: ${{ steps.vm-credentials.outputs.password }}
+        run: |
+          set -euo pipefail
+          outputs="$(az deployment group create \
+            --name "lab04-primary-${{ github.run_number }}" \
+            --resource-group "${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/primary.bicep" \
+            --parameters \
+              prefix="${{ vars.LAB04_PREFIX }}" \
+              suffix="${{ vars.LAB04_SUFFIX }}" \
+              location="${{ vars.LAB04_PRIMARY_LOCATION }}" \
+              codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}" \
+              sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
+              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+              vmAdminUsername="$VM_ADMIN_USERNAME" \
+              vmAdminPassword="$VM_ADMIN_PASSWORD" \
+            --query properties.outputs --output json)"
+          echo "registry-name=$(jq -r '.containerRegistryName.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+          echo "private-dns-zone=$(jq -r '.privateDnsZoneName.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+          echo "database-vnet-id=$(jq -r '.databaseVnetId.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+          echo "database-vnet-name=$(jq -r '.databaseVnetName.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+
+      - name: Preview and deploy secondary region
+        id: secondary
+        shell: bash
+        env:
+          IAC_PATH: ${{ needs.plan.outputs.iac-path }}
+        run: |
+          set -euo pipefail
+          params=(
+            prefix="${{ vars.LAB04_PREFIX }}"
+            suffix="${{ vars.LAB04_SUFFIX }}"
+            location="${{ vars.LAB04_SECONDARY_LOCATION }}"
+            applicationLocation="${{ vars.LAB04_APPLICATION_LOCATION }}"
+            codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}"
+            containerRegistryName="${{ steps.primary.outputs.registry-name }}"
+            containerRegistryResourceGroupName="${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}"
+            privateDnsZoneResourceGroupName="${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}"
+            privateDnsZoneName="${{ steps.primary.outputs.private-dns-zone }}"
+            primaryDatabaseResourceGroupName="${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}"
+            primaryDatabaseVnetName="${{ steps.primary.outputs.database-vnet-name }}"
+            primaryDatabaseVnetId="${{ steps.primary.outputs.database-vnet-id }}"
+          )
+          az deployment group what-if \
+            --resource-group "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/secondary.bicep" \
+            --parameters "${params[@]}"
+          outputs="$(az deployment group create \
+            --name "lab04-secondary-${{ github.run_number }}" \
+            --resource-group "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/secondary.bicep" \
+            --parameters "${params[@]}" \
+            --query properties.outputs --output json)"
+          echo "container-app-fqdn=$(jq -r '.containerAppFqdn.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+          echo "environment-id=$(jq -r '.containerAppsEnvironmentId.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+
+      - name: Preview and deploy global routing
+        id: global
+        shell: bash
+        env:
+          IAC_PATH: ${{ needs.plan.outputs.iac-path }}
+        run: |
+          set -euo pipefail
+          params=(
+            prefix="${{ vars.LAB04_PREFIX }}"
+            suffix="${{ vars.LAB04_SUFFIX }}"
+            applicationLocation="${{ vars.LAB04_APPLICATION_LOCATION }}"
+            codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}"
+            originFqdn="${{ steps.secondary.outputs.container-app-fqdn }}"
+            containerAppsEnvironmentId="${{ steps.secondary.outputs.environment-id }}"
+          )
+          az deployment group what-if \
+            --resource-group "${{ vars.LAB04_GLOBAL_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/global.bicep" \
+            --parameters "${params[@]}"
+          outputs="$(az deployment group create \
+            --name "lab04-global-${{ github.run_number }}" \
+            --resource-group "${{ vars.LAB04_GLOBAL_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/global.bicep" \
+            --parameters "${params[@]}" \
+            --query properties.outputs --output json)"
+          echo "endpoint=$(jq -r '.frontDoorEndpointHostName.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+
+      - name: Approve Front Door private endpoint connections
+        shell: bash
+        env:
+          ENVIRONMENT_ID: ${{ steps.secondary.outputs.environment-id }}
+        run: |
+          set -euo pipefail
+          approved=false
+          for attempt in {1..20}; do
+            mapfile -t pending < <(az network private-endpoint-connection list \
+              --id "$ENVIRONMENT_ID" \
+              --query "[?properties.privateLinkServiceConnectionState.status=='Pending'].id" \
+              --output tsv)
+            if (( ${#pending[@]} > 0 )); then
+              for connection_id in "${pending[@]}"; do
+                az network private-endpoint-connection approve \
+                  --id "$connection_id" \
+                  --description 'Approved by the Lab 04 deployment workflow.' \
+                  --output none
+              done
+              approved=true
+              break
+            fi
+            sleep 15
+          done
+          if [[ "$approved" != true ]]; then
+            echo "::error::No pending Front Door Private Link request appeared for $ENVIRONMENT_ID."
+            exit 1
+          fi
+
+      - name: Smoke test Front Door
+        shell: bash
+        env:
+          FRONT_DOOR_ENDPOINT: ${{ steps.global.outputs.endpoint }}
+        run: |
+          set -euo pipefail
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --max-time 20 \
+              "https://$FRONT_DOOR_ENDPOINT/healthz" > /dev/null; then
+              echo "Front Door endpoint is healthy: https://$FRONT_DOOR_ENDPOINT/"
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "::error::Front Door did not become healthy within the smoke-test window."
+          exit 1
+
+      - name: Write deployment summary
+        shell: bash
+        run: |
+          {
+            echo "## Lab 04 foundation"
+            echo
+            echo "- Implementation: \`${{ inputs.implementation }}\`"
+            echo "- Front Door: https://${{ steps.global.outputs.endpoint }}/"
+            echo "- Primary resource group: \`${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}\`"
+            echo "- Secondary resource group: \`${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}\`"
+            echo "- Global resource group: \`${{ vars.LAB04_GLOBAL_RESOURCE_GROUP }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,164 @@
+name: Lab 04 - Deploy optional SQL Managed Instance
+
+on:
+  workflow_dispatch:
+    inputs:
+      implementation:
+        description: Infrastructure implementation to deploy
+        required: true
+        type: choice
+        default: complete
+        options:
+          - student
+          - complete
+      confirm_cost:
+        description: I understand SQL MI is expensive and can take hours to deploy
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lab04-sqlmi
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Validate and preview SQL MI
+    if: ${{ inputs.confirm_cost }}
+    runs-on: ubuntu-latest
+    environment: lab04
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      iac-path: ${{ steps.implementation.outputs.path }}
+      database-vnet-name: ${{ steps.network.outputs.vnet-name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select allow-listed implementation
+        id: implementation
+        shell: bash
+        run: |
+          case "${{ inputs.implementation }}" in
+            student|complete)
+              echo "path=infra/lab04/${{ inputs.implementation }}" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "::error::Unsupported implementation selection."
+              exit 1
+              ;;
+          esac
+
+      - name: Sign in to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify base deployment and SQL MI subnet
+        id: network
+        shell: bash
+        run: |
+          set -euo pipefail
+          vnet_name="${{ vars.LAB04_PREFIX }}-db-secondary-${{ vars.LAB04_SUFFIX }}-vnet"
+          az network vnet subnet show \
+            --resource-group "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
+            --vnet-name "$vnet_name" \
+            --name snet-sqlmi \
+            --query id --output tsv
+          echo "vnet-name=$vnet_name" >> "$GITHUB_OUTPUT"
+
+      - name: Build and validate SQL MI Bicep
+        shell: bash
+        env:
+          IAC_PATH: ${{ steps.implementation.outputs.path }}
+        run: |
+          set -euo pipefail
+          az bicep build --file "$IAC_PATH/sqlmi.bicep" --stdout > /dev/null
+          az deployment group validate \
+            --resource-group "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/sqlmi.bicep" \
+            --parameters \
+              prefix="${{ vars.LAB04_PREFIX }}" \
+              suffix="${{ vars.LAB04_SUFFIX }}" \
+              location="${{ vars.LAB04_SECONDARY_LOCATION }}" \
+              databaseVnetName="${{ steps.network.outputs.vnet-name }}" \
+              sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
+              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+            --output none
+
+      - name: Preview SQL MI deployment
+        shell: bash
+        env:
+          IAC_PATH: ${{ steps.implementation.outputs.path }}
+        run: |
+          set -euo pipefail
+          az deployment group what-if \
+            --resource-group "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/sqlmi.bicep" \
+            --parameters \
+              prefix="${{ vars.LAB04_PREFIX }}" \
+              suffix="${{ vars.LAB04_SUFFIX }}" \
+              location="${{ vars.LAB04_SECONDARY_LOCATION }}" \
+              databaseVnetName="${{ steps.network.outputs.vnet-name }}" \
+              sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
+              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}"
+
+  deploy:
+    name: Deploy approved SQL MI
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: lab04-deploy
+    timeout-minutes: 360
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Sign in to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy SQL Managed Instance
+        id: sqlmi
+        shell: bash
+        env:
+          IAC_PATH: ${{ needs.plan.outputs.iac-path }}
+        run: |
+          set -euo pipefail
+          outputs="$(az deployment group create \
+            --name "lab04-sqlmi-${{ github.run_number }}" \
+            --resource-group "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
+            --template-file "$IAC_PATH/sqlmi.bicep" \
+            --parameters \
+              prefix="${{ vars.LAB04_PREFIX }}" \
+              suffix="${{ vars.LAB04_SUFFIX }}" \
+              location="${{ vars.LAB04_SECONDARY_LOCATION }}" \
+              databaseVnetName="${{ needs.plan.outputs.database-vnet-name }}" \
+              sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
+              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+            --query properties.outputs --output json)"
+          echo "name=$(jq -r '.managedInstanceName.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+          echo "fqdn=$(jq -r '.managedInstanceFqdn.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+
+      - name: Write deployment summary
+        shell: bash
+        run: |
+          {
+            echo "## Optional SQL Managed Instance"
+            echo
+            echo "- Name: \`${{ steps.sqlmi.outputs.name }}\`"
+            echo "- FQDN: \`${{ steps.sqlmi.outputs.fqdn }}\`"
+            echo "- Resource group: \`${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

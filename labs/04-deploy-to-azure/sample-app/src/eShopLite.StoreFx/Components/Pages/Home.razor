@@ -1,0 +1,78 @@
+@page "/"
+@page "/home"
+@page "/home/index"
+
+<PageTitle>eShopLite - outdoor gear, simply</PageTitle>
+
+<div class="stack-lg">
+    <section class="hero">
+        <div class="hero-inner">
+            <span class="eyebrow"><AppIcon Name="sparkle" Size="14" /> Outdoor gear</span>
+            <h1>Kit that keeps up with the trail.</h1>
+            <p>
+                Browse and search the catalogue, open a product for the full details, build a cart
+                that follows you through sign-in, and look back over everything you have ordered.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/products" class="btn-app">Browse products <AppIcon Name="arrow-right" Size="16" /></a>
+                <a href="/stores" class="btn-ghost">Find a store</a>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="/products" class="card-app is-hoverable feature-card">
+                    <span class="feature-icon"><AppIcon Name="package" Size="21" /></span>
+                    <h3>Shop</h3>
+                    <p>
+                        Search by name or description, open any product for its full details, pick a
+                        quantity, and add it to your cart without leaving the page.
+                    </p>
+                    <span class="link-arrow">Products <AppIcon Name="arrow-right" Size="15" /></span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/stores" class="card-app is-hoverable feature-card">
+                    <span class="feature-icon"><AppIcon Name="store" Size="21" /></span>
+                    <h3>Stores</h3>
+                    <p>
+                        Our locations, each with its own city and opening hours &mdash; the physical
+                        side of the catalogue.
+                    </p>
+                    <span class="link-arrow">Stores <AppIcon Name="arrow-right" Size="15" /></span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/orders" class="card-app is-hoverable feature-card">
+                    <span class="feature-icon"><AppIcon Name="receipt" Size="21" /></span>
+                    <h3>Your orders</h3>
+                    <p>
+                        Every order you have placed, newest first, with a running lifetime total and
+                        a link back to each receipt. You only ever see your own.
+                    </p>
+                    <span class="link-arrow">My orders <AppIcon Name="arrow-right" Size="15" /></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4">
+        <div class="col-md-6">
+            <h2 class="h4">About eShopLite</h2>
+            <p class="text-muted mb-0">
+                Everything the storefront does is reachable from the header: <strong>Products</strong>
+                for the catalogue and product details, <strong>Stores</strong> for locations and
+                opening hours, and <strong>Orders</strong> for your history once you are signed in.
+            </p>
+        </div>
+        <div class="col-md-6">
+            <h2 class="h4">Signing in</h2>
+            <p class="text-muted mb-0">
+                Browsing and adding to the cart are open to everyone; checkout requires an account.
+                Your cart is kept server-side and survives signing in.
+            </p>
+        </div>
+    </section>
+</div>

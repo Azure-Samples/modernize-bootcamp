@@ -1,0 +1,130 @@
+@page "/products"
+@page "/home/products"
+@implements IDisposable
+@inject IStoreService StoreService
+@inject NavigationManager Navigation
+
+<PageTitle>Products - eShopLite</PageTitle>
+
+<div class="page-head">
+    <div>
+        <h1>Products</h1>
+        <p class="sub">Search the catalogue and add anything to your cart.</p>
+    </div>
+
+    <div class="search-bar">
+        <span class="icon"><AppIcon Name="search" Size="18" /></span>
+        <input type="search" placeholder="Search products" aria-label="Search products"
+               value="@_searchTerm" @oninput="OnSearchInput" @onkeydown="OnSearchKeyDown" />
+        @if (!string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            <button type="button" class="btn-quiet btn-sm" @onclick="ClearSearch">Clear</button>
+        }
+    </div>
+</div>
+
+@if (_products is null)
+{
+    <div class="product-grid">
+        @for (var i = 0; i < 6; i++)
+        {
+            <div class="skeleton skeleton-card"></div>
+        }
+    </div>
+}
+else if (_products.Count == 0)
+{
+    <EmptyState Icon="search"
+                Title="@($"Nothing matched \"{_searchTerm}\"")"
+                Message="Try a shorter search, or clear it to see the whole catalogue."
+                ActionText="Show all products"
+                ActionHref="/products" />
+}
+else
+{
+    <p class="text-muted small mb-3">
+        Showing @_products.Count product@(_products.Count == 1 ? null : "s")@(string.IsNullOrWhiteSpace(_searchTerm) ? null : $" for \"{_searchTerm}\"")
+    </p>
+
+    <div class="product-grid">
+        @foreach (var product in _products)
+        {
+            <ProductCard Product="product" @key="product.Id" />
+        }
+    </div>
+}
+
+@code {
+    // Kept as a query string so a search stays shareable and bookmarkable, exactly as the
+    // MVC action's ?q= parameter did.
+    [SupplyParameterFromQuery(Name = "q")]
+    private string Query { get; set; }
+
+    private IReadOnlyList<Product> _products;
+    private string _searchTerm = string.Empty;
+    private CancellationTokenSource _debounce;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _searchTerm = Query ?? string.Empty;
+        _products = null;
+
+        _products = await StoreService.SearchProductsAsync(_searchTerm);
+    }
+
+    private void OnSearchInput(ChangeEventArgs args)
+    {
+        _searchTerm = args.Value?.ToString() ?? string.Empty;
+
+        _debounce?.Cancel();
+        _debounce?.Dispose();
+        _debounce = new CancellationTokenSource();
+
+        _ = DebouncedNavigateAsync(_searchTerm, _debounce.Token);
+    }
+
+    private async Task DebouncedNavigateAsync(string term, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(325, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        await InvokeAsync(() => Navigate(term));
+    }
+
+    private void OnSearchKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            _debounce?.Cancel();
+            Navigate(_searchTerm);
+        }
+    }
+
+    private void ClearSearch()
+    {
+        _debounce?.Cancel();
+        _searchTerm = string.Empty;
+        Navigate(string.Empty);
+    }
+
+    private void Navigate(string term)
+    {
+        var target = string.IsNullOrWhiteSpace(term)
+            ? "/products"
+            : $"/products?q={Uri.EscapeDataString(term.Trim())}";
+
+        Navigation.NavigateTo(target, replace: true);
+    }
+
+    public void Dispose()
+    {
+        _debounce?.Cancel();
+        _debounce?.Dispose();
+    }
+}

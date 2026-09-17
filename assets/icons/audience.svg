@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+  <title id="title">Audience</title>
+  <rect width="32" height="32" rx="7" fill="#d83b01"/>
+  <circle cx="16" cy="11" r="5" fill="#fff"/>
+  <path d="M7 27c.5-6 3.5-9 9-9s8.5 3 9 9H7Z" fill="#ffd8c2"/>
+  <circle cx="7" cy="14" r="3" fill="#ffb900"/>
+  <circle cx="25" cy="14" r="3" fill="#ffb900"/>
+</svg>

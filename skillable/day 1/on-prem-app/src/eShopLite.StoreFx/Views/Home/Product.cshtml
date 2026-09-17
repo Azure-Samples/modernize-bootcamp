@@ -1,0 +1,27 @@
+@using eShopLite.StoreFx.Models
+@model Product
+@{
+  ViewBag.Title = Model.Name;
+}
+<main aria-labelledby="title">
+  <p>@Html.ActionLink("\u2190 Back to products", "Products", "Home")</p>
+
+  <div class="row">
+    @Html.Action("ProductDetails", "Home", new { id = Model.Id })
+  </div>
+
+  <div class="row">
+    <div class="col-md-7 offset-md-5">
+      @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "d-flex gap-2 align-items-center" }))
+      {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="productId" value="@Model.Id" />
+        <input type="hidden" name="returnUrl" value="@Request.Url.PathAndQuery" />
+        <label class="visually-hidden" for="qty">Quantity</label>
+        <input type="number" id="qty" name="quantity" value="1" min="1"
+               class="form-control" style="width: 6rem;" />
+        <button type="submit" class="btn btn-primary">Add to cart</button>
+      }
+    </div>
+  </div>
+</main>

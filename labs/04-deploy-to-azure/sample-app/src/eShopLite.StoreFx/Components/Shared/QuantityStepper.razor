@@ -1,0 +1,41 @@
+<div class="stepper" role="group" aria-label="Quantity">
+    <button type="button" @onclick="Decrement" disabled="@(Value <= Min)" aria-label="Decrease quantity">
+        <AppIcon Name="minus" Size="15" />
+    </button>
+    <span class="value" aria-live="polite">@Value</span>
+    <button type="button" @onclick="Increment" disabled="@(Value >= Max)" aria-label="Increase quantity">
+        <AppIcon Name="plus" Size="15" />
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public int Value { get; set; } = 1;
+
+    [Parameter]
+    public EventCallback<int> ValueChanged { get; set; }
+
+    [Parameter]
+    public int Min { get; set; } = 1;
+
+    [Parameter]
+    public int Max { get; set; } = 99;
+
+    private Task Increment() => Set(Value + 1);
+
+    private Task Decrement() => Set(Value - 1);
+
+    private Task Set(int next)
+    {
+        next = Math.Clamp(next, Min, Max);
+
+        if (next == Value)
+        {
+            return Task.CompletedTask;
+        }
+
+        Value = next;
+
+        return ValueChanged.InvokeAsync(next);
+    }
+}

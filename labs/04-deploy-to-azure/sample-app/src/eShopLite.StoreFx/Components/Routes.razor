@@ -1,0 +1,29 @@
+@inject CartState Cart
+
+@* NotFoundPage, not the legacy <NotFound> fragment: on .NET 10 the fragment yields a 404 with an
+   empty body, which is how an unmatched route ends up rendering as a blank page. *@
+<Router AppAssembly="@typeof(Routes).Assembly" NotFoundPage="@typeof(Pages.PageNotFound)">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            <NotAuthorized>
+                <RedirectToLogin />
+            </NotAuthorized>
+            <Authorizing>
+                <div class="container py-5 text-center text-muted">Checking your session&hellip;</div>
+            </Authorizing>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+</Router>
+
+@code {
+    // Supplied by App.razor, which is the last component with access to HttpContext and therefore
+    // the cart cookie. Runs once per render scope: once while prerendering, once per circuit.
+    [Parameter]
+    public string CartKey { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Cart.Initialize(CartKey);
+    }
+}

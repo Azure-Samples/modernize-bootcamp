@@ -1,0 +1,14 @@
+[
+  {
+    "username": "admin",
+    "passwordHash": "f865b53623b121fd34ee5426c792e5c33af8c227",
+    "role": "Editor",
+    "displayName": "Catalog Administrator"
+  },
+  {
+    "username": "supportdeskagent",
+    "passwordHash": "f433468eb1433476eee5058bf8a4e968d0ce44a3",
+    "role": "Reader",
+    "displayName": "Support Desk Agent"
+  }
+]

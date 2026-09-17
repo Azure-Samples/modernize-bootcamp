@@ -1,0 +1,55 @@
+@implements IDisposable
+@inject CartState Cart
+
+<a href="/cart" class="cart-button" aria-label="@AriaLabel">
+    <AppIcon Name="cart" Size="18" />
+    <span class="d-none d-sm-inline">Cart</span>
+    @if (_count > 0)
+    {
+        <span class="cart-count @(_bump ? "bump" : null)">@_count</span>
+    }
+</a>
+
+@code {
+    private int _count;
+    private bool _bump;
+
+    private string AriaLabel => _count == 0 ? "Cart, empty" : $"Cart, {_count} item(s)";
+
+    protected override void OnInitialized()
+    {
+        _count = Cart.Cart.ItemCount;
+        Cart.Changed += OnCartChanged;
+    }
+
+    private void OnCartChanged()
+    {
+        var next = Cart.Cart.ItemCount;
+        var grew = next > _count;
+        _count = next;
+
+        InvokeAsync(StateHasChanged);
+
+        if (grew)
+        {
+            _ = BumpAsync();
+        }
+    }
+
+    // The class has to come back off, or re-adding it never restarts the CSS animation.
+    private async Task BumpAsync()
+    {
+        _bump = true;
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(500);
+
+        _bump = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Cart.Changed -= OnCartChanged;
+    }
+}

@@ -1,0 +1,36 @@
+@inject CartState Cart
+@inject ToastService Toasts
+
+<article class="product-card">
+    <a class="product-media" href="@DetailUrl" aria-label="@Product.Name">
+        <img src="@ProductImage.UrlFor(Product.ImageUrl)" alt="@Product.Name" loading="lazy" width="320" height="240" />
+    </a>
+    <div class="product-body">
+        <a class="product-title" href="@DetailUrl">@Product.Name</a>
+        <p class="product-desc">@Product.Description</p>
+        <div class="price"><small>USD</small>@Product.Price.ToString("N2")</div>
+
+        <div class="product-actions">
+            <QuantityStepper @bind-Value="_quantity" />
+            <button type="button" class="btn-app btn-sm flex-grow-1" @onclick="AddToCart">
+                <AppIcon Name="cart" Size="16" /> Add
+            </button>
+        </div>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public Product Product { get; set; }
+
+    private int _quantity = 1;
+
+    private string DetailUrl => $"/products/{Product.Id}";
+
+    private void AddToCart()
+    {
+        Cart.Add(Product, _quantity);
+        Toasts.Show($"Added {_quantity} \u00d7 \"{Product.Name}\" to your cart.");
+        _quantity = 1;
+    }
+}

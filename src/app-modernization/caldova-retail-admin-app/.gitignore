@@ -1,0 +1,16 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+
+## NuGet (packages.config restore target)
+packages/
+*.nupkg
+
+## Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.userprefs
