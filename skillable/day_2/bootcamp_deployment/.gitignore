@@ -1,0 +1,7 @@
+# Azure Developer CLI local environments can contain generated credentials.
+.azure/*
+!.azure/deployment-plan.md
+
+# Generated deployment output and editor files.
+*.local.json
+.vscode/

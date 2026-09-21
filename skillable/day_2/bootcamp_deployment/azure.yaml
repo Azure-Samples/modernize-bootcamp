@@ -1,0 +1,12 @@
+name: bootcamp-deployment
+
+infra:
+  provider: bicep
+  path: ./infra
+  module: main
+
+hooks:
+  preprovision:
+    shell: pwsh
+    run: ./infra/hooks/preprovision.ps1
+    interactive: true

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "primaryLocation": {
+      "value": "${LAB04_PRIMARY_LOCATION}"
+    },
+    "secondaryLocation": {
+      "value": "${LAB04_SECONDARY_LOCATION}"
+    },
+    "applicationLocation": {
+      "value": "${LAB04_APPLICATION_LOCATION}"
+    },
+    "prefix": {
+      "value": "${LAB04_PREFIX}"
+    },
+    "databaseMode": {
+      "value": "${LAB04_DATABASE_MODE}"
+    },
+    "sqlEntraAdminObjectId": {
+      "value": "${LAB04_SQL_ADMIN_OBJECT_ID}"
+    },
+    "sqlEntraAdminLogin": {
+      "value": "${LAB04_SQL_ADMIN_LOGIN}"
+    },
+    "vmAdminUsername": {
+      "value": "${LAB04_VM_ADMIN_USERNAME}"
+    },
+    "vmAdminPassword": {
+      "value": "${LAB04_VM_ADMIN_PASSWORD}"
+    }
+  }
+}
