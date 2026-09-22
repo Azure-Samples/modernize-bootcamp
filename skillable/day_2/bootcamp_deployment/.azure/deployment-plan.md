@@ -1,6 +1,19 @@
 # Bootcamp Deployment Export Plan
 
-> **Status:** Validated
+> **Status:** Ready for Validation
+
+## SQL Managed Instance default amendment
+
+- Make `sqlMi` the default AZD and direct-deployment database mode.
+- Prefer Freemium General Purpose v2 (Gen5, 4 vCores, 64 GB, license included).
+- Allow instructor automation to select paid General Purpose without a separate
+  confirmation prompt when Freemium is unavailable.
+- Retain Microsoft Entra-only authentication.
+- Enable the SQL MI public endpoint without broad NSG ingress. Participants
+  separately allow only their current public IPv4 `/32` on TCP 3342.
+- Keep `azureSql` available as an explicit alternative.
+
+The remainder of this plan records the original export work.
 
 ## Multi-subscription naming hardening
 
@@ -59,8 +72,7 @@ deployment.
   `app-data-modernize`.
 - Recipe: AZD with a subscription-scoped Bicep entry point, plus a direct
   Azure CLI/PowerShell deployment path.
-- Database modes: mutually exclusive `azureSql` (default) and `sqlMi`
-  (explicit cost confirmation required).
+- Database modes: mutually exclusive `sqlMi` (default) and `azureSql`.
 
 ### Export manifest
 

@@ -21,21 +21,23 @@ endpoint. Validation and what-if remain read-only.
 The pre-provision hook selects one database target and stores the configuration
 in the active AZD environment:
 
-- `azureSql` (default): Azure SQL Database with a private endpoint.
-- `sqlMi`: Azure SQL Managed Instance in the delegated secondary subnet.
+- `sqlMi` (default): Azure SQL Managed Instance in the delegated secondary
+  subnet, requesting the Freemium offer.
+- `azureSql`: Azure SQL Database with a private endpoint.
 
-SQL MI is expensive and can take hours to provision. Selecting it requires a
-second explicit confirmation. For non-interactive use, configure both values:
+If the subscription or region cannot use Freemium, instructor automation can
+select the paid General Purpose model:
 
 ```powershell
-azd env set LAB04_DATABASE_MODE sqlMi
-azd env set LAB04_CONFIRM_SQL_MI_COST true
+azd env set LAB04_SQL_MI_PRICING_MODEL Regular
 azd up --no-prompt
 ```
 
 The targets are mutually exclusive. Both use Microsoft Entra-only
-authentication, disable their public database endpoint, and contain an `eShop`
-database. Database mode is immutable for an AZD environment because incremental
+authentication and contain an `eShop` database. Azure SQL Database disables its
+public endpoint. SQL MI enables its public endpoint, but Bicep does not add a
+broad TCP 3342 rule; participant access is added later for one public IPv4
+address. Database mode is immutable for an AZD environment because incremental
 Bicep does not delete resources omitted by a condition. To change modes, run
 `azd down --purge` and create a new AZD environment.
 
@@ -93,6 +95,13 @@ This is a training deployment, not a production security baseline. See
 [Security posture and lab exceptions](../../README.md#security-posture-and-lab-exceptions)
 for the public-endpoint inventory, accepted lab trade-offs, production
 recommendations, and Azure Landing Zone guidance.
+
+Participants do not run Bicep. After the instructor deployment, they run
+`assets/scripts/Enable-Lab04SqlMiPublicAccess.ps1` to create or update a single
+TCP 3342 NSG rule for their current public IPv4 `/32`. The participant needs
+Network Contributor on the SQL MI NSG only. Supply the public endpoint and
+resource names explicitly when the participant does not have Reader access for
+automatic discovery.
 
 ## Optional GitHub OIDC setup
 

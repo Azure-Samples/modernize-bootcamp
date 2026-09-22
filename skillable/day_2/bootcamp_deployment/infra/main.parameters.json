@@ -20,6 +20,9 @@
     "databaseMode": {
       "value": "${LAB04_DATABASE_MODE}"
     },
+    "sqlMiPricingModel": {
+      "value": "${LAB04_SQL_MI_PRICING_MODEL}"
+    },
     "sqlEntraAdminObjectId": {
       "value": "${LAB04_SQL_ADMIN_OBJECT_ID}"
     },

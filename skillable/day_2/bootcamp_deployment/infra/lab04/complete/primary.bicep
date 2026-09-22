@@ -14,7 +14,7 @@ param location string = 'centralus'
   'azureSql'
   'sqlMi'
 ])
-param databaseMode string = 'azureSql'
+param databaseMode string = 'sqlMi'
 
 param codeBuildPrincipalId string
 param sqlEntraAdminObjectId string

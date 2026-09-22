@@ -15,6 +15,12 @@ param sqlEntraAdminObjectId string
 param sqlEntraAdminLogin string
 
 @allowed([
+  'Freemium'
+  'Regular'
+])
+param pricingModel string = 'Freemium'
+
+@allowed([
   'User'
   'Group'
   'Application'
@@ -32,3 +38,4 @@ param tags object = {
 
 output managedInstanceName string = ''
 output managedInstanceFqdn string = ''
+output managedInstancePublicEndpoint string = ''

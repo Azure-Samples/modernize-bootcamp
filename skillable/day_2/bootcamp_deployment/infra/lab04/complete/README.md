@@ -47,7 +47,8 @@ it because SQL MI is now selected exclusively through `databaseMode`.
 ## Design caveats
 
 - SQL MI requires a dedicated delegated subnet, NSG, route table, available
-  regional quota, explicit cost confirmation, and a long provisioning window.
+  regional quota, and a long provisioning window. Freemium is preferred;
+  instructor automation can select paid General Purpose when it is unavailable.
 - The optional GitHub setup creates separate infrastructure preview and
   deployment identities. Preview receives Reader on the four lab resource
   groups. Only deployment receives the custom subscription deployment role,

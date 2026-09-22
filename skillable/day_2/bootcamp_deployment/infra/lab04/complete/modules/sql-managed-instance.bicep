@@ -6,6 +6,12 @@ param entraAdminObjectId string
 param entraAdminLogin string
 
 @allowed([
+  'Freemium'
+  'Regular'
+])
+param pricingModel string = 'Freemium'
+
+@allowed([
   'User'
   'Group'
   'Application'
@@ -37,16 +43,18 @@ resource managedInstance 'Microsoft.Sql/managedInstances@2023-08-01' = {
       tenantId: subscription().tenantId
     }
     collation: 'SQL_Latin1_General_CP1_CI_AS'
-    licenseType: 'BasePrice'
+    licenseType: 'LicenseIncluded'
+    pricingModel: pricingModel
+    isGeneralPurposeV2: true
     managedInstanceCreateMode: 'Default'
     minimalTlsVersion: '1.2'
     proxyOverride: 'Redirect'
-    publicDataEndpointEnabled: false
+    publicDataEndpointEnabled: true
     requestedBackupStorageRedundancy: 'Local'
     subnetId: subnetId
     timezoneId: 'UTC'
     vCores: 4
-    storageSizeInGB: 32
+    storageSizeInGB: 64
   }
 }
 
@@ -65,4 +73,5 @@ resource database 'Microsoft.Sql/managedInstances/databases@2023-08-01' = {
 output id string = managedInstance.id
 output name string = managedInstance.name
 output fullyQualifiedDomainName string = managedInstance.properties.fullyQualifiedDomainName
+output publicEndpoint string = '${replace(managedInstance.properties.fullyQualifiedDomainName, '${managedInstance.name}.', '${managedInstance.name}.public.')},3342'
 output databaseName string = database.name

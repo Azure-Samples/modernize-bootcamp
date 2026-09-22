@@ -184,26 +184,26 @@ deployment first.
 
 ## Select the database target
 
-Azure SQL Database is the default:
+SQL Managed Instance is the default and requests the Freemium offer:
 
 ```powershell
 .\infra\Deploy-Lab04.ps1 `
   -SubscriptionId $subscriptionId `
-  -DatabaseMode azureSql `
   -Action Deploy
 ```
 
-SQL Managed Instance is mutually exclusive, expensive, and can take hours. It
-requires explicit cost confirmation:
+If Freemium is unavailable, instructor automation can select the paid General
+Purpose model without an additional prompt:
 
 ```powershell
 .\infra\Deploy-Lab04.ps1 `
   -SubscriptionId $subscriptionId `
   -EnvironmentName 'lab04-direct-sqlmi' `
-  -DatabaseMode sqlMi `
-  -ConfirmSqlMiCost `
+  -SqlMiPricingModel Regular `
   -Action Deploy
 ```
+
+To deploy Azure SQL Database instead, pass `-DatabaseMode azureSql`.
 
 Do not switch database modes for an existing environment name. Conditional
 Bicep resources omitted during an incremental deployment are not automatically
