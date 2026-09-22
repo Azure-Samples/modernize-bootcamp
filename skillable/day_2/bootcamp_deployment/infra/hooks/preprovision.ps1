@@ -107,17 +107,35 @@ if ($sqlMiPricingModel -notin @('Freemium', 'Regular')) {
     throw "LAB04_SQL_MI_PRICING_MODEL must be 'Freemium' or 'Regular'. Received '$sqlMiPricingModel'."
 }
 
-$sqlAdminObjectId = Get-AzdValue -Name LAB04_SQL_ADMIN_OBJECT_ID
 $sqlAdminLogin = Get-AzdValue -Name LAB04_SQL_ADMIN_LOGIN
-if (-not $sqlAdminObjectId -or -not $sqlAdminLogin) {
-    $signedInUser = az ad signed-in-user show --query '{id:id, login:userPrincipalName}' --output json |
-        ConvertFrom-Json
-    if (-not $signedInUser.id -or -not $signedInUser.login) {
-        throw 'Unable to resolve the signed-in Microsoft Entra user for SQL administration.'
+$tenantId = az account show --query tenantId --output tsv
+if ($sqlAdminLogin) {
+    try {
+        $sqlAdmin = az ad user show `
+            --id $sqlAdminLogin `
+            --query '{id:id, login:userPrincipalName}' `
+            --output json | ConvertFrom-Json
     }
-    azd env set LAB04_SQL_ADMIN_OBJECT_ID $signedInUser.id
-    azd env set LAB04_SQL_ADMIN_LOGIN $signedInUser.login
+    catch {
+        throw "Unable to resolve SQL administrator '$sqlAdminLogin' as a Microsoft Entra user. Verify the user principal name and reauthenticate with 'az login --tenant $tenantId'."
+    }
 }
+else {
+    try {
+        $sqlAdmin = az ad signed-in-user show `
+            --query '{id:id, login:userPrincipalName}' `
+            --output json | ConvertFrom-Json
+    }
+    catch {
+        throw "Unable to resolve the signed-in Microsoft Entra user for SQL administration. Reauthenticate with 'az login --tenant $tenantId', or set LAB04_SQL_ADMIN_LOGIN to a user principal name."
+    }
+}
+if (-not $sqlAdmin.id -or -not $sqlAdmin.login) {
+    throw 'The selected Microsoft Entra SQL administrator did not return both an object ID and user principal name.'
+}
+
+azd env set LAB04_SQL_ADMIN_OBJECT_ID ([string]$sqlAdmin.id)
+azd env set LAB04_SQL_ADMIN_LOGIN ([string]$sqlAdmin.login)
 
 if (-not (Get-AzdValue -Name LAB04_VM_ADMIN_PASSWORD)) {
     $vaultName = $null

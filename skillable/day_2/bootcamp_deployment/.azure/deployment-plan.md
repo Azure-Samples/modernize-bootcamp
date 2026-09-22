@@ -9,6 +9,9 @@
 - Allow instructor automation to select paid General Purpose without a separate
   confirmation prompt when Freemium is unavailable.
 - Retain Microsoft Entra-only authentication.
+- Accept only an optional Entra administrator user principal name at the AZD
+  and direct-deployment interfaces, resolve its required object ID before
+  Bicep runs, and default to the signed-in user when the name is omitted.
 - Enable the SQL MI public endpoint without broad NSG ingress. Participants
   separately allow only their current public IPv4 `/32` on TCP 3342.
 - Keep `azureSql` available as an explicit alternative.
@@ -166,6 +169,9 @@ not require database data-plane roles.
 | Naming-updated AZD package | Pass: `azd package --no-prompt` completed; generated local environment state was removed afterward |
 | Naming-updated AZD schema | Pass: `azure.yaml` remains valid against the stable schema |
 | Naming metadata and safety | Pass: YAML/JSON, documentation links, secret scan, excluded-content scan, and zero local AZD state |
+| SQL administrator input scripts | Pass: AZD hook and direct deployment script parse without errors; only the optional UPN is exposed and the object ID is resolved internally |
+| SQL administrator Bicep contract | Pass: entry point builds; entry point and both SQL modules lint with zero diagnostics; Entra-only login and SID properties remain intact |
+| Updated AZD package | Pass: `azd package --no-prompt` completed; generated local environment state was removed afterward |
 
 Azure deployment, policy evaluation, quota checks, and runtime verification were
 not executed because this task exports a reusable package rather than deploying
