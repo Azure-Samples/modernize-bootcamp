@@ -21,9 +21,10 @@ param(
     [string]$Prefix = 'caldova-lab04',
 
     [ValidateSet('azureSql', 'sqlMi')]
-    [string]$DatabaseMode = 'azureSql',
+    [string]$DatabaseMode = 'sqlMi',
 
-    [switch]$ConfirmSqlMiCost,
+    [ValidateSet('Freemium', 'Regular')]
+    [string]$SqlMiPricingModel = 'Freemium',
 
     [ValidateSet('Validate', 'WhatIf', 'Deploy')]
     [string]$Action = 'WhatIf',
@@ -181,10 +182,6 @@ if (-not (Get-Command az -ErrorAction SilentlyContinue)) {
     throw "Azure CLI 'az' was not found on PATH."
 }
 
-if ($DatabaseMode -eq 'sqlMi' -and -not $ConfirmSqlMiCost) {
-    throw 'SQL Managed Instance is expensive and can take hours to deploy. Pass -ConfirmSqlMiCost to continue.'
-}
-
 az account set --subscription $SubscriptionId
 
 if (-not $SqlEntraAdminObjectId -or -not $SqlEntraAdminLogin) {
@@ -238,6 +235,7 @@ $deploymentParameters = @(
     "applicationLocation=$ApplicationLocation"
     "prefix=$Prefix"
     "databaseMode=$DatabaseMode"
+    "sqlMiPricingModel=$SqlMiPricingModel"
     "sqlEntraAdminObjectId=$SqlEntraAdminObjectId"
     "sqlEntraAdminLogin=$SqlEntraAdminLogin"
     "vmAdminUsername=$VmAdminUsername"

@@ -17,7 +17,7 @@ are separate concerns.
 | --- | --- |
 | Bootstrap | Resource group, RBAC-enabled Key Vault, VM secrets, separate code build/deploy managed identities |
 | Primary | Database VNet, Windows and Ubuntu VMs without public IPs, Bastion, Azure Container Registry, Database Migration Service, optional Azure SQL Database |
-| Secondary | Database and application VNets, peering, Log Analytics, internal zone-redundant Container Apps environment, placeholder Container App, optional SQL Managed Instance |
+| Secondary | Database and application VNets, peering, Log Analytics, internal zone-redundant Container Apps environment, placeholder Container App, and default SQL Managed Instance |
 | Global | Front Door Premium, endpoint, route, and Private Link origin |
 | Automation | AZD hook, direct-deployment script, optional GitHub OIDC identities/environments/workflow, cleanup script |
 
@@ -69,8 +69,8 @@ flowchart TB
 
 Exactly one database target is created:
 
-- `azureSql` is the default, lower-cost path.
-- `sqlMi` is the compatibility path and requires explicit cost confirmation.
+- `sqlMi` is the default compatibility path. It requests Freemium first.
+- `azureSql` is the explicit lower-cost alternative.
 
 Do not change database mode in place. Incremental ARM deployment does not
 delete resources omitted by a changed Bicep condition. Use a new environment or
@@ -148,19 +148,62 @@ The pre-provision hook:
 1. selects the Azure subscription and regions
 2. resolves the signed-in Entra administrator
 3. creates or recovers a compliant VM password in the local AZD environment
-4. defaults to Azure SQL Database
-5. blocks SQL MI unless cost is explicitly confirmed
+4. defaults to SQL Managed Instance with the Freemium pricing model
+5. accepts `LAB04_SQL_MI_PRICING_MODEL=Regular` when the instructor determines
+   that the subscription or region cannot use Freemium
 
-To select SQL MI before provisioning:
+To select the paid General Purpose fallback before instructor provisioning:
 
 ```powershell
-azd env set LAB04_DATABASE_MODE sqlMi
-azd env set LAB04_CONFIRM_SQL_MI_COST true
+azd env set LAB04_SQL_MI_PRICING_MODEL Regular
 azd up
 ```
 
+Freemium provides 4 vCores, 64 GB of storage, and 720 vCore-hours per month for
+12 months on one eligible instance per subscription. The paid `Regular` model
+uses the same General Purpose v2 lab shape but incurs normal Azure charges.
+
 AZD local state under `.azure/<environment>` can contain generated VM
 credentials and must not be committed or shared.
+
+## Enable participant SQL MI access
+
+Infrastructure is deployed before participants begin the lab. SQL MI keeps its
+VNet-local endpoint and also exposes the public endpoint on TCP 3342, but the
+deployment does not allow arbitrary internet traffic.
+
+An instructor must grant each participant **Network Contributor** on only the
+SQL MI network security group. If the participant needs automatic endpoint
+discovery, also grant **Reader** on the SQL MI resource; otherwise provide the
+`LAB04_SQL_MI_PUBLIC_ENDPOINT` deployment output.
+
+After `az login`, the participant runs:
+
+```powershell
+.\assets\scripts\Enable-Lab04SqlMiPublicAccess.ps1 `
+  -SubscriptionId '<subscription-id>'
+```
+
+The script asks before using `api.ipify.org`, validates the returned public
+IPv4 address, and idempotently creates or updates one TCP 3342 rule for that
+participant's Entra object ID and `/32`. Multiple participants therefore do not
+overwrite each other's rules. Participants can avoid external discovery and
+supply the address:
+
+```powershell
+.\assets\scripts\Enable-Lab04SqlMiPublicAccess.ps1 `
+  -SubscriptionId '<subscription-id>' `
+  -IpAddress '<public-ipv4>' `
+  -ResourceGroupName '<secondary-resource-group>' `
+  -NetworkSecurityGroupName '<sqlmi-nsg-name>' `
+  -PublicEndpoint '<sqlmi-public-hostname>,3342' `
+  -RuleName 'AllowSqlMi-<instructor-provided-unique-value>'
+```
+
+Rerun the script whenever the participant's public IP changes. Connect from
+SSMS with a Microsoft Entra authentication method; SQL authentication remains
+disabled. Use `-RuleName` only when tenant policy prevents
+`az ad signed-in-user show`; keep the same unique value on every rerun.
 
 ## Deploy Bicep directly
 
@@ -245,7 +288,8 @@ This is a training deployment, not a complete production landing zone.
 ### Intentionally private
 
 - VMs have no public IP addresses and are accessed through Bastion.
-- Azure SQL and SQL MI disable public database access.
+- Azure SQL disables public database access. SQL MI retains private VNet
+  connectivity and enables its public data endpoint for the migration lab.
 - The Container Apps environment is internal.
 - Front Door reaches Container Apps through Private Link.
 - Key Vault uses Azure RBAC.
@@ -257,6 +301,8 @@ This is a training deployment, not a complete production landing zone.
 - Bastion exposes its managed public endpoint.
 - ACR Basic retains public network access for GitHub-hosted runners, but its
   admin account is disabled and access uses scoped RBAC.
+- SQL MI public TCP 3342 remains blocked until a participant script adds one
+  validated public IPv4 `/32` rule to the NSG.
 - The lab does not provide enterprise hub-spoke networking, Firewall,
   DDoS Network Protection, centralized Private DNS, policy assignments, SIEM
   integration, or full multi-region disaster recovery.

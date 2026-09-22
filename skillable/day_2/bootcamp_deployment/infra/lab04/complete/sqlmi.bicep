@@ -15,6 +15,12 @@ param sqlEntraAdminObjectId string
 param sqlEntraAdminLogin string
 
 @allowed([
+  'Freemium'
+  'Regular'
+])
+param pricingModel string = 'Freemium'
+
+@allowed([
   'User'
   'Group'
   'Application'
@@ -49,10 +55,12 @@ module managedInstance './modules/sql-managed-instance.bicep' = {
     entraAdminObjectId: sqlEntraAdminObjectId
     entraAdminLogin: sqlEntraAdminLogin
     entraAdminPrincipalType: sqlEntraAdminPrincipalType
+    pricingModel: pricingModel
     tags: tags
   }
 }
 
 output managedInstanceName string = managedInstance.outputs.name
 output managedInstanceFqdn string = managedInstance.outputs.fullyQualifiedDomainName
+output managedInstancePublicEndpoint string = managedInstance.outputs.publicEndpoint
 output managedDatabaseName string = managedInstance.outputs.databaseName

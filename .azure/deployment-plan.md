@@ -2,6 +2,21 @@
 
 > **Status:** Ready for Validation
 
+## SQL Managed Instance default amendment
+
+- Make `sqlMi` the default database mode for AZD and direct Bicep deployments.
+- Prefer the Azure SQL Managed Instance free offer with General Purpose v2,
+  Gen5, 4 vCores, 64 GB, locally redundant backups, and license included.
+- Permit instructor automation to select the paid General Purpose pricing model
+  without a separate confirmation prompt when Freemium is unavailable.
+- Keep Microsoft Entra-only authentication.
+- Enable the SQL MI public data endpoint, but do not allow broad public ingress
+  in Bicep. Participants run a post-deployment script that limits TCP 3342 to
+  their current public IPv4 `/32`.
+- Preserve Azure SQL Database as an explicit alternative.
+
+The remainder of this plan records the previously completed deployment work.
+
 Generated: 2026-08-31
 
 ## 1. Project Overview
@@ -130,6 +145,13 @@ Participants must run the documented preflight and quota checks in their selecte
 
 - [x] Invoke `azure-validate`.
 - [ ] All validation checks pass.
+  - [x] SQL MI default, Freemium/Regular pricing, Entra-only authentication,
+    public endpoint, and `/32` participant rule assertions.
+  - [x] All root and standalone-package Bicep files compile.
+  - [x] Changed Bicep entry points and SQL MI modules lint cleanly.
+  - [x] Participant access script syntax, mirrored-file consistency, positive
+    NSG argument behavior, and private-address rejection.
+  - [x] AZD CLI availability and `azure.yaml` schema shape.
   - [x] Bicep compilation and lint diagnostics.
   - [x] PowerShell and workflow YAML parsing.
   - [x] .NET Release build.
@@ -146,6 +168,11 @@ Participants must run the documented preflight and quota checks in their selecte
 - The GitHub deployment identity receives management-plane Contributor and Role Based Access Control Administrator only on the three lab deployment resource groups.
 - The GitHub deployment identity receives Key Vault Secrets User only on the bootstrap vault.
 - The participant receives Key Vault Secrets Officer only on the bootstrap vault so the bootstrap can create and later rotate the VM credentials.
+- SQL MI participant onboarding requires Network Contributor scoped to the SQL
+  MI NSG. Because participant object IDs are not known at infrastructure
+  authoring time, the assignment remains an instructor setup step rather than a
+  broad Bicep assignment. Reader on the SQL MI is optional when the instructor
+  supplies the resource names and public endpoint to the participant script.
 - VM and SQL MI system identities have no data-plane permissions because this infrastructure-only lab does not use them yet. Later labs must add service-specific roles before using those identities.
 
 ## 8. Files to Generate
@@ -161,7 +188,7 @@ Participants must run the documented preflight and quota checks in their selecte
 | `assets/scripts/Initialize-Lab04Repository.ps1` | Lab 04 and Lab 06 OIDC identities, RBAC bootstrap, Key Vault, and GitHub environments |
 | `assets/scripts/Remove-Lab04Environment.ps1` | Scoped cleanup |
 | `.github/workflows/lab04-deploy.yml` | Base deployment |
-| `.github/workflows/lab04-deploy-sqlmi.yml` | Optional SQL MI deployment |
+| `.github/workflows/lab04-deploy-sqlmi.yml` | Instructor SQL MI deployment with Freemium/Regular selection |
 | `assets/solutions/lab06/lab06-retail-cicd.yml` | Known-good PR validation and main-branch deployment recovery file |
 | `infra/lab04/student/` | Participant starter |
 | `infra/lab04/complete/` | Refactored known-good modular Bicep |
@@ -189,5 +216,13 @@ Run the Lab 04 bootstrap in the selected participant subscription, then use the 
 | Stale lab references | Search for previous deployment/data paths and numbering | Pass: no matches | 2026-08-31 |
 | Static RBAC | Reviewed Bicep role assignments and bootstrap CLI scopes | Pass: infrastructure and code-deployment identities are separated; workload roles are resource-scoped | 2026-08-31 |
 | CI/CD security | Static assertions over `assets/solutions/lab06/lab06-retail-cicd.yml` | Pass: PR has no Azure token, Azure jobs use OIDC, digest deployment, system-identity pull, main-only release | 2026-08-31 |
+| Full Bicep compilation | `az bicep build --file <file> --stdout` over `infra/` and `skillable/day_2/bootcamp_deployment/infra/` | Pass: 44 files | 2026-09-22 |
+| Changed Bicep lint | `az bicep lint` for the AZD entry point and both SQL MI modules | Pass: zero diagnostics | 2026-09-22 |
+| AZD project contract | `azd version` plus PyYAML/schema-shape assertions over `skillable/day_2/bootcamp_deployment/azure.yaml` | Pass: AZD 1.33.0 available; provider/path/module valid | 2026-09-22 |
+| SQL MI requirements | Static assertions for `sqlMi` default, Freemium/Regular pricing, GPv2, Gen5/4 vCores/64 GB, `LicenseIncluded`, public endpoint, and Entra-only auth | Pass | 2026-09-22 |
+| Public ingress safety | Search Bicep for TCP 3342 NSG rules; inspect participant script for validated IPv4 `/32` and destination TCP 3342 | Pass: Bicep has no 3342 ingress rule; script is narrowly scoped | 2026-09-22 |
+| Participant script behavior | PowerShell parser; mirrored-file hash; mocked Azure CLI positive rule test; private IPv4 rejection test | Pass | 2026-09-22 |
+| Changed configuration syntax | PowerShell parser, JSON parser, and PyYAML over changed scripts, `main.parameters.json`, and SQL MI workflow | Pass | 2026-09-22 |
+| Diff whitespace | `git diff --check` | Pass | 2026-09-22 |
 
 Azure template validation, policy evaluation, quota checks, and what-if require the participant-selected subscription, bootstrapped resource groups, Key Vault secrets, and Entra administrator values. They remain enforced by the workflows and were not run during this repository-only change.

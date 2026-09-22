@@ -15,7 +15,13 @@ param applicationLocation string = 'centralus'
   'azureSql'
   'sqlMi'
 ])
-param databaseMode string = 'azureSql'
+param databaseMode string = 'sqlMi'
+
+@allowed([
+  'Freemium'
+  'Regular'
+])
+param sqlMiPricingModel string = 'Freemium'
 
 param codeDeploymentPrincipalId string
 param containerRegistryName string
@@ -168,6 +174,7 @@ module managedInstance './modules/sql-managed-instance.bicep' = if (databaseMode
     entraAdminObjectId: sqlEntraAdminObjectId
     entraAdminLogin: sqlEntraAdminLogin
     entraAdminPrincipalType: sqlEntraAdminPrincipalType
+    pricingModel: sqlMiPricingModel
     tags: tags
   }
 }
@@ -182,5 +189,6 @@ output databaseVnetId string = network.outputs.databaseVnetId
 output databaseVnetName string = network.outputs.databaseVnetName
 output managedInstanceSubnetId string = network.outputs.managedInstanceSubnetId
 output databaseFqdn string = managedInstance.?outputs.?fullyQualifiedDomainName ?? ''
+output sqlMiPublicEndpoint string = managedInstance.?outputs.?publicEndpoint ?? ''
 output databaseName string = managedInstance.?outputs.?databaseName ?? ''
 output databaseType string = databaseMode

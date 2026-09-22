@@ -15,7 +15,13 @@ param prefix string = 'caldova-lab04'
   'azureSql'
   'sqlMi'
 ])
-param databaseMode string = 'azureSql'
+param databaseMode string = 'sqlMi'
+
+@allowed([
+  'Freemium'
+  'Regular'
+])
+param sqlMiPricingModel string = 'Freemium'
 
 param sqlEntraAdminObjectId string
 param sqlEntraAdminLogin string
@@ -104,6 +110,7 @@ module secondary './lab04/complete/secondary.bicep' = {
     location: secondaryLocation
     applicationLocation: applicationLocation
     databaseMode: databaseMode
+    sqlMiPricingModel: sqlMiPricingModel
     codeDeploymentPrincipalId: bootstrap.outputs.codeDeploymentPrincipalId
     containerRegistryName: primary.outputs.containerRegistryName
     containerRegistryResourceGroupName: primaryResourceGroup.name
@@ -145,9 +152,13 @@ output LAB04_APPLICATION_LOCATION string = applicationLocation
 output LAB04_SQL_ADMIN_OBJECT_ID string = sqlEntraAdminObjectId
 output LAB04_SQL_ADMIN_LOGIN string = sqlEntraAdminLogin
 output LAB04_DATABASE_MODE string = databaseMode
+output LAB04_SQL_MI_PRICING_MODEL string = sqlMiPricingModel
 output LAB04_DATABASE_FQDN string = databaseMode == 'azureSql'
   ? primary.outputs.databaseFqdn
   : secondary.outputs.databaseFqdn
+output LAB04_SQL_MI_PUBLIC_ENDPOINT string = databaseMode == 'sqlMi'
+  ? secondary.outputs.sqlMiPublicEndpoint
+  : ''
 output LAB04_DATABASE_NAME string = 'eShop'
 output LAB04_DATABASE_RESOURCE_GROUP string = databaseMode == 'azureSql'
   ? primaryResourceGroup.name

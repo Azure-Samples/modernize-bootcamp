@@ -149,11 +149,23 @@ This is the same database the application connects to, as you found in challenge
 
 ## Student tasks
 
-1. Create a SQL Managed instance - in an empty sublet of a Vnet. It should have SQL login enabled, note down admin credentials.
+1. Use the SQL Managed Instance predeployed by the instructor. Do not create or
+   reprovision the instance.
 
-2. Connect to the SQL MI using SSMS tool. Note: if using MCAPS subscription it will only allow an authentication using entra-login only. 
+2. Sign in to Azure and run:
 
-3. 
+```powershell
+.\assets\scripts\Enable-Lab04SqlMiPublicAccess.ps1 `
+  -SubscriptionId '<subscription-id>'
+```
+
+3. Connect to the public endpoint reported by the script using SSMS and a
+   Microsoft Entra authentication method. The endpoint uses TCP 3342.
+
+4. If your public IP changes, rerun the script before reconnecting.
+
+SQL authentication is intentionally disabled. The participant identity is the
+configured Microsoft Entra administrator for the lab database.
 
 ## Challenge 6  — Enable private endpoint
 

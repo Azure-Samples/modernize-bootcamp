@@ -4,7 +4,8 @@ The database exercise needs servers, private connectivity, migration services, a
 
 You will make real architecture decisions, but you will work inside a set of non-negotiable security and resilience requirements. A tested Bicep implementation is included so that an infrastructure issue does not prevent you from continuing to the data lab.
 
-This lab takes approximately **90-120 minutes**. Azure SQL Managed Instance is an optional, separately triggered deployment and can take substantially longer.
+This lab takes approximately **90-120 minutes**. The instructor predeploys
+Azure SQL Managed Instance because provisioning can take substantially longer.
 
 > 💡 **Need an Azure-ready application?** [`sample-app/`](./sample-app/) in this folder is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, reading every Azure setting from configuration, and exposing health endpoints. Use it if your own Module 3 run did not finish, or as the known-good application for Lab 06.
 
@@ -51,7 +52,9 @@ git status --short
 ```
 
 > [!WARNING]
-> This lab creates billable resources. Azure Bastion, Azure Front Door Premium, VMs, DMS, and SQL Managed Instance can be significant cost drivers. Use a lab subscription, deploy SQL MI only when required, and complete cleanup promptly.
+> This lab creates billable resources. Azure Bastion, Azure Front Door Premium,
+> VMs, DMS, and a paid SQL Managed Instance fallback can be significant cost
+> drivers. Prefer the SQL MI free offer and complete cleanup promptly.
 
 ## 🏗️ Required Final Architecture
 
@@ -266,16 +269,27 @@ If your generated infrastructure does not validate and the remaining lab time is
 
 Using the recovery path keeps the bootcamp moving, but it does not replace explaining what failed and which architectural requirement was missed.
 
-## 🐢 Optional SQL Managed Instance
+## 🐢 Predeployed SQL Managed Instance
 
-SQL MI is not required by the current Lab 05 exercise. Deploy it only when an instructor asks you to test that target:
+The instructor deployment uses SQL MI by default and requests the Freemium
+General Purpose v2 offer first. If the subscription or region cannot use the
+free offer, the instructor can select the paid `Regular` pricing model without
+an additional confirmation prompt.
 
-1. Complete the base deployment.
-2. Check SQL MI regional availability, subnet requirements, and quota.
-3. Run **Lab 04 - Deploy optional SQL Managed Instance** manually.
-4. Review and approve its what-if output.
+Participants do not deploy Bicep. To allow only your current public IPv4:
 
-The workflow is deliberately not chained to the base deployment. This prevents a long-running, high-cost resource from being created accidentally.
+```powershell
+az login
+.\assets\scripts\Enable-Lab04SqlMiPublicAccess.ps1 `
+  -SubscriptionId '<subscription-id>'
+```
+
+The script asks before detecting your address, then creates or updates one
+inbound NSG rule named for your Entra object ID and scoped to your `/32` on TCP
+3342. Multiple participants do not overwrite each other. Rerun it if your
+public IP changes. Your instructor must grant Network Contributor on only the
+SQL MI NSG. Connect to the endpoint reported by the script using Microsoft
+Entra authentication. SQL authentication is disabled.
 
 ## ✅ Verification
 
@@ -286,6 +300,8 @@ The workflow is deliberately not chained to the base deployment. This prevents a
 - [ ] Both VMs have no public IP.
 - [ ] Bastion can open RDP to Windows and SSH to Ubuntu.
 - [ ] The Azure SQL server has public network access disabled.
+- [ ] SQL MI public access allows TCP 3342 only from the participant `/32`.
+- [ ] SQL MI accepts Microsoft Entra authentication and rejects SQL authentication.
 - [ ] The Azure SQL FQDN resolves to the private endpoint from the Windows VM.
 - [ ] The two database VNets are peered.
 - [ ] Platform logs reach the application-region Log Analytics workspace.

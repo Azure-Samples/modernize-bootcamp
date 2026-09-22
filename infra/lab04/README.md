@@ -9,7 +9,8 @@ Deploy the entry points in this exact order:
 1. `primary.bicep` in the primary resource group.
 2. `secondary.bicep` in the secondary resource group, passing primary outputs.
 3. `global.bicep` in the global resource group, passing secondary app outputs.
-4. `sqlmi.bicep` in the secondary resource group only when SQL MI is requested.
+4. `sqlmi.bicep` in the secondary resource group. Freemium is the default
+   pricing model; use `pricingModel=Regular` when the free offer is unavailable.
 
 All entry points target an existing resource group. The bootstrap script creates the resource groups, OIDC identity, RBAC-enabled Key Vault, and VM credentials before a workflow runs.
 
@@ -45,7 +46,7 @@ $vmPassword = az keyvault secret show --vault-name $env:LAB04_KEY_VAULT_NAME --n
 az deployment group create --resource-group $env:LAB04_PRIMARY_RESOURCE_GROUP --template-file infra/lab04/complete/primary.bicep --parameters vmAdminUsername=$vmUser vmAdminPassword=$vmPassword
 ```
 
-`vmAdminPassword` is declared with `@secure()`. Azure SQL and optional SQL Managed Instance use Microsoft Entra-only authentication and accept no SQL authentication credentials.
+`vmAdminPassword` is declared with `@secure()`. Azure SQL and SQL Managed Instance use Microsoft Entra-only authentication and accept no SQL authentication credentials. SQL MI enables its public endpoint, but Bicep does not create broad public ingress.
 
 ## Local validation
 

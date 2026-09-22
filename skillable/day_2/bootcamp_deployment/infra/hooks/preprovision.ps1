@@ -48,6 +48,7 @@ Set-AzdDefault -Name LAB04_PRIMARY_LOCATION -Value 'centralus'
 Set-AzdDefault -Name LAB04_SECONDARY_LOCATION -Value 'centralus'
 Set-AzdDefault -Name LAB04_APPLICATION_LOCATION -Value 'centralus'
 Set-AzdDefault -Name LAB04_VM_ADMIN_USERNAME -Value 'labadmin'
+Set-AzdDefault -Name LAB04_SQL_MI_PRICING_MODEL -Value 'Freemium'
 azd env set AZURE_LOCATION (Get-AzdValue -Name LAB04_PRIMARY_LOCATION)
 
 $prefix = Get-AzdValue -Name LAB04_PREFIX
@@ -58,14 +59,14 @@ if ($prefix -notmatch '(?-i)^(?!.*--)[a-z0-9][a-z0-9-]{1,16}[a-z0-9]$') {
 $databaseMode = Get-AzdValue -Name LAB04_DATABASE_MODE
 if (-not $databaseMode) {
     $databaseMode = if ([Console]::IsInputRedirected) {
-        'azureSql'
+        'sqlMi'
     }
     else {
-        $selection = Read-Host 'Database target: 1) Azure SQL Database (default), 2) Azure SQL Managed Instance'
+        $selection = Read-Host 'Database target: 1) Azure SQL Managed Instance (default), 2) Azure SQL Database'
         switch ($selection) {
-            { [string]::IsNullOrWhiteSpace($_) } { 'azureSql'; break }
-            '1' { 'azureSql'; break }
-            '2' { 'sqlMi'; break }
+            { [string]::IsNullOrWhiteSpace($_) } { 'sqlMi'; break }
+            '1' { 'sqlMi'; break }
+            '2' { 'azureSql'; break }
             default { throw "Invalid database selection '$selection'." }
         }
     }
@@ -101,22 +102,9 @@ if ($environmentName) {
     }
 }
 
-$costConfirmed = Get-AzdValue -Name LAB04_CONFIRM_SQL_MI_COST
-if ($databaseMode -eq 'sqlMi') {
-    if ($costConfirmed -ne 'true') {
-        if ([Console]::IsInputRedirected) {
-            throw 'SQL Managed Instance requires LAB04_CONFIRM_SQL_MI_COST=true.'
-        }
-
-        $confirmation = Read-Host 'SQL Managed Instance is expensive and can take hours to deploy. Type YES to continue'
-        if ($confirmation -cne 'YES') {
-            throw 'SQL Managed Instance cost confirmation was not provided.'
-        }
-        azd env set LAB04_CONFIRM_SQL_MI_COST true
-    }
-}
-else {
-    azd env set LAB04_CONFIRM_SQL_MI_COST false
+$sqlMiPricingModel = Get-AzdValue -Name LAB04_SQL_MI_PRICING_MODEL
+if ($sqlMiPricingModel -notin @('Freemium', 'Regular')) {
+    throw "LAB04_SQL_MI_PRICING_MODEL must be 'Freemium' or 'Regular'. Received '$sqlMiPricingModel'."
 }
 
 $sqlAdminObjectId = Get-AzdValue -Name LAB04_SQL_ADMIN_OBJECT_ID

@@ -1,4 +1,4 @@
-name: Lab 04 - Deploy optional SQL Managed Instance
+name: Lab 04 - Deploy SQL Managed Instance
 
 on:
   workflow_dispatch:
@@ -11,11 +11,14 @@ on:
         options:
           - student
           - complete
-      confirm_cost:
-        description: I understand SQL MI is expensive and can take hours to deploy
+      pricing_model:
+        description: SQL MI pricing model (use Regular when Freemium is unavailable)
         required: true
-        type: boolean
-        default: false
+        type: choice
+        default: Freemium
+        options:
+          - Freemium
+          - Regular
 
 permissions:
   contents: read
@@ -27,7 +30,6 @@ concurrency:
 jobs:
   plan:
     name: Validate and preview SQL MI
-    if: ${{ inputs.confirm_cost }}
     runs-on: ubuntu-latest
     environment: lab04
     permissions:
@@ -91,6 +93,7 @@ jobs:
               databaseVnetName="${{ steps.network.outputs.vnet-name }}" \
               sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
               sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+              pricingModel="${{ inputs.pricing_model }}" \
             --output none
 
       - name: Preview SQL MI deployment
@@ -108,7 +111,8 @@ jobs:
               location="${{ vars.LAB04_SECONDARY_LOCATION }}" \
               databaseVnetName="${{ steps.network.outputs.vnet-name }}" \
               sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
-              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}"
+              sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+              pricingModel="${{ inputs.pricing_model }}"
 
   deploy:
     name: Deploy approved SQL MI
@@ -148,17 +152,21 @@ jobs:
               databaseVnetName="${{ needs.plan.outputs.database-vnet-name }}" \
               sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
               sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
+              pricingModel="${{ inputs.pricing_model }}" \
             --query properties.outputs --output json)"
           echo "name=$(jq -r '.managedInstanceName.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
           echo "fqdn=$(jq -r '.managedInstanceFqdn.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
+          echo "public-endpoint=$(jq -r '.managedInstancePublicEndpoint.value' <<< "$outputs")" >> "$GITHUB_OUTPUT"
 
       - name: Write deployment summary
         shell: bash
         run: |
           {
-            echo "## Optional SQL Managed Instance"
+            echo "## SQL Managed Instance"
             echo
             echo "- Name: \`${{ steps.sqlmi.outputs.name }}\`"
             echo "- FQDN: \`${{ steps.sqlmi.outputs.fqdn }}\`"
+            echo "- Public endpoint: \`${{ steps.sqlmi.outputs.public-endpoint }}\`"
+            echo "- Pricing model: \`${{ inputs.pricing_model }}\`"
             echo "- Resource group: \`${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
