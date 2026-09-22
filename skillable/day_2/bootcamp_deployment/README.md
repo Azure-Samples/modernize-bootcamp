@@ -122,8 +122,8 @@ updates.
 - Azure Developer CLI for the AZD path
 - an Azure subscription where you can create subscription deployments,
   resource groups, role assignments, and a custom role
-- Microsoft Graph access to resolve the signed-in Entra user, or the Entra
-  administrator object ID and login supplied explicitly
+- Microsoft Graph access to resolve the signed-in Entra user or an explicitly
+  supplied Entra administrator user principal name
 - regional capacity and quota for VMs, DMS, zone-redundant Container Apps, and
   the selected database service
 
@@ -233,8 +233,8 @@ Door Private Link request, and waits for the public Front Door endpoint to
 respond successfully.
 
 See the [direct deployment guide](./infra/DEPLOYMENT.md) for region parameters,
-SQL MI selection, password rules, Entra administrator overrides, reruns, and
-diagnostics.
+SQL MI selection, password rules, the optional Entra administrator user
+principal name, reruns, and diagnostics.
 
 ## Optional GitHub OIDC
 

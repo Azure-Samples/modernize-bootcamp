@@ -33,8 +33,6 @@ param(
 
     [securestring]$VmAdminPassword,
 
-    [string]$SqlEntraAdminObjectId,
-
     [string]$SqlEntraAdminLogin
 )
 
@@ -184,27 +182,38 @@ if (-not (Get-Command az -ErrorAction SilentlyContinue)) {
 
 az account set --subscription $SubscriptionId
 
-if (-not $SqlEntraAdminObjectId -or -not $SqlEntraAdminLogin) {
-    $tenantId = az account show --query tenantId --output tsv
+$tenantId = az account show --query tenantId --output tsv
+if ($SqlEntraAdminLogin) {
     try {
-        $signedInUser = az ad signed-in-user show `
+        $sqlAdmin = az ad user show `
+            --id $SqlEntraAdminLogin `
             --query '{id:id,login:userPrincipalName}' `
             --output json | ConvertFrom-Json
     }
     catch {
-        throw "Unable to query the signed-in Microsoft Entra user. Reauthenticate interactively with 'az login --tenant $tenantId', or supply both -SqlEntraAdminObjectId and -SqlEntraAdminLogin."
+        throw "Unable to resolve SQL administrator '$SqlEntraAdminLogin' as a Microsoft Entra user. Verify the user principal name and reauthenticate interactively with 'az login --tenant $tenantId'."
     }
-    if (-not $signedInUser.id -or -not $signedInUser.login) {
-        throw 'Unable to resolve the signed-in Microsoft Entra user. Supply -SqlEntraAdminObjectId and -SqlEntraAdminLogin.'
+}
+else {
+    try {
+        $sqlAdmin = az ad signed-in-user show `
+            --query '{id:id,login:userPrincipalName}' `
+            --output json | ConvertFrom-Json
     }
-
-    $SqlEntraAdminObjectId = [string]$signedInUser.id
-    $SqlEntraAdminLogin = [string]$signedInUser.login
+    catch {
+        throw "Unable to resolve the signed-in Microsoft Entra user. Reauthenticate interactively with 'az login --tenant $tenantId', or supply -SqlEntraAdminLogin with a user principal name."
+    }
 }
 
+if (-not $sqlAdmin.id -or -not $sqlAdmin.login) {
+    throw 'The selected Microsoft Entra SQL administrator did not return both an object ID and user principal name.'
+}
+
+$SqlEntraAdminObjectId = [string]$sqlAdmin.id
+$SqlEntraAdminLogin = [string]$sqlAdmin.login
 $parsedObjectId = [guid]::Empty
 if (-not [guid]::TryParse($SqlEntraAdminObjectId, [ref]$parsedObjectId)) {
-    throw "SqlEntraAdminObjectId must be a GUID. Received '$SqlEntraAdminObjectId'."
+    throw "The resolved SQL administrator object ID must be a GUID. Received '$SqlEntraAdminObjectId'."
 }
 
 if (-not $VmAdminPassword) {

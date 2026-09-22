@@ -18,8 +18,9 @@ Run every command from the repository root.
 ## Use the deployment script
 
 The script prompts securely for the VM administrator password, resolves the
-signed-in Microsoft Entra user for SQL administration, validates the object ID,
-and never writes the password to a parameter file.
+selected Microsoft Entra user for SQL administration, validates the object ID,
+and never writes the password to a parameter file. Supply only the user's
+principal name; the object ID remains an internal Bicep parameter.
 
 The password must be 12-72 characters, must not contain the VM administrator
 username, and must contain lowercase, uppercase, numeric, and at least one of
@@ -56,9 +57,9 @@ az ad signed-in-user show --output table
 
 If browser authentication is unavailable, use
 `az login --tenant $tenantId --use-device-code`. Do not use a service principal
-for the default signed-in-user lookup. Alternatively, pass both
-`-SqlEntraAdminObjectId` and `-SqlEntraAdminLogin` to the deployment script to
-skip the Microsoft Graph request.
+for the default signed-in-user lookup. To select a different administrator,
+pass `-SqlEntraAdminLogin` with that user's principal name. Both paths query
+Microsoft Graph to obtain the object ID required by Azure SQL.
 
 Validate the template and parameters:
 
@@ -212,19 +213,18 @@ deleted.
 ## Use a different Entra administrator
 
 By default, the script uses the signed-in Entra user. For a different Entra
-user, pass the user's object ID and login name:
+user, pass only the user's principal name:
 
 ```powershell
 .\infra\Deploy-Lab04.ps1 `
   -SubscriptionId $subscriptionId `
-  -SqlEntraAdminObjectId '<object-guid>' `
-  -SqlEntraAdminLogin '<display-or-login-name>' `
+  -SqlEntraAdminLogin '<user-principal-name>' `
   -Action WhatIf
 ```
 
-The object ID must be a GUID. Do not pass a PowerShell object expression such
-as `$entraUser.id` directly inside a native command argument; assign it to a
-string variable first.
+The script resolves the user principal name to the object ID required by Azure
+SQL and passes both values to Bicep internally. If the user cannot be resolved,
+the deployment stops rather than selecting a different administrator.
 
 ## Reruns and diagnostics
 

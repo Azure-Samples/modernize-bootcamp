@@ -10,6 +10,9 @@
 - Permit instructor automation to select the paid General Purpose pricing model
   without a separate confirmation prompt when Freemium is unavailable.
 - Keep Microsoft Entra-only authentication.
+- Accept only an optional Entra administrator user principal name at the AZD
+  and direct-deployment interfaces, resolve its required object ID before
+  Bicep runs, and default to the signed-in user when the name is omitted.
 - Enable the SQL MI public data endpoint, but do not allow broad public ingress
   in Bicep. Participants run a post-deployment script that limits TCP 3342 to
   their current public IPv4 `/32`.
@@ -224,5 +227,8 @@ Run the Lab 04 bootstrap in the selected participant subscription, then use the 
 | Participant script behavior | PowerShell parser; mirrored-file hash; mocked Azure CLI positive rule test; private IPv4 rejection test | Pass | 2026-09-22 |
 | Changed configuration syntax | PowerShell parser, JSON parser, and PyYAML over changed scripts, `main.parameters.json`, and SQL MI workflow | Pass | 2026-09-22 |
 | Diff whitespace | `git diff --check` | Pass | 2026-09-22 |
+| SQL administrator input scripts | PowerShell parser over the AZD hook and direct deployment script; stale public object-ID override search | Pass: only an optional UPN is exposed and the object ID is resolved internally | 2026-09-22 |
+| SQL administrator Bicep contract | `az bicep build` for the AZD entry point; `az bicep lint` for the entry point and both SQL modules | Pass: zero diagnostics; Entra-only login and SID properties remain intact | 2026-09-22 |
+| Updated AZD package | `azd version`; `azd package --no-prompt` | Pass: AZD 1.33.0; generated local environment state removed afterward | 2026-09-22 |
 
 Azure template validation, policy evaluation, quota checks, and what-if require the participant-selected subscription, bootstrapped resource groups, Key Vault secrets, and Entra administrator values. They remain enforced by the workflows and were not run during this repository-only change.
