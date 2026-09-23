@@ -30,7 +30,7 @@ plan, and a per-task record of what changed.
 Then browse to the URL it prints.
 
 Sign in as `alice` or `bob` — both are customers with existing order history. Credentials are in
-[Module 00](../../00-Setup/Readme.md#-demo-accounts).
+[Demo logins](../../../docs/logins.md).
 
 ## Prerequisites
 

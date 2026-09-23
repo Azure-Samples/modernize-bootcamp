@@ -1,23 +1,8 @@
 # 🧭 Setup & GitHub Copilot Essentials
 
-This module is a **reference, not a lab**.
+This page is a **reference, not a lab**.
 
-Every other module in this bootcamp drives GitHub Copilot Chat. This page is the shared background those modules assume — what the dropdowns do, how to give Copilot the right context, what it costs, and how to pull it back when it goes off the rails. Read it once before starting the labs, and feel free to come back to it whenever a module says something you do not recognise.
-
-## 🔑 Demo accounts
-
-The lab applications ship with seeded accounts. Whenever a module tells you to sign in, these are the credentials:
-
-| App | Username | Password | Notes |
-| --- | --- | --- | --- |
-| Caldova storefront | `alice` | `Password1!` | Customer, with existing order history |
-| Caldova storefront | `bob` | `Password1!` | Customer, with existing order history |
-| Caldova admin tool | `admin` | `admin123` | Editor — can add, edit, and delete products |
-| Caldova admin tool | `supportdeskagent` | `supportdeskagent` | Reader — product buttons are greyed out |
-
-Either storefront account works for the sign-in and cart checks the labs ask you to run. Use both admin accounts if you want to see the permission difference.
-
-> ⚠️ These are throwaway credentials for a local sandbox, and the authentication behind them is deliberately insecure — SHA-1 password hashes (salted in the storefront, unsalted in the admin tool), a shared API key in the admin tool's config file, and permission checks that only grey out buttons. That is the "before" state the bootcamp migrates away from. Never reuse this pattern anywhere real.
+Every module in this bootcamp drives GitHub Copilot Chat. This page is the shared background those modules assume — what the dropdowns do, how to give Copilot the right context, what it costs, and how to pull it back when it goes off the rails. Read it once before starting the labs, and feel free to come back to it whenever a module says something you do not recognise.
 
 ## 🎛️ Modes
 
@@ -196,4 +181,4 @@ Run `/chronicle:cost-tips` in any session for recommendations based on your own 
 
 ---
 
-Next: [Module 01: Assessment →](../01-assesment/Readme.md)
+Next: [Module 01: Assessment →](../labs/01-assesment/Readme.md)

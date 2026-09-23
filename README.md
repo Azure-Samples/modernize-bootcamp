@@ -26,7 +26,6 @@ By working through the bootcamp, attendees will learn how to:
 - Plan the evolution of SQL Server workloads toward managed Azure data services such as Azure SQL Managed Instance and Azure SQL Database.
 - Apply identity, secrets management, governance, and security capabilities using Microsoft Entra ID, Azure Key Vault, Azure Policy, and Microsoft Defender for Cloud.
 - Introduce DevSecOps practices with GitHub, GitHub Actions, GitHub Copilot, and Azure DevOps.
-- Improve operational visibility with Azure Monitor and Application Insights, then use telemetry to guide further modernization decisions.
 - Include resiliency, business continuity, cost management, and FinOps considerations in a modernization roadmap.
 - Turn lessons from a pilot workload into repeatable patterns that can be applied across a larger application portfolio.
 
@@ -51,6 +50,7 @@ This repository is the starting state for the hands-on exercises. Its intentiona
 | --- | --- |
 | [`src/`](src/) | Legacy application source code used throughout the modernization exercises |
 | [`labs/`](labs/) | Step-by-step bootcamp modules, from setup and assessment through Azure deployment |
+| [`docs/`](docs/) | Shared reference material the labs assume, including [GitHub Copilot essentials](docs/copilot-essentials.md) and [demo logins](docs/logins.md) |
 | [`data/`](data/) | Data assets used by the applications and data modernization exercises |
 | [`infra/`](infra/) | Infrastructure and deployment resources |
 | [`assets/`](assets/) | Images and visual assets used by the repository documentation |
@@ -60,9 +60,3 @@ The application source is organized under [`src/app-modernization/`](src/app-mod
 | Lab application | Starting technology | Role in the bootcamp | Setup |
 | --- | --- | --- | --- |
 | Storefront | ASP.NET MVC 5 on .NET Framework 4.8 with Entity Framework 6 and SQL Server | Customer-facing web and data modernization | [Storefront README](src/app-modernization/caldova-retail-web-app/README.md) |
-| Admin tool | .NET Framework 4.8 WinForms application with legacy configuration and authentication | Internal application, identity, API, and client modernization | [Admin tool README](src/app-modernization/caldova-retail-admin-app/README.md) |
-
-Each application README documents its prerequisites, setup, build, and run process. Database connectivity and troubleshooting guidance is available in the [remote SQL setup guide](src/app-modernization/caldova-retail-web-app/docs/remote-sql-setup.md).
-
-Begin with [Lab 00: Setup & GitHub Copilot Essentials](labs/00-Setup/Readme.md), a short reference on chat modes, model selection, context, cost, and course-correcting that the later labs assume you have read.
-

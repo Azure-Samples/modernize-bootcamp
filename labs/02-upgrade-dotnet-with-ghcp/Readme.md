@@ -4,7 +4,7 @@ The Caldova Retail storefront runs on .NET Framework 4.8 — a platform that is 
 
 In this module you'll use **GitHub Copilot Modernization** to make that move. Rather than working through breaking changes by hand, you'll direct an AI agent that assesses the codebase, produces a plan you can review and edit, and then executes it task by task — validating with a real build at each stage.
 
-> 🧭 New to GitHub Copilot Chat? [Module 00](../00-Setup/Readme.md) is a short reference on modes, models, context, cost, and course-correcting.
+> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 ## 💼 Business case
 
@@ -23,7 +23,7 @@ Caldova Retail's goal is not .NET 10 — it's an Azure PaaS service (App Service
 
 ## 🔍 Prerequisites
 
-This module is done entirely in **Visual Studio Code**. Before you start, make sure you have:
+Skillable will already have these installed for you, but for reference this is what is needed. The module is done entirely in **Visual Studio Code**:
 
 | Requirement | Why you need it |
 | --- | --- |
@@ -32,7 +32,7 @@ This module is done entirely in **Visual Studio Code**. Before you start, make s
 | [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) | Agent mode, which drives the upgrade |
 | [GitHub Copilot upgrade](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.upgrade-agent) (`ms-dotnettools.upgrade-agent`) | Adds the `@upgrade` agent that performs the modernization |
 
-You also need everything required to build and run the **original** .NET Framework 4.8 storefront, because you start the module by running it:
+Building and running the **original** .NET Framework 4.8 storefront, which you do at the start of the module, also needs:
 
 | Requirement | Why you need it |
 | --- | --- |
@@ -86,14 +86,12 @@ This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its 
 Once it loads, walk the app and record what you see. For a small baseline, confirm:
 
 - [ ] The product catalog loads, with images
-- [ ] Sign-in works for both accounts — credentials are in [Module 00](../00-Setup/Readme.md#-demo-accounts)
+- [ ] Sign-in works for both accounts — credentials are in [Demo logins](../../docs/logins.md)
 - [ ] Adding an item to the cart persists across page loads
 
-> 💡 **TIP**
->
-> Take a screenshot of the storefront home page. At the end of the module you will compare against it, and a picture settles "did that always look like that?" faster than memory does.
-
 If the build fails with a missing `csc.exe`, see [Handling Common Issues](#-handling-common-issues) below.
+
+Now that you have seen how the app looks and behaves on .NET Framework 4.8, you have the baseline everything that follows is measured against. Time to modernize it.
 
 ## 🤖 How GitHub Copilot Modernization Works
 
@@ -158,17 +156,17 @@ The rest of this module is the upgrade itself, in five steps.
 
    > 💡 **PICKING A MODEL**
    >
-   > **The default is fine for this lab.** If you do change it, prefer a reasoning model over a `mini`, `fast`, or `lite` variant — see [Module 00](../00-Setup/Readme.md).
+   > **The default is fine for this lab.** If you do change it, prefer a reasoning model over a `mini`, `fast`, or `lite` variant — see [Copilot Essentials](../../docs/copilot-essentials.md).
 
 4. A modal will load that offers options on the upgrade. You can see it already detected the app is running on .NET Framework 4.8 and has pulled out the solution file. Select the following options:
 
    - Target Framework: .NET 10
-   - Flow Mode: Automatic. For the purpose of this lab we will let the flow run end-to-end, pausing only when blocked. Guided mode is the better choice when you are learning the tool, working in an unfamiliar or high-risk codebase, or sitting with a customer who wants to approve each stage before it happens — it stops after assessment and planning so you can inspect and redirect.
+   - Flow Mode: Guided. It stops after assessment and again after planning, so you can inspect what the agent found and redirect it before a line of code changes — which is what you want while you are still learning the tool. It is also the right choice in an unfamiliar or high-risk codebase, or when you are sitting with a customer who wants to approve each stage. Automatic runs end-to-end, pausing only when blocked; reach for it once the tool is familiar and the work is low-risk.
    - Create working branch: Check the box. This is important so that the modernized code lives on a new branch you can rollback from.
-   - Branch name: upgrade-net10
+   - Branch name: upgrade-net10 (or whatever you prefer)
    - Commit strategy: Commit after each task
 
-   Press 'Confirm' at the end to kick off the upgrade with these parameters.
+   Do not be concerned if some of these options do not appear or extra ones appear. This is an agentic flow, and some variability is expected. If extra options appear, select choices based off of your own judgement. The defaults are already what Copilot recommends. Press 'Confirm' at the end to kick off the upgrade with these parameters.
 
    ![Copilot Chat displays a modal for selecting the upgrade parameters](./images/net-upgrade-selection-modal.png)
 
@@ -178,7 +176,7 @@ The rest of this module is the upgrade itself, in five steps.
 
 > ‼️ **IMPORTANT**
 >
-> The agent runs many tool calls. If VS Code prompts you to approve each one, choose the option to allow them for the rest of the session — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
+> The agent runs many tool calls. If VS Code prompts you to approve each one, be ready to stand by and approve. Optionally, you can choose the option to allow them for the rest of the session — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
 
 ## 2️⃣ Initial Assessment
 
@@ -283,7 +281,7 @@ It lists the package updates, breaking changes, and migration path the agent int
 
 > 💡 **NOTE**
 >
-> Because we chose **Automatic** flow mode, the agent continues without waiting for you to approve the plan. In **Guided** mode it would stop here. You can still halt execution and edit the plan at any point.
+> Because we chose **Guided** flow mode, the agent stops here and waits for you before it changes any code. This is the moment to edit `plan.md` — whatever you leave in it is what gets executed. In **Automatic** mode the agent would carry straight on without asking.
 
 **2. Open `tasks.md`.**
 
@@ -300,7 +298,7 @@ What should hold steady is the **shape**: establish prerequisites, convert the p
 
 ## 4️⃣ Monitor the Upgrade Process
 
-Now that the plan is set, the tool will begin the automated upgrade process. During this phase:
+Once you approve the plan, the tool begins the upgrade. In Guided mode nothing is executed until you do, so take the time to read `plan.md` first. During this phase:
 
 - Files will be modified incrementally
 - Git commits will be created for each major change
@@ -332,7 +330,7 @@ Check the activity tab of the dashboard. It records the timeline, log, and commi
 
 > 💡 **TIPS**
 >
-> - The agent runs a lot of commands. Rather than approving each one individually, choose the option to allow all commands for the rest of the session.
+> - The agent runs a lot of commands. Rather than approving each one individually, once you are used to the dynamic, you can choose the option to allow all commands for the rest of the session.
 > - Sometimes the dashboard gets stuck. It reflects state the agent reports rather than polling the repo, so it can lag behind the real work. Check the chat and the Source Control view before assuming anything has actually stalled — if commits are still landing, the upgrade is fine and only the display is behind.
 > - If the agent gets stuck (no new chat output and no tasks being checked off) tell it to continue in the chat.
 
@@ -407,19 +405,12 @@ Sometimes the tool may encounter errors during the upgrade. When this happens:
 
 1. If you see an error message, click on **"Resume"** - in 70% of cases, the issue resolves in subsequent iterations.
 2. If the error persists, type in the chatbox:
+
    ```
    Fix the errors and continue with the update
    ```
 
 3. For specific errors, analyze the error message and debug with Copilot by providing context
-
-### Scope Creep
-
-The agent may start converting views to Blazor or swapping the database provider on its own initiative, because those are common companions to a framework upgrade. If you see it heading that way, pull it back:
-
-```
-Stay on the framework upgrade only. Keep the existing SQL Server database and the existing MVC views. Revert any changes that convert views to Blazor or change the database provider.
-```
 
 ### Static Assets and Views
 
