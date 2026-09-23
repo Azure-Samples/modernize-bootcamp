@@ -111,7 +111,7 @@ Review the diff, especially the second bullet. Creating a second Log Analytics w
 ### Step 3: Redeploy and generate traffic
 
 1. Redeploy using the Lab 04 workflow.
-1. Open the storefront URL and use it like a customer would: browse the catalog, search, open a product, add something to the cart, sign in with one of the [demo accounts](../00-Setup/Readme.md#-demo-accounts).
+1. Open the storefront URL and use it like a customer would: browse the catalog, search, open a product, add something to the cart, sign in with one of the [demo accounts](../../docs/copilot-essentials.md#-demo-accounts).
 1. Give it two or three minutes. First ingestion is not instant, and an empty blade usually means "too early", not "broken".
 
 ### Step 4: Read your telemetry

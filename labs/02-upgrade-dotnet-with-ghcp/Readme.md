@@ -4,7 +4,7 @@ The Caldova Retail storefront runs on .NET Framework 4.8 — a platform that is 
 
 In this module you'll use **GitHub Copilot Modernization** to make that move. Rather than working through breaking changes by hand, you'll direct an AI agent that assesses the codebase, produces a plan you can review and edit, and then executes it task by task — validating with a real build at each stage.
 
-> 🧭 New to GitHub Copilot Chat? [Module 00](../00-Setup/Readme.md) is a short reference on modes, models, context, cost, and course-correcting.
+> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 ## 💼 Business case
 
@@ -86,7 +86,7 @@ This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its 
 Once it loads, walk the app and record what you see. For a small baseline, confirm:
 
 - [ ] The product catalog loads, with images
-- [ ] Sign-in works for both accounts — credentials are in [Module 00](../00-Setup/Readme.md#-demo-accounts)
+- [ ] Sign-in works for both accounts — credentials are in [Copilot Essentials](../../docs/copilot-essentials.md#-demo-accounts)
 - [ ] Adding an item to the cart persists across page loads
 
 > 💡 **TIP**
@@ -158,7 +158,7 @@ The rest of this module is the upgrade itself, in five steps.
 
    > 💡 **PICKING A MODEL**
    >
-   > **The default is fine for this lab.** If you do change it, prefer a reasoning model over a `mini`, `fast`, or `lite` variant — see [Module 00](../00-Setup/Readme.md).
+   > **The default is fine for this lab.** If you do change it, prefer a reasoning model over a `mini`, `fast`, or `lite` variant — see [Copilot Essentials](../../docs/copilot-essentials.md).
 
 4. A modal will load that offers options on the upgrade. You can see it already detected the app is running on .NET Framework 4.8 and has pulled out the solution file. Select the following options:
 

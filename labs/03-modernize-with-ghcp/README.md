@@ -4,7 +4,7 @@ Module 2 got the storefront onto .NET 10. Because ASP.NET MVC 5 does not run the
 
 In this chapter you will work in **GitHub Copilot Chat** throughout — leaning on the `@upgrade` agent where its .NET modernization knowledge earns its keep, and regular chat where the job is ordinary refactoring. Ask the agent what the framework upgrade left behind, convert the MVC pages to Blazor components, then ask directly whether the app is ready for Azure and close the gaps that come back.
 
-> 🧭 New to GitHub Copilot Chat? [Module 00](../00-Setup/Readme.md) is a short reference on modes, models, context, cost, and course-correcting.
+> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 ## 📋 What you'll do
 
@@ -49,7 +49,7 @@ Everything in this module runs through GitHub Copilot Chat. Confirm the agent is
 
 In Module 2 the question was *what .NET version can this run on*. Here it is *what does this app still do the old way, and what does it need before it runs in Azure* — a question no compatibility report answers, because none of it is broken.
 
-You also pick your own mode and model from here; see [Module 00](../00-Setup/Readme.md) for what each is for. For this module: a fast model in agent mode for the page-by-page Blazor conversion in section 2, and a reasoning model in plan mode for the readiness question in section 4.
+You also pick your own mode and model from here; see [Copilot Essentials](../../docs/copilot-essentials.md) for what each is for. For this module: a fast model in agent mode for the page-by-page Blazor conversion in section 2, and a reasoning model in plan mode for the readiness question in section 4.
 
 ## 1️⃣ Ask what still needs modernizing
 
@@ -122,7 +122,7 @@ If Copilot does not automatically do this verification, then:
 1. Check that:
    - All pages load correctly and render as Blazor components
    - Images and static content display properly
-   - Sign-in still works and the cart still holds its contents — credentials are in [Module 00](../00-Setup/Readme.md#-demo-accounts)
+   - Sign-in still works and the cart still holds its contents — credentials are in [Copilot Essentials](../../docs/copilot-essentials.md#-demo-accounts)
    - No MVC views or controllers are left behind in the routing
    - The application starts cleanly from the Visual Studio Code terminal
 

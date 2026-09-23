@@ -1,8 +1,8 @@
 # 🧭 Setup & GitHub Copilot Essentials
 
-This module is a **reference, not a lab**.
+This page is a **reference, not a lab**.
 
-Every other module in this bootcamp drives GitHub Copilot Chat. This page is the shared background those modules assume — what the dropdowns do, how to give Copilot the right context, what it costs, and how to pull it back when it goes off the rails. Read it once before starting the labs, and feel free to come back to it whenever a module says something you do not recognise.
+Every module in this bootcamp drives GitHub Copilot Chat. This page is the shared background those modules assume — what the dropdowns do, how to give Copilot the right context, what it costs, and how to pull it back when it goes off the rails. Read it once before starting the labs, and feel free to come back to it whenever a module says something you do not recognise.
 
 ## 🔑 Demo accounts
 
@@ -194,4 +194,4 @@ Run `/chronicle:cost-tips` in any session for recommendations based on your own 
 
 ---
 
-Next: [Module 01: Assessment →](../01-assesment/Readme.md)
+Next: [Module 01: Assessment →](../labs/01-assesment/Readme.md)

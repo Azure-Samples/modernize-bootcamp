@@ -51,6 +51,7 @@ This repository is the starting state for the hands-on exercises. Its intentiona
 | --- | --- |
 | [`src/`](src/) | Legacy application source code used throughout the modernization exercises |
 | [`labs/`](labs/) | Step-by-step bootcamp modules, from setup and assessment through Azure deployment |
+| [`docs/`](docs/) | Shared reference material the labs assume, including [GitHub Copilot essentials](docs/copilot-essentials.md) |
 | [`data/`](data/) | Data assets used by the applications and data modernization exercises |
 | [`infra/`](infra/) | Infrastructure and deployment resources |
 | [`assets/`](assets/) | Images and visual assets used by the repository documentation |
@@ -60,9 +61,3 @@ The application source is organized under [`src/app-modernization/`](src/app-mod
 | Lab application | Starting technology | Role in the bootcamp | Setup |
 | --- | --- | --- | --- |
 | Storefront | ASP.NET MVC 5 on .NET Framework 4.8 with Entity Framework 6 and SQL Server | Customer-facing web and data modernization | [Storefront README](src/app-modernization/caldova-retail-web-app/README.md) |
-| Admin tool | .NET Framework 4.8 WinForms application with legacy configuration and authentication | Internal application, identity, API, and client modernization | [Admin tool README](src/app-modernization/caldova-retail-admin-app/README.md) |
-
-Each application README documents its prerequisites, setup, build, and run process. Database connectivity and troubleshooting guidance is available in the [remote SQL setup guide](src/app-modernization/caldova-retail-web-app/docs/remote-sql-setup.md).
-
-Begin with [Lab 00: Setup & GitHub Copilot Essentials](labs/00-Setup/Readme.md), a short reference on chat modes, model selection, context, cost, and course-correcting that the later labs assume you have read.
-
