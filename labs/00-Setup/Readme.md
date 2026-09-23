@@ -12,12 +12,10 @@ The lab applications ship with seeded accounts. Whenever a module tells you to s
 | --- | --- | --- | --- |
 | Caldova storefront | `alice` | `Password1!` | Customer, with existing order history |
 | Caldova storefront | `bob` | `Password1!` | Customer, with existing order history |
-| Caldova admin tool | `admin` | `admin123` | Editor — can add, edit, and delete products |
-| Caldova admin tool | `supportdeskagent` | `supportdeskagent` | Reader — product buttons are greyed out |
 
-Either storefront account works for the sign-in and cart checks the labs ask you to run. Use both admin accounts if you want to see the permission difference.
+Either storefront account works for the sign-in and cart checks the labs ask you to run.
 
-> ⚠️ These are throwaway credentials for a local sandbox, and the authentication behind them is deliberately insecure — SHA-1 password hashes (salted in the storefront, unsalted in the admin tool), a shared API key in the admin tool's config file, and permission checks that only grey out buttons. That is the "before" state the bootcamp migrates away from. Never reuse this pattern anywhere real.
+> ⚠️ These are throwaway credentials for a local sandbox, and the authentication behind them is deliberately insecure with SHA-1 password hashes (salted in the storefront). That is the "before" state the bootcamp migrates away from.
 
 ## 🎛️ Modes
 
