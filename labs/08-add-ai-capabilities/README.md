@@ -286,4 +286,4 @@ You added a genuinely new customer-facing capability to an application that, at 
 That is the argument worth carrying into a customer conversation. The migration was not the deliverable; it was the thing that made the deliverable possible.
 
 ---
-[← Previous: Add Azure Application Insights](../07-add-application-insights/README.md) | [Next: Modernize a Desktop App with the CLI →](../09-modernize-with-cli/README.md)
+[← Previous: Add Azure Application Insights](../07-add-application-insights/README.md)
