@@ -89,11 +89,9 @@ Once it loads, walk the app and record what you see. For a small baseline, confi
 - [ ] Sign-in works for both accounts — credentials are in [Demo logins](../../docs/logins.md)
 - [ ] Adding an item to the cart persists across page loads
 
-> 💡 **TIP**
->
-> Take a screenshot of the storefront home page. At the end of the module you will compare against it, and a picture settles "did that always look like that?" faster than memory does.
-
 If the build fails with a missing `csc.exe`, see [Handling Common Issues](#-handling-common-issues) below.
+
+Now that you have seen how the app looks and behaves on .NET Framework 4.8, you have the baseline everything that follows is measured against. Time to modernize it.
 
 ## 🤖 How GitHub Copilot Modernization Works
 
