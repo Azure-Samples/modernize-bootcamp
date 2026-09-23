@@ -2,15 +2,15 @@
 
 Module 2 got the storefront onto .NET 10. Because ASP.NET MVC 5 does not run there, that upgrade also had to move the app to dependency injection, `appsettings.json`, and the modern hosting model — whether you wanted it to or not. What it did not do is make the app ready to run **in Azure**.
 
-In this chapter you will work in **GitHub Copilot Chat** throughout — leaning on the `@upgrade` agent where its .NET modernization knowledge earns its keep, and regular chat where the job is ordinary refactoring. Ask the agent what the framework upgrade left behind, convert the MVC pages to Blazor components, then ask directly whether the app is ready for Azure and close the gaps that come back.
+In this chapter you will work in **GitHub Copilot Chat** throughout — mostly regular chat, where the job is ordinary refactoring, with the `@upgrade` agent available for the optional question that opens the module. Convert the MVC pages to Blazor components, then ask directly whether the app is ready for Azure and close the gaps that come back.
 
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 ## 📋 What you'll do
 
-- 🤖 Ask the upgrade agent what modernization work is still relevant
 - 🚀 Convert the MVC pages to Blazor components
 - ☁️ Ask whether the app is Azure ready, and fix what comes back
+- 🤖 Optionally, ask the upgrade agent what modernization work is still relevant
 
 ## 🔍 Prerequisites
 
@@ -19,7 +19,7 @@ Before starting, ensure you have:
 - Visual Studio Code installed
 - The GitHub Copilot extension installed and signed in
 - A GitHub Copilot subscription, paid or free
-- The **GitHub Copilot upgrade** agent (`@upgrade`), installed in Module 2
+- The **GitHub Copilot upgrade** agent (`@upgrade`), installed in Module 2 — only needed for the optional step below
 - A .NET 10 SDK available for the application
 
 ### Choose your starting point
@@ -36,12 +36,12 @@ Pick whichever fits where you landed in Module 2:
 
 > 💡 Both options put you in the same place. Option B just skips re-running Module 2 if your upgrade did not finish or you want a known-good starting point.
 
-### Verify the upgrade agent
+### Verify Copilot Chat
 
-Everything in this module runs through GitHub Copilot Chat. Confirm the agent is available before you start:
+Everything in this module runs through GitHub Copilot Chat. Confirm it is available before you start:
 
 1. Open the project folder in Visual Studio Code.
-1. Open the **GitHub Copilot Chat** view, send `@upgrade`, and confirm the agent responds.
+1. Open the **GitHub Copilot Chat** view and confirm it responds. If you plan to run the optional step below, send `@upgrade` and check that the agent answers too.
 
 ![GitHub Copilot Agent Mode](./images/copilot-agent-mode.png)
 
@@ -49,9 +49,9 @@ Everything in this module runs through GitHub Copilot Chat. Confirm the agent is
 
 In Module 2 the question was *what .NET version can this run on*. Here it is *what does this app still do the old way, and what does it need before it runs in Azure* — a question no compatibility report answers, because none of it is broken.
 
-You also pick your own mode and model from here; see [Copilot Essentials](../../docs/copilot-essentials.md) for what each is for. For this module: a fast model in agent mode for the page-by-page Blazor conversion in section 2, and a reasoning model in plan mode for the readiness question in section 4.
+## 🔎 Optional: ask what still needs modernizing
 
-## 1️⃣ Ask what still needs modernizing
+**Skip this if you are short on time** — nothing later in the module depends on it. It is worth running when you have the time, because it shows the upgrade agent answering a question no compatibility report does.
 
 Start with the upgrade agent. It knows the .NET side of this app, so it is the quickest way to see what the framework upgrade left behind before you decide what is worth acting on.
 
@@ -64,13 +64,7 @@ Start with the upgrade agent. It knows the .NET side of this app, so it is the q
 
 You will get a list back, not a plan — things like SDK-style project files, `Newtonsoft.Json` where `System.Text.Json` would do, or MVC patterns worth revisiting. Read it, but you do not have to act on all of it.
 
-1. Pick one thing to edit. Type it into the chat and watch the code change.
-
-> 🪧 **Important**
->
-> If the agent pauses or stops in the middle of a task, ask it to continue by saying `"continue"` or `"please continue"`.
-
-## 2️⃣ Convert to Blazor pages
+## 1️⃣ Convert to Blazor pages
 
 The storefront still renders through MVC views and controllers. They work fine on .NET 10, but they keep the front end on an older rendering model than the rest of the stack. You will convert those pages to Blazor components, and ask for a more modern look while you are at it.
 
@@ -113,7 +107,7 @@ This is our final page:
 
 ![Blazor Products](./images/blazor-products.png)
 
-## 3️⃣ Build and test
+## 2️⃣ Build and test
 
 If Copilot does not automatically do this verification, then:
 
@@ -130,7 +124,7 @@ If Copilot does not automatically do this verification, then:
 
 > 💡 The app does the same things it did at the end of Module 2 — that is the point. Everything so far changed *how* the app runs and renders, not *what* it does.
 
-## 4️⃣ Get the app cloud ready
+## 3️⃣ Get the app cloud ready
 
 The app runs on .NET 10 and renders through Blazor, but it is not ready for the Azure components we plan to put around it — Key Vault, managed identity, a container platform in front of it. Nothing so far has touched that, because a framework upgrade has no reason to.
 
@@ -203,7 +197,6 @@ If product images don't appear after modernization:
 
 By the end of this section, you should have:
 
-- 🔹 Asked the upgrade agent what modernization work was still relevant
 - 🔹 Converted the MVC pages to Blazor components
 - 🔹 Asked the agent directly whether the app is Azure ready
 - 🔹 Closed the gaps it found, including HTTPS redirection, forwarded headers, and a health endpoint
