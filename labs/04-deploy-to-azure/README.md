@@ -151,6 +151,14 @@ Your plan and implementation must:
 
 ## 🧪 Challenge 1: Explore Before You Plan
 
+Start with what you carried out of Module 3. Open the `appsettings.json` from your
+Azure-ready application and list every setting the agent added — Key Vault URIs,
+managed identity client IDs, storage or telemetry endpoints, health check paths.
+Those empty settings are the application's own statement of what it expects Azure
+to provide, and they are the evidence your plan is graded against. If your Module 3
+run did not finish, use [`sample-app/`](./sample-app/) and read its `appsettings.json`
+instead.
+
 Do not begin by asking Copilot to create files. First, use **Ask** mode to learn
 what is already in the repository and to identify the evidence behind the
 requirements.
@@ -161,7 +169,8 @@ Explore this repository for Lab 04 without changing any files.
 Identify:
 - the application and database requirements established by earlier labs
 - every existing Lab 04 Bicep entry point, module, workflow, and script
-- the Azure resources implied by application configuration
+- the Azure resources implied by application configuration, including every setting
+  the Module 3 readiness work added to appsettings.json
 - security, identity, networking, availability, operations, and cost constraints
 - assumptions or conflicts that require human review
 
@@ -170,8 +179,11 @@ facts from recommendations. Do not create an implementation plan yet.
 ```
 
 Review the inventory. Ask follow-up questions when a conclusion is unsupported
-or a repository requirement has been missed. This step keeps the plan grounded
-in evidence instead of accepting a plausible but generic Azure design.
+or a repository requirement has been missed. Check the result against your own
+`appsettings.json` list — a setting the app reads but the inventory does not
+account for is a gap in the plan, not a detail to sort out later. This step keeps
+the plan grounded in evidence instead of accepting a plausible but generic Azure
+design.
 
 ## 🧪 Challenge 2: Produce and Review the Plan
 
