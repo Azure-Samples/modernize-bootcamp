@@ -11,7 +11,7 @@ This module takes approximately **30 minutes**.
 ## 📋 What You'll Do
 
 - 📡 Add the Azure Monitor OpenTelemetry distro to the storefront
-- 🏗️ Add Application Insights to the Container Apps foundation generated in Lab 04
+- 🏗️ Add Application Insights to the preprovisioned Lab 04 Container Apps foundation
 - 🔌 Pass the connection string in as configuration rather than code
 - 🗺️ Read the Application Map, Live Metrics, transaction details, and failures
 - 🔎 Prove — or disprove — the scale-out concerns raised back in Lab 03
@@ -19,7 +19,7 @@ This module takes approximately **30 minutes**.
 
 ## 🧭 Where This Fits
 
-Lab 04 provisioned the resilient Azure Container Apps foundation, Lab 05 prepared the managed data target, and Lab 06 replaced the placeholder through CI/CD. This module proves you can *operate* that workload — the observability conversation an infrastructure architect gets asked about on day two of any migration, usually right after the first incident.
+The instructor preprovisioned the resilient Azure Container Apps foundation examined in Lab 04, Lab 05 prepared the managed data target, and Lab 06 replaced the placeholder through CI/CD. This module proves you can *operate* that workload — the observability conversation an infrastructure architect gets asked about on day two of any migration, usually right after the first incident.
 
 > ‼️ **IMPORTANT**
 >
@@ -34,7 +34,7 @@ Before you begin, make sure you have:
 - an **Azure subscription** with permission to create resources — this module deploys to Azure, there's no local-only path
 - the **Azure CLI**, signed in with `az login`
 - Visual Studio Code with the **GitHub Copilot** extension, for the infrastructure change
-- the Lab 04 Container Apps platform and its Bicep or your participant IaC
+- the preprovisioned Lab 04 Container Apps platform and its complete Bicep baseline
 - the Lab 05 managed database target
 - the modernized storefront image deployed in place of the Lab 04 placeholder
 
@@ -88,7 +88,7 @@ That is the entire code change: one package and four lines.
 
 ### Step 2: Add the resources to your infrastructure
 
-Lab 04 produced the platform Bicep or your participant IaC, so this is an infrastructure change, not a portal click-through. Ask Copilot to extend what you already have:
+The preprovisioned platform is represented by the complete Lab 04 Bicep implementation, so this is an infrastructure change, not a portal click-through. Ask Copilot to extend that baseline:
 
 ```plaintext
 Extend the infrastructure in this repo to add Azure Monitor telemetry for the storefront.
