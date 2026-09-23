@@ -51,7 +51,7 @@ This repository is the starting state for the hands-on exercises. Its intentiona
 | --- | --- |
 | [`src/`](src/) | Legacy application source code used throughout the modernization exercises |
 | [`labs/`](labs/) | Step-by-step bootcamp modules, from setup and assessment through Azure deployment |
-| [`docs/`](docs/) | Shared reference material the labs assume, including [GitHub Copilot essentials](docs/copilot-essentials.md) |
+| [`docs/`](docs/) | Shared reference material the labs assume, including [GitHub Copilot essentials](docs/copilot-essentials.md) and [demo logins](docs/logins.md) |
 | [`data/`](data/) | Data assets used by the applications and data modernization exercises |
 | [`infra/`](infra/) | Infrastructure and deployment resources |
 | [`assets/`](assets/) | Images and visual assets used by the repository documentation |

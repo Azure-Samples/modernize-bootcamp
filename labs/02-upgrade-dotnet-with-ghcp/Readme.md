@@ -86,7 +86,7 @@ This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its 
 Once it loads, walk the app and record what you see. For a small baseline, confirm:
 
 - [ ] The product catalog loads, with images
-- [ ] Sign-in works for both accounts — credentials are in [Copilot Essentials](../../docs/copilot-essentials.md#-demo-accounts)
+- [ ] Sign-in works for both accounts — credentials are in [Demo logins](../../docs/logins.md)
 - [ ] Adding an item to the cart persists across page loads
 
 > 💡 **TIP**

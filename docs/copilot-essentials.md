@@ -4,18 +4,7 @@ This page is a **reference, not a lab**.
 
 Every module in this bootcamp drives GitHub Copilot Chat. This page is the shared background those modules assume — what the dropdowns do, how to give Copilot the right context, what it costs, and how to pull it back when it goes off the rails. Read it once before starting the labs, and feel free to come back to it whenever a module says something you do not recognise.
 
-## 🔑 Demo accounts
-
-The lab applications ship with seeded accounts. Whenever a module tells you to sign in, these are the credentials:
-
-| App | Username | Password | Notes |
-| --- | --- | --- | --- |
-| Caldova storefront | `alice` | `Password1!` | Customer, with existing order history |
-| Caldova storefront | `bob` | `Password1!` | Customer, with existing order history |
-
-Either storefront account works for the sign-in and cart checks the labs ask you to run.
-
-> ⚠️ These are throwaway credentials for a local sandbox, and the authentication behind them is deliberately insecure with SHA-1 password hashes (salted in the storefront). That is the "before" state the bootcamp migrates away from.
+> 🔑 Looking for sign-in credentials? They are in [Demo logins](logins.md).
 
 ## 🎛️ Modes
 

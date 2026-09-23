@@ -86,7 +86,7 @@ Your target end state for this module:
 
     ![The legacy Caldova Retail admin tool running on .NET Framework 4.8](./images/original-app.png)
 
-1. Sign in with the seed account `admin` / `admin123` — the full list is in [Copilot Essentials](../../docs/copilot-essentials.md#-demo-accounts).
+1. Sign in with the seed account `admin` / `admin123` — the full list is in the [admin tool README](../../src/app-modernization/caldova-retail-admin-app/README.md#sign-in).
 1. Explore both tabs:
    - **Products**: refresh the grid, add a product, edit a product, and delete a product
    - **Orders**: confirm the read-only order list loads from `Data\orders.json`

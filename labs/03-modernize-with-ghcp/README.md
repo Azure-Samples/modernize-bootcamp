@@ -122,7 +122,7 @@ If Copilot does not automatically do this verification, then:
 1. Check that:
    - All pages load correctly and render as Blazor components
    - Images and static content display properly
-   - Sign-in still works and the cart still holds its contents — credentials are in [Copilot Essentials](../../docs/copilot-essentials.md#-demo-accounts)
+   - Sign-in still works and the cart still holds its contents — credentials are in [Demo logins](../../docs/logins.md)
    - No MVC views or controllers are left behind in the routing
    - The application starts cleanly from the Visual Studio Code terminal
 
