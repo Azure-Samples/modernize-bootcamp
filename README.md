@@ -26,7 +26,6 @@ By working through the bootcamp, attendees will learn how to:
 - Plan the evolution of SQL Server workloads toward managed Azure data services such as Azure SQL Managed Instance and Azure SQL Database.
 - Apply identity, secrets management, governance, and security capabilities using Microsoft Entra ID, Azure Key Vault, Azure Policy, and Microsoft Defender for Cloud.
 - Introduce DevSecOps practices with GitHub, GitHub Actions, GitHub Copilot, and Azure DevOps.
-- Improve operational visibility with Azure Monitor and Application Insights, then use telemetry to guide further modernization decisions.
 - Include resiliency, business continuity, cost management, and FinOps considerations in a modernization roadmap.
 - Turn lessons from a pilot workload into repeatable patterns that can be applied across a larger application portfolio.
 
