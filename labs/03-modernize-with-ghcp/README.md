@@ -103,7 +103,7 @@ If Copilot does not automatically do this verification, then:
 
 ## 3️⃣ Get the app cloud ready
 
-The app runs on .NET 10 and renders through Blazor, but it is not ready for the Azure components we plan to put around it — Key Vault, managed identity, a container platform in front of it. Nothing so far has touched that, because a framework upgrade has no reason to.
+The app runs on .NET 10 and renders through Blazor, but it is not ready for the Azure components we plan to put around it — such as Key Vault and managed identity. Nothing so far has touched that, because a framework upgrade has no reason to.
 
 So ask.
 

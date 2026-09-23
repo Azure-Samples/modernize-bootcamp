@@ -1,6 +1,6 @@
 # ☁️ Lab 04: Design the Azure Foundation with GitHub Copilot
 
-You finished Module 3 with an application that is ready for Azure and a list of settings describing what it expects to find there — a Key Vault to read from, an identity to authenticate with, a platform to run on. None of it exists yet. This lab designs it.
+You finished Module 3 with an application that is ready for Azure and a list of settings describing what it expects to find there. None of it exists yet. This lab designs it.
 
 The platform has to serve more than the storefront. The data migration in [Lab 05](../05-modernize-data/README.md) needs servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
 

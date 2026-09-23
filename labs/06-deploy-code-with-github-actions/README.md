@@ -376,10 +376,10 @@ If your workflow does not validate and lab time is running short:
 
 ## 🧹 Cleanup
 
-This lab adds images and revisions but no new Azure service. Keep the current image if continuing to Lab 07.
+This lab adds images and revisions but no new Azure service.
 
 To reduce registry storage, delete only known obsolete tags after confirming that no active or rollback revision references their digest. Do not delete the Lab 04 resource groups until all remaining labs are complete.
 
 ---
 
-[← Previous: Modernize Data](../05-modernize-data/README.md) | [Next: Add Azure Application Insights →](../07-add-application-insights/README.md)
+[← Previous: Modernize Data](../05-modernize-data/README.md)
