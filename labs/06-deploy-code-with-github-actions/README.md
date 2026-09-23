@@ -2,8 +2,6 @@
 
 Lab 04 examined the design of a secure Azure platform, and the instructor-preprovisioned environment supplies that platform for this lab. Lab 05 migrated the `eShop` database, and the Container App still runs a placeholder image. In this challenge, you will create a CI/CD workflow that validates the modernized retail application, builds a container, pushes an immutable image to the existing Azure Container Registry, and releases a new Azure Container Apps revision.
 
-The WinForms admin application is not part of this deployment. You will modernize it in Lab 09.
-
 This lab takes approximately **60-75 minutes**.
 
 ## 🎯 Objectives
@@ -382,4 +380,4 @@ To reduce registry storage, delete only known obsolete tags after confirming tha
 
 ---
 
-[← Previous: Modernize Data](../05-modernize-data/README.md)
+[← Previous: Modernize Data](../05-modernize-data/README.md) | [Next: Modernize with the CLI →](../07-modernize-with-cli/README.md)
