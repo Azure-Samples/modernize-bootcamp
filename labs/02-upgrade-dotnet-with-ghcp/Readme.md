@@ -163,10 +163,10 @@ The rest of this module is the upgrade itself, in five steps.
    - Target Framework: .NET 10
    - Flow Mode: Guided. It stops after assessment and again after planning, so you can inspect what the agent found and redirect it before a line of code changes — which is what you want while you are still learning the tool. It is also the right choice in an unfamiliar or high-risk codebase, or when you are sitting with a customer who wants to approve each stage. Automatic runs end-to-end, pausing only when blocked; reach for it once the tool is familiar and the work is low-risk.
    - Create working branch: Check the box. This is important so that the modernized code lives on a new branch you can rollback from.
-   - Branch name: upgrade-net10
+   - Branch name: upgrade-net10 (or whatever you prefer)
    - Commit strategy: Commit after each task
 
-   Press 'Confirm' at the end to kick off the upgrade with these parameters.
+   Do not be concerned if some of these options do not appear or extra ones appear. This is an agentic flow, and some variability is expected. If extra options appear, select choices based off of your own judgement. The defaults are already what Copilot recommends. Press 'Confirm' at the end to kick off the upgrade with these parameters.
 
    ![Copilot Chat displays a modal for selecting the upgrade parameters](./images/net-upgrade-selection-modal.png)
 
@@ -176,7 +176,7 @@ The rest of this module is the upgrade itself, in five steps.
 
 > ‼️ **IMPORTANT**
 >
-> The agent runs many tool calls. If VS Code prompts you to approve each one, choose the option to allow them for the rest of the session — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
+> The agent runs many tool calls. If VS Code prompts you to approve each one, be ready to stand by and approve. Optionally, you can choose the option to allow them for the rest of the session — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
 
 ## 2️⃣ Initial Assessment
 
@@ -330,7 +330,7 @@ Check the activity tab of the dashboard. It records the timeline, log, and commi
 
 > 💡 **TIPS**
 >
-> - The agent runs a lot of commands. Rather than approving each one individually, choose the option to allow all commands for the rest of the session.
+> - The agent runs a lot of commands. Rather than approving each one individually, once you are used to the dynamic, you can choose the option to allow all commands for the rest of the session.
 > - Sometimes the dashboard gets stuck. It reflects state the agent reports rather than polling the repo, so it can lag behind the real work. Check the chat and the Source Control view before assuming anything has actually stalled — if commits are still landing, the upgrade is fine and only the display is behind.
 > - If the agent gets stuck (no new chat output and no tasks being checked off) tell it to continue in the chat.
 
@@ -405,19 +405,12 @@ Sometimes the tool may encounter errors during the upgrade. When this happens:
 
 1. If you see an error message, click on **"Resume"** - in 70% of cases, the issue resolves in subsequent iterations.
 2. If the error persists, type in the chatbox:
+
    ```
    Fix the errors and continue with the update
    ```
 
 3. For specific errors, analyze the error message and debug with Copilot by providing context
-
-### Scope Creep
-
-The agent may start converting views to Blazor or swapping the database provider on its own initiative, because those are common companions to a framework upgrade. If you see it heading that way, pull it back:
-
-```
-Stay on the framework upgrade only. Keep the existing SQL Server database and the existing MVC views. Revert any changes that convert views to Blazor or change the database provider.
-```
 
 ### Static Assets and Views
 

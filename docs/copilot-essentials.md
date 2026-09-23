@@ -4,8 +4,6 @@ This page is a **reference, not a lab**.
 
 Every module in this bootcamp drives GitHub Copilot Chat. This page is the shared background those modules assume — what the dropdowns do, how to give Copilot the right context, what it costs, and how to pull it back when it goes off the rails. Read it once before starting the labs, and feel free to come back to it whenever a module says something you do not recognise.
 
-> 🔑 Looking for sign-in credentials? They are in [Demo logins](logins.md).
-
 ## 🎛️ Modes
 
 A row of controls sits under the chat input. As of VS Code 1.135 you get an **agent** picker, a **model** picker, a **reasoning level**, and — on the line below — where the session runs (**local** or **cloud**) and its **permission level** (**Default permissions** or **Allow all**).
