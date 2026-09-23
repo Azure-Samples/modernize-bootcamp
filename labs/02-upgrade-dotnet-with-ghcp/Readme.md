@@ -161,7 +161,7 @@ The rest of this module is the upgrade itself, in five steps.
 4. A modal will load that offers options on the upgrade. You can see it already detected the app is running on .NET Framework 4.8 and has pulled out the solution file. Select the following options:
 
    - Target Framework: .NET 10
-   - Flow Mode: Automatic. For the purpose of this lab we will let the flow run end-to-end, pausing only when blocked. Guided mode is the better choice when you are learning the tool, working in an unfamiliar or high-risk codebase, or sitting with a customer who wants to approve each stage before it happens — it stops after assessment and planning so you can inspect and redirect.
+   - Flow Mode: Guided. It stops after assessment and again after planning, so you can inspect what the agent found and redirect it before a line of code changes — which is what you want while you are still learning the tool. It is also the right choice in an unfamiliar or high-risk codebase, or when you are sitting with a customer who wants to approve each stage. Automatic runs end-to-end, pausing only when blocked; reach for it once the tool is familiar and the work is low-risk.
    - Create working branch: Check the box. This is important so that the modernized code lives on a new branch you can rollback from.
    - Branch name: upgrade-net10
    - Commit strategy: Commit after each task
@@ -281,7 +281,7 @@ It lists the package updates, breaking changes, and migration path the agent int
 
 > 💡 **NOTE**
 >
-> Because we chose **Automatic** flow mode, the agent continues without waiting for you to approve the plan. In **Guided** mode it would stop here. You can still halt execution and edit the plan at any point.
+> Because we chose **Guided** flow mode, the agent stops here and waits for you before it changes any code. This is the moment to edit `plan.md` — whatever you leave in it is what gets executed. In **Automatic** mode the agent would carry straight on without asking.
 
 **2. Open `tasks.md`.**
 
@@ -298,7 +298,7 @@ What should hold steady is the **shape**: establish prerequisites, convert the p
 
 ## 4️⃣ Monitor the Upgrade Process
 
-Now that the plan is set, the tool will begin the automated upgrade process. During this phase:
+Once you approve the plan, the tool begins the upgrade. In Guided mode nothing is executed until you do, so take the time to read `plan.md` first. During this phase:
 
 - Files will be modified incrementally
 - Git commits will be created for each major change
