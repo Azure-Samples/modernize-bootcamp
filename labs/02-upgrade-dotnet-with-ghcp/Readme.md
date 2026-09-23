@@ -23,7 +23,7 @@ Caldova Retail's goal is not .NET 10 — it's an Azure PaaS service (App Service
 
 ## 🔍 Prerequisites
 
-This module is done entirely in **Visual Studio Code**. Before you start, make sure you have:
+Skillable will already have these installed for you, but for reference this is what is needed. The module is done entirely in **Visual Studio Code**:
 
 | Requirement | Why you need it |
 | --- | --- |
@@ -32,7 +32,7 @@ This module is done entirely in **Visual Studio Code**. Before you start, make s
 | [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) | Agent mode, which drives the upgrade |
 | [GitHub Copilot upgrade](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.upgrade-agent) (`ms-dotnettools.upgrade-agent`) | Adds the `@upgrade` agent that performs the modernization |
 
-You also need everything required to build and run the **original** .NET Framework 4.8 storefront, because you start the module by running it:
+Building and running the **original** .NET Framework 4.8 storefront, which you do at the start of the module, also needs:
 
 | Requirement | Why you need it |
 | --- | --- |
