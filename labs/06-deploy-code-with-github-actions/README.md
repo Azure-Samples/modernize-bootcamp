@@ -1,6 +1,6 @@
 # 🚀 Lab 06: Deploy Code with GitHub Actions
 
-Lab 04 created a secure Azure platform and Lab 05 migrated the `eShop` database. The Container App still runs a placeholder image. In this challenge, you will create a CI/CD workflow that validates the modernized retail application, builds a container, pushes an immutable image to the existing Azure Container Registry, and releases a new Azure Container Apps revision.
+Lab 04 examined the design of a secure Azure platform, and the instructor-preprovisioned environment supplies that platform for this lab. Lab 05 migrated the `eShop` database, and the Container App still runs a placeholder image. In this challenge, you will create a CI/CD workflow that validates the modernized retail application, builds a container, pushes an immutable image to the existing Azure Container Registry, and releases a new Azure Container Apps revision.
 
 The WinForms admin application is not part of this deployment. You will modernize it in Lab 09.
 
@@ -21,9 +21,10 @@ By the end of this lab, you will be able to:
 
 ## ✅ Prerequisites
 
-- completed [Lab 04](../04-deploy-to-azure/README.md), including the bootstrap script and base deployment
+- completed the planning, Bicep generation, validation, and review walkthrough in [Lab 04](../04-deploy-to-azure/README.md)
+- access to the instructor-preprovisioned Lab 04 platform
 - completed [Lab 05](../05-modernize-data/README.md), including the managed-identity database user
-- the `lab06` and `lab06-deploy` GitHub environments created by the updated Lab 04 bootstrap
+- the repository-specific OIDC bootstrap described below
 - required reviewers configured on `lab06-deploy`
 - the modernized .NET 10 retail app
 - GitHub Actions enabled for the repository
@@ -35,6 +36,54 @@ labs/04-deploy-to-azure/sample-app/
 ```
 
 That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, and already Azure ready. If you modernized the root application in place, use its corresponding solution and project paths instead.
+
+## 🔑 Bootstrap GitHub OIDC
+
+The Azure platform is already provisioned, but its GitHub federation cannot be
+copied generically between repositories. An OIDC federated credential includes
+the repository and GitHub environment in its subject, so this setup must be
+completed for the repository that will run the Lab 06 workflow.
+
+Before continuing, an instructor or administrator with access to both the Azure
+deployment identity and the GitHub repository must:
+
+1. bind the existing Lab 06 code-deployment identity to the `lab06` and
+   `lab06-deploy` GitHub environments with environment-scoped federated
+   credentials
+2. create both GitHub environments and add the required reviewer protection to
+   `lab06-deploy`
+3. publish the non-secret Azure and Lab 04 resource variables required by the
+   workflow to both environments
+4. confirm that the existing identity retains only `AcrPush` on the registry,
+   `Container Apps Contributor` on the retail app, and Reader on the Front Door
+   profile
+
+> [!IMPORTANT]
+> Do not run `assets/scripts/Initialize-Lab04Repository.ps1` for this step. That
+> script is the full Lab 04 infrastructure bootstrap: it creates resource
+> groups, identities, Key Vault content, and infrastructure deployment
+> settings. Running it against the preprovisioned environment could create a
+> second lab boundary or rotate generated credentials. Use the
+> instructor-approved repository OIDC setup for the existing deployment.
+
+Verify the GitHub side of the bootstrap from the repository root:
+
+```powershell
+gh auth status
+$repository = gh repo view --json nameWithOwner --jq '.nameWithOwner'
+
+gh api "repos/$repository/environments/lab06" --jq '.name'
+gh api "repos/$repository/environments/lab06-deploy" --jq '.name'
+
+gh variable list --env lab06
+gh variable list --env lab06-deploy
+```
+
+Both environments must contain the variables listed in the
+[Identity and RBAC](#-identity-and-rbac) section. If an environment or variable
+is missing, stop and have the instructor or repository administrator complete
+the OIDC bootstrap before you create or run the deployment workflow. Do not
+replace OIDC with an Azure client secret.
 
 ## 🧭 Delivery Flow
 
@@ -56,7 +105,7 @@ flowchart LR
 
 ## 🔐 Identity and RBAC
 
-Lab 04 bootstraps a **separate code-deployment identity**. Do not reuse the infrastructure identity.
+The preprovisioned Lab 04 environment includes a **separate code-deployment identity**. Do not reuse the infrastructure identity.
 
 | Principal | Role | Scope | Purpose |
 | --- | --- | --- | --- |
@@ -68,7 +117,7 @@ Lab 04 bootstraps a **separate code-deployment identity**. Do not reuse the infr
 
 The workflow receives a short-lived Azure token only after GitHub presents an OIDC token whose repository and environment claims match the federated credential. No Azure client secret or ACR password is stored in GitHub.
 
-Lab 04 creates the non-secret environment variables needed by both Lab 06 jobs:
+The Lab 04 preprovisioning process creates the non-secret environment variables needed by both Lab 06 jobs:
 
 | Variable | Purpose |
 | --- | --- |
@@ -82,7 +131,7 @@ These are GitHub variables, not secrets. The identity's federated credential and
 
 ## Challenge 1: Create the Container Contract
 
-The application has no Dockerfile. Generate one rather than copying a template, because the container has to satisfy two things at once: how the application starts, and what the platform you deployed in Lab 04 expects to run.
+The application has no Dockerfile. Generate one rather than copying a template, because the container has to satisfy two things at once: how the application starts, and what the preprovisioned Lab 04 platform expects to run.
 
 Open GitHub Copilot in **Agent** mode:
 
