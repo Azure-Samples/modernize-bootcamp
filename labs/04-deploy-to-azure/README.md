@@ -1,6 +1,8 @@
 # ☁️ Lab 04: Design the Azure Foundation with GitHub Copilot
 
-The database exercise needs servers, private connectivity, migration services, and managed database targets before a migration can begin. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
+You finished Module 3 with an application that is ready for Azure and a list of settings describing what it expects to find there — a Key Vault to read from, an identity to authenticate with, a platform to run on. None of it exists yet. This lab designs it.
+
+The platform has to serve more than the storefront. The data migration in [Lab 05](../05-modernize-data/README.md) needs servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
 
 You will make real architecture decisions inside a set of non-negotiable security and resilience requirements. The instructor has already provisioned the Azure environment used by the later labs, so **you will not deploy the Bicep you generate**. The goal is to practice an effective GitHub Copilot workflow while keeping architectural judgment and approval with you.
 
@@ -27,9 +29,9 @@ By the end of this lab, you will be able to:
 
 ## 🧭 Where This Fits
 
-The earlier labs assessed and modernized the application. This lab examines the Azure platform required by [Lab 05: Modernize Data](../05-modernize-data/README.md). The instructor-preprovisioned environment provides that platform, while your Bicep remains a local learning artifact.
+The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects and that [Lab 05: Modernize Data](../05-modernize-data/README.md) requires. The instructor-preprovisioned environment provides that platform, while your Bicep remains a local learning artifact.
 
-The preprovisioned Container App runs a placeholder image so the platform can be verified independently of the workshop application. The application arrives in [Lab 06](../06-deploy-code-with-github-actions/README.md).
+The preprovisioned Container App runs a placeholder image so the platform can be verified independently of the workshop application. Your storefront is not deployed here — it arrives in [Lab 06](../06-deploy-code-with-github-actions/README.md), onto the foundation you are about to design.
 
 ## ✅ Prerequisites
 
