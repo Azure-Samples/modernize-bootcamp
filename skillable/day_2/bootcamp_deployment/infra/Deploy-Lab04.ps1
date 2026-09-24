@@ -15,6 +15,9 @@ param(
     [string]$PrimaryLocation = 'centralus',
 
     [ValidatePattern('^[a-z0-9]+$')]
+    [string]$DeploymentLocation = $PrimaryLocation,
+
+    [ValidatePattern('^[a-z0-9]+$')]
     [string]$SecondaryLocation = 'centralus',
 
     [ValidatePattern('^[a-z0-9]+$')]
@@ -273,7 +276,7 @@ try {
         '--name'
         $armDeploymentName
         '--location'
-        $PrimaryLocation
+        $DeploymentLocation
         '--template-file'
         $templateFile
         '--parameters'

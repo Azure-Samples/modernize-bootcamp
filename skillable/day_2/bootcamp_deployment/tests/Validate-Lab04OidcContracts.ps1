@@ -108,6 +108,7 @@ foreach ($name in @(
     'EnvironmentName',
     'DeploymentName',
     'PrimaryLocation',
+    'DeploymentLocation',
     'SecondaryLocation',
     'ApplicationLocation',
     'Prefix',
@@ -207,6 +208,9 @@ Assert-Contract (
 Assert-Contract (
     $deployScript -match '"\$EnvironmentName-deploy"'
 ) 'Deploy-Lab04.ps1 no longer defaults to <EnvironmentName>-deploy.'
+Assert-Contract (
+    $deployScript -match '(?s)''--location''\s*\r?\n\s*\$DeploymentLocation'
+) 'Deploy-Lab04.ps1 does not use DeploymentLocation for the subscription deployment record.'
 Assert-Contract (
     $deployScript -match 'Split-Path -Parent \$PSScriptRoot' -and
     $deployScript -match '''assets\\scripts\\Configure-Lab04GitHub\.ps1'''

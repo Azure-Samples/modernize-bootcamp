@@ -75,6 +75,9 @@ az deployment sub what-if `
   --template-file .\infra\main.bicep `
   --parameters `
     environmentName='lab04-direct' `
+    primaryLocation='centralus' `
+    secondaryLocation='eastus2' `
+    applicationLocation='centralus' `
     vmAdminUsername='labadmin' `
     vmAdminPassword='<strong-password>'
 ```
@@ -211,12 +214,17 @@ inline JSON argument before Azure CLI parsed it. Update
 command. The corrected script uses a temporary JSON file and cleans it up;
 there is no need to redeploy Lab 04.
 
-## Select regions
+## Select deployment and resource locations
+
+The Azure CLI `--location` value stores the subscription deployment record and
+does not control resource locations. The direct deployment script exposes this
+value as `DeploymentLocation`. By default, it uses the selected
+`PrimaryLocation`, preserving the existing behavior.
 
 The Bicep `primaryLocation`, `secondaryLocation`, and `applicationLocation`
-parameters are independent and each defaults to `centralus`. The deployment
-script mirrors those defaults, so no location arguments are required for a
-default deployment.
+parameters independently control resource locations and each defaults to
+`centralus`. The deployment script mirrors those defaults, so no location
+arguments are required for a default deployment.
 
 Pass one or more location arguments to override the defaults. For example:
 
@@ -224,11 +232,16 @@ Pass one or more location arguments to override the defaults. For example:
 .\infra\Deploy-Lab04.ps1 `
   -SubscriptionId $subscriptionId `
   -EnvironmentName 'lab04-direct' `
+  -DeploymentLocation 'eastus2' `
   -PrimaryLocation 'centralus' `
   -SecondaryLocation 'eastus2' `
   -ApplicationLocation 'centralus' `
   -Action WhatIf
 ```
+
+For a raw Azure CLI deployment, set the deployment record with `--location`
+and pass the three resource locations through `--parameters`, as shown in the
+earlier `az deployment sub what-if` example.
 
 Confirm SQL, VM, DMS, SQL MI, and zone-redundant Container Apps availability
 before deploying to different regions. Locations cannot be changed in place for
