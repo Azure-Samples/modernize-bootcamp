@@ -267,6 +267,10 @@ $subscriptionId = '<subscription-id>'
 .\infra\Deploy-Lab04.ps1 `
   -SubscriptionId $subscriptionId `
   -EnvironmentName 'lab04-direct' `
+  -DeploymentLocation 'eastus2' `
+  -PrimaryLocation 'centralus' `
+  -SecondaryLocation 'eastus2' `
+  -ApplicationLocation 'centralus' `
   -Action WhatIf
 
 .\infra\Deploy-Lab04.ps1 `
@@ -279,7 +283,12 @@ $subscriptionId = '<subscription-id>'
 Door Private Link request, and waits for the public Front Door endpoint to
 respond successfully.
 
-See the [direct deployment guide](./infra/DEPLOYMENT.md) for region parameters,
+`DeploymentLocation` controls the subscription deployment record.
+`PrimaryLocation`, `SecondaryLocation`, and `ApplicationLocation` control the
+deployed resource regions. When omitted, the deployment location follows the
+primary location and all resource locations default to `centralus`.
+
+See the [direct deployment guide](./infra/DEPLOYMENT.md) for location parameters,
 SQL MI selection, password rules, the optional Entra administrator user
 principal name, reruns, and diagnostics.
 
