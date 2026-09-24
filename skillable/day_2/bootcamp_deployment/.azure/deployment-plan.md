@@ -11,7 +11,10 @@
 - Retain Microsoft Entra-only authentication.
 - Accept only an optional Entra administrator user principal name at the AZD
   and direct-deployment interfaces, resolve its required object ID before
-  Bicep runs, and default to the signed-in user when the name is omitted.
+  Bicep runs, and default to the signed-in user when the name is omitted. AZD
+  uses `LAB04_SQL_ADMIN_LOGIN_OVERRIDE`; the resolved
+  `LAB04_SQL_ADMIN_LOGIN` and `LAB04_SQL_ADMIN_OBJECT_ID` values are internal
+  Bicep inputs rather than selection parameters.
 - Enable the SQL MI public endpoint without broad NSG ingress. Participants
   separately allow only their current public IPv4 `/32` on TCP 3342.
 - Keep `azureSql` available as an explicit alternative.

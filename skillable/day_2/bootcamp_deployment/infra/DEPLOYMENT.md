@@ -58,8 +58,11 @@ az ad signed-in-user show --output table
 If browser authentication is unavailable, use
 `az login --tenant $tenantId --use-device-code`. Do not use a service principal
 for the default signed-in-user lookup. To select a different administrator,
-pass `-SqlEntraAdminLogin` with that user's principal name. Both paths query
-Microsoft Graph to obtain the object ID required by Azure SQL.
+set the optional `LAB04_SQL_ADMIN_LOGIN_OVERRIDE` AZD value, or pass
+`-SqlEntraAdminLogin` to the direct deployment script, with that user's
+principal name. Both paths query Microsoft Graph to obtain the object ID
+required by Azure SQL. The resolved login and object ID remain required
+internal Bicep parameters because ARM cannot infer the Azure CLI user.
 
 Validate the template and parameters:
 
