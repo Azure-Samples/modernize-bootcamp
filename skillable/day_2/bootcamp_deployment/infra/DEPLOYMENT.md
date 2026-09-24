@@ -149,9 +149,12 @@ controls the ARM subscription deployment record only; `-EnvironmentName`
 continues to control resource naming and tags. If supplied, use that exact
 deployment name when running `Configure-Lab04GitHub.ps1`.
 
-For the default `lab04-direct` environment, run this from the repository root:
+For the default `lab04-direct` environment, run this from the bootcamp
+deployment directory:
 
 ```powershell
+Set-Location (Join-Path (git rev-parse --show-toplevel) 'skillable\day_2\bootcamp_deployment')
+
 .\assets\scripts\Configure-Lab04GitHub.ps1 `
   -SubscriptionId $subscriptionId `
   -DeploymentName 'lab04-direct-deploy' `
@@ -171,6 +174,20 @@ gh repo view `
 
 If needed, have a repository administrator run the setup or add
 `-Repository 'owner/name'` for a repository you administer.
+
+If PowerShell reports that `DeploymentName` is not a recognized parameter,
+inspect the resolved script before retrying:
+
+```powershell
+$oidcScript = Get-Command .\assets\scripts\Configure-Lab04GitHub.ps1
+$oidcScript.Source
+$oidcScript.ParameterSets |
+  Select-Object Name, @{ Name = 'Parameters'; Expression = { $_.Parameters.Name -join ', ' } }
+```
+
+The `Arm` row must include `DeploymentName`. If it does not, the command is
+loading a stale script; update the checkout or remove the stale copy. This
+binding error occurs before Azure validates the deployment name.
 
 Do not use `-AzdEnvironment` for infrastructure created by
 `Deploy-Lab04.ps1`. To locate the generated ARM deployment and verify its

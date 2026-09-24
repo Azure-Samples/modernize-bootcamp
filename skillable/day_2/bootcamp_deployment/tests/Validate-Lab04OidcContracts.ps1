@@ -13,6 +13,11 @@ $parametersPath = Join-Path $projectRoot 'infra\main.parameters.json'
 $foundationWorkflowPath = Join-Path $repositoryRoot '.github\workflows\lab04-deploy.yml'
 $sqlMiWorkflowPath = Join-Path $repositoryRoot '.github\workflows\lab04-deploy-sqlmi.yml'
 $completeBicepPath = Join-Path $projectRoot 'infra\lab04\complete'
+$documentationPaths = @(
+    (Join-Path $projectRoot 'README.md'),
+    (Join-Path $projectRoot 'infra\DEPLOYMENT.md'),
+    (Join-Path $projectRoot 'infra\lab04\README.md')
+)
 
 $failures = [System.Collections.Generic.List[string]]::new()
 
@@ -47,6 +52,28 @@ function Get-ScriptParameterNames {
     )
 }
 
+function Get-CommandParameterSet {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string]$Name
+    )
+
+    return Get-Command -Name $Path |
+        Select-Object -ExpandProperty ParameterSets |
+        Where-Object Name -EQ $Name
+}
+
+function Get-ParameterAttribute {
+    param(
+        [Parameter(Mandatory)][System.Management.Automation.CommandInfo]$Command,
+        [Parameter(Mandatory)][string]$ParameterName,
+        [Parameter(Mandatory)][type]$AttributeType
+    )
+
+    return $Command.Parameters[$ParameterName].Attributes |
+        Where-Object { $_ -is $AttributeType }
+}
+
 function Get-BicepDeclarationNames {
     param(
         [Parameter(Mandatory)][string]$Path,
@@ -62,6 +89,7 @@ function Get-BicepDeclarationNames {
 
 $configureParameters = Get-ScriptParameterNames -Path $configureScriptPath
 $deployParameters = Get-ScriptParameterNames -Path $deployScriptPath
+$configureCommand = Get-Command -Name $configureScriptPath
 
 foreach ($name in @(
     'SubscriptionId',
@@ -94,6 +122,84 @@ foreach ($name in @(
         "Deploy-Lab04.ps1 is missing parameter '$name'."
 }
 
+$expectedConfigureParameterSets = @{
+    Azd = @('SubscriptionId', 'AzdEnvironment', 'RequiredReviewer')
+    Arm = @('SubscriptionId', 'DeploymentName', 'RequiredReviewer')
+}
+foreach ($entry in $expectedConfigureParameterSets.GetEnumerator()) {
+    $parameterSet = Get-CommandParameterSet `
+        -Path $configureScriptPath `
+        -Name $entry.Key
+    Assert-Contract ($null -ne $parameterSet) `
+        "Configure-Lab04GitHub.ps1 is missing parameter set '$($entry.Key)'."
+    if ($null -eq $parameterSet) {
+        continue
+    }
+
+    $mandatoryParameters = @(
+        $parameterSet.Parameters |
+            Where-Object IsMandatory |
+            ForEach-Object Name |
+            Sort-Object
+    )
+    $expectedMandatoryParameters = @($entry.Value | Sort-Object)
+    Assert-Contract (
+        @(
+            Compare-Object $mandatoryParameters $expectedMandatoryParameters
+        ).Count -eq 0
+    ) "Configure-Lab04GitHub.ps1 parameter set '$($entry.Key)' has incorrect mandatory parameters. Expected: $($expectedMandatoryParameters -join ', '). Actual: $($mandatoryParameters -join ', ')."
+}
+
+$azdParameterSet = Get-CommandParameterSet `
+    -Path $configureScriptPath `
+    -Name 'Azd'
+$armParameterSet = Get-CommandParameterSet `
+    -Path $configureScriptPath `
+    -Name 'Arm'
+Assert-Contract (
+    $null -ne $azdParameterSet -and
+    'DeploymentName' -notin @($azdParameterSet.Parameters.Name)
+) 'The Azd parameter set must not accept DeploymentName.'
+Assert-Contract (
+    $null -ne $armParameterSet -and
+    'AzdEnvironment' -notin @($armParameterSet.Parameters.Name)
+) 'The Arm parameter set must not accept AzdEnvironment.'
+
+$expectedConfigureValidation = @{
+    SubscriptionId = [System.Management.Automation.ValidatePatternAttribute]
+    Repository = [System.Management.Automation.ValidatePatternAttribute]
+    AzdEnvironment = [System.Management.Automation.ValidateNotNullOrEmptyAttribute]
+    DeploymentName = [System.Management.Automation.ValidatePatternAttribute]
+    GitHubEnvironment = [System.Management.Automation.ValidatePatternAttribute]
+    RequiredReviewer = [System.Management.Automation.ValidatePatternAttribute]
+    DeploymentBranch = [System.Management.Automation.ValidateNotNullOrEmptyAttribute]
+}
+foreach ($entry in $expectedConfigureValidation.GetEnumerator()) {
+    $attribute = Get-ParameterAttribute `
+        -Command $configureCommand `
+        -ParameterName $entry.Key `
+        -AttributeType $entry.Value
+    Assert-Contract ($null -ne $attribute) `
+        "Configure-Lab04GitHub.ps1 parameter '$($entry.Key)' is missing $($entry.Value.Name)."
+}
+
+$expectedConfigureLengths = @{
+    DeploymentName = @(1, 64)
+    GitHubEnvironment = @(1, 106)
+    RequiredReviewer = @(1, 39)
+}
+foreach ($entry in $expectedConfigureLengths.GetEnumerator()) {
+    $attribute = Get-ParameterAttribute `
+        -Command $configureCommand `
+        -ParameterName $entry.Key `
+        -AttributeType ([System.Management.Automation.ValidateLengthAttribute])
+    Assert-Contract (
+        $null -ne $attribute -and
+        $attribute.MinLength -eq $entry.Value[0] -and
+        $attribute.MaxLength -eq $entry.Value[1]
+    ) "Configure-Lab04GitHub.ps1 parameter '$($entry.Key)' must have a length range of $($entry.Value[0])-$($entry.Value[1])."
+}
+
 $deployScript = Get-Content -LiteralPath $deployScriptPath -Raw
 Assert-Contract (
     $deployScript -match '\$armDeploymentName\s*=\s*if\s*\(\$DeploymentName\)'
@@ -101,6 +207,14 @@ Assert-Contract (
 Assert-Contract (
     $deployScript -match '"\$EnvironmentName-deploy"'
 ) 'Deploy-Lab04.ps1 no longer defaults to <EnvironmentName>-deploy.'
+Assert-Contract (
+    $deployScript -match 'Split-Path -Parent \$PSScriptRoot' -and
+    $deployScript -match '''assets\\scripts\\Configure-Lab04GitHub\.ps1'''
+) 'Deploy-Lab04.ps1 does not generate a working-directory-independent OIDC setup path.'
+Assert-Contract (
+    $deployScript -match 'Write-Host\s+"& ''\$configureScriptPath''' -and
+    $deployScript -match '-DeploymentName ''\$armDeploymentName'''
+) 'Deploy-Lab04.ps1 does not print a copyable OIDC setup command with DeploymentName.'
 
 $mainParameters = Get-BicepDeclarationNames -Path $mainBicepPath -Type param
 $parameterDocument = Get-Content -LiteralPath $parametersPath -Raw |
@@ -113,6 +227,38 @@ foreach ($name in $mainParameters) {
 foreach ($name in $mappedParameters) {
     Assert-Contract ($name -in $mainParameters) `
         "main.parameters.json maps unknown main.bicep parameter '$name'."
+}
+
+$deploymentParametersMatch = [regex]::Match(
+    $deployScript,
+    '(?s)\$deploymentParameters\s*=\s*@\((.*?)\)\s*\r?\n\r?\ntry'
+)
+Assert-Contract $deploymentParametersMatch.Success `
+    'Could not locate the direct deployment parameter mapping in Deploy-Lab04.ps1.'
+$directDeploymentParameters = @(
+    [regex]::Matches(
+        $deploymentParametersMatch.Groups[1].Value,
+        '"([A-Za-z0-9_]+)='
+    ) | ForEach-Object { $_.Groups[1].Value }
+)
+foreach ($name in $mainParameters) {
+    Assert-Contract ($name -in $directDeploymentParameters) `
+        "Deploy-Lab04.ps1 does not pass main.bicep parameter '$name'."
+}
+foreach ($name in $directDeploymentParameters) {
+    Assert-Contract ($name -in $mainParameters) `
+        "Deploy-Lab04.ps1 passes unknown main.bicep parameter '$name'."
+}
+
+$expectedProjectLocationCommand = "Set-Location (Join-Path (git rev-parse --show-toplevel) 'skillable\day_2\bootcamp_deployment')"
+foreach ($documentationPath in $documentationPaths) {
+    $documentation = Get-Content -LiteralPath $documentationPath -Raw
+    Assert-Contract (
+        $documentation.Contains($expectedProjectLocationCommand)
+    ) "$(Split-Path -Leaf $documentationPath) does not identify the working directory required by its relative OIDC setup command."
+    Assert-Contract (
+        $documentation -match 'Get-Command .*?Configure-Lab04GitHub\.ps1'
+    ) "$(Split-Path -Leaf $documentationPath) does not explain how to diagnose a stale OIDC setup script."
 }
 
 $configureScript = Get-Content -LiteralPath $configureScriptPath -Raw
