@@ -192,6 +192,13 @@ those resolved values as `LAB04_SQL_ADMIN_LOGIN` and
 `LAB04_SQL_ADMIN_OBJECT_ID` for the Bicep parameter mapping; they are outputs,
 not administrator-selection inputs.
 
+The Bicep entry point also defaults `sqlEntraAdminLogin` and
+`sqlEntraAdminObjectId` from `deployer()`, so an interactive user invoking
+`infra/main.bicep` directly does not need to supply either parameter. Service
+principals and managed identities usually have no user principal name and must
+provide both values explicitly. Any override must provide a matching login and
+object ID.
+
 To select the paid General Purpose fallback before instructor provisioning:
 
 ```powershell
