@@ -107,17 +107,17 @@ if ($sqlMiPricingModel -notin @('Freemium', 'Regular')) {
     throw "LAB04_SQL_MI_PRICING_MODEL must be 'Freemium' or 'Regular'. Received '$sqlMiPricingModel'."
 }
 
-$sqlAdminLogin = Get-AzdValue -Name LAB04_SQL_ADMIN_LOGIN
+$sqlAdminLoginOverride = Get-AzdValue -Name LAB04_SQL_ADMIN_LOGIN_OVERRIDE
 $tenantId = az account show --query tenantId --output tsv
-if ($sqlAdminLogin) {
+if ($sqlAdminLoginOverride) {
     try {
         $sqlAdmin = az ad user show `
-            --id $sqlAdminLogin `
+            --id $sqlAdminLoginOverride `
             --query '{id:id, login:userPrincipalName}' `
             --output json | ConvertFrom-Json
     }
     catch {
-        throw "Unable to resolve SQL administrator '$sqlAdminLogin' as a Microsoft Entra user. Verify the user principal name and reauthenticate with 'az login --tenant $tenantId'."
+        throw "Unable to resolve SQL administrator '$sqlAdminLoginOverride' as a Microsoft Entra user. Verify LAB04_SQL_ADMIN_LOGIN_OVERRIDE and reauthenticate with 'az login --tenant $tenantId'."
     }
 }
 else {
@@ -127,7 +127,7 @@ else {
             --output json | ConvertFrom-Json
     }
     catch {
-        throw "Unable to resolve the signed-in Microsoft Entra user for SQL administration. Reauthenticate with 'az login --tenant $tenantId', or set LAB04_SQL_ADMIN_LOGIN to a user principal name."
+        throw "Unable to resolve the signed-in Microsoft Entra user for SQL administration. Reauthenticate with 'az login --tenant $tenantId', or set LAB04_SQL_ADMIN_LOGIN_OVERRIDE to a user principal name."
     }
 }
 if (-not $sqlAdmin.id -or -not $sqlAdmin.login) {

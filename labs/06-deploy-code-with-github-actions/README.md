@@ -22,8 +22,8 @@ By the end of this lab, you will be able to:
 - completed the planning, Bicep generation, validation, and review walkthrough in [Lab 04](../04-deploy-to-azure/README.md)
 - access to the instructor-preprovisioned Lab 04 platform
 - completed [Lab 05](../05-modernize-data/README.md), including the managed-identity database user
-- the repository-specific OIDC bootstrap described below
-- required reviewers configured on `lab06-deploy`
+- Azure access to read the Lab 04 deployment and configure federated credentials
+- GitHub `ADMIN` permission on the repository
 - the modernized .NET 10 retail app
 - GitHub Actions enabled for the repository
 
@@ -42,19 +42,51 @@ copied generically between repositories. An OIDC federated credential includes
 the repository and GitHub environment in its subject, so this setup must be
 completed for the repository that will run the Lab 06 workflow.
 
-Before continuing, an instructor or administrator with access to both the Azure
-deployment identity and the GitHub repository must:
+The preprovisioned platform includes separate build and deployment identities.
+Bootstrap your repository without rerunning the Lab 04 Bicep:
 
-1. bind the existing Lab 06 code-deployment identity to the `lab06` and
-   `lab06-deploy` GitHub environments with environment-scoped federated
-   credentials
-2. create both GitHub environments and add the required reviewer protection to
-   `lab06-deploy`
-3. publish the non-secret Azure and Lab 04 resource variables required by the
-   workflow to both environments
-4. confirm that the existing identity retains only `AcrPush` on the registry,
-   `Container Apps Contributor` on the retail app, and Reader on the Front Door
-   profile
+```powershell
+az login
+gh auth login
+
+$subscriptionId = az account show --query id --output tsv
+.\assets\scripts\Initialize-Lab06Repository.ps1 `
+  -SubscriptionId $subscriptionId `
+  -RequiredReviewer '<github-user-login>' `
+  -DeploymentBranch 'main'
+```
+
+Use the GitHub login of the instructor or other person who will approve the
+deployment as `RequiredReviewer`. The script:
+
+1. finds the single successful subscription deployment containing the complete
+   Lab 06 output contract
+2. validates the existing identities, target resources, and scoped role
+   assignments without creating or changing them
+3. binds the build identity to `lab06` and the deployment identity to
+   `lab06-deploy` with environment-scoped federated credentials
+4. creates both GitHub environments, restricts `lab06-deploy` to `main`, and
+   requires approval with self-review disabled
+5. publishes and verifies the non-secret variables required by the workflow
+
+If the subscription contains more than one matching lab deployment, the script
+lists the candidates and stops. Select the instructor-provisioned deployment
+explicitly:
+
+```powershell
+.\assets\scripts\Initialize-Lab06Repository.ps1 `
+  -SubscriptionId $subscriptionId `
+  -DeploymentName '<preprovisioning-deployment-name>' `
+  -RequiredReviewer '<github-user-login>' `
+  -DeploymentBranch 'main'
+```
+
+The Azure account needs permission to read subscription deployments, resources,
+and role assignments, and to create or update federated credentials on the two
+preprovisioned managed identities. The GitHub account needs `ADMIN` permission
+on the repository. The script fails with an actionable error if either account
+lacks access or if the repository plan does not support the required deployment
+protection.
 
 > [!IMPORTANT]
 > Do not run `assets/scripts/Initialize-Lab04Repository.ps1` for this step. That
@@ -79,9 +111,10 @@ gh variable list --env lab06-deploy
 
 Both environments must contain the variables listed in the
 [Identity and RBAC](#-identity-and-rbac) section. If an environment or variable
-is missing, stop and have the instructor or repository administrator complete
-the OIDC bootstrap before you create or run the deployment workflow. Do not
-replace OIDC with an Azure client secret.
+is missing, rerun the idempotent bootstrap. If it reports an Azure RBAC or
+preprovisioning mismatch, stop and have the instructor repair the platform
+boundary before you create or run the deployment workflow. Do not replace OIDC
+with an Azure client secret.
 
 ## 🧭 Delivery Flow
 
@@ -103,29 +136,32 @@ flowchart LR
 
 ## 🔐 Identity and RBAC
 
-The preprovisioned Lab 04 environment includes a **separate code-deployment identity**. Do not reuse the infrastructure identity.
+The preprovisioned Lab 04 environment includes **separate code build and
+code-deployment identities**. Do not reuse the infrastructure identity.
 
 | Principal | Role | Scope | Purpose |
 | --- | --- | --- | --- |
-| Lab 06 GitHub identity | `AcrPush` | ACR | Push and inspect image manifests |
-| Lab 06 GitHub identity | `Container Apps Contributor` | Retail Container App | Create a revision by updating the image and configuration |
-| Lab 06 GitHub identity | `Reader` | Front Door profile | Resolve the existing endpoint for the post-deployment smoke test |
+| Lab 06 build identity (`lab06`) | `AcrPush` | ACR | Push and inspect image manifests |
+| Lab 06 deployment identity (`lab06-deploy`) | `Container Apps Contributor` | Retail Container App | Create a revision by updating the image and configuration |
+| Lab 06 deployment identity (`lab06-deploy`) | `Reader` | Front Door profile | Resolve the existing endpoint for the post-deployment smoke test |
 | Retail Container App identity | `AcrPull` | ACR | Pull the released image at runtime |
 | Retail Container App identity | Contained database user | `eShop` database | Read and write application data without a password |
 
 The workflow receives a short-lived Azure token only after GitHub presents an OIDC token whose repository and environment claims match the federated credential. No Azure client secret or ACR password is stored in GitHub.
 
-The Lab 04 preprovisioning process creates the non-secret environment variables needed by both Lab 06 jobs:
+The bootstrap publishes the non-secret environment variables from the Lab 04
+deployment outputs:
 
 | Variable | Purpose |
 | --- | --- |
-| `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | OIDC sign-in context for the dedicated code-deployment identity |
+| `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | OIDC sign-in context; `AZURE_CLIENT_ID` identifies the build identity in `lab06` and the deployment identity in `lab06-deploy` |
 | `LAB06_CONTAINER_REGISTRY_NAME` | Existing Lab 04 registry |
 | `LAB06_CONTAINER_APP_NAME` | Existing retail Container App |
 | `LAB04_PRIMARY_RESOURCE_GROUP`, `LAB04_SECONDARY_RESOURCE_GROUP` | Registry, SQL, and application lookup scopes |
 | `LAB04_GLOBAL_RESOURCE_GROUP`, `LAB04_PREFIX`, `LAB04_SUFFIX` | Existing Front Door endpoint lookup |
 
-These are GitHub variables, not secrets. The identity's federated credential and resource-scoped role assignments are the authorization boundary.
+These are GitHub variables, not secrets. Each identity's federated credential
+and resource-scoped role assignments are the authorization boundary.
 
 ## Challenge 1: Create the Container Contract
 

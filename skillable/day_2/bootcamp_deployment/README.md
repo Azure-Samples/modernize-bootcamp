@@ -146,11 +146,25 @@ azd up
 The pre-provision hook:
 
 1. selects the Azure subscription and regions
-2. resolves the signed-in Entra administrator
+2. uses the signed-in Entra user as the SQL administrator
 3. creates or recovers a compliant VM password in the local AZD environment
 4. defaults to SQL Managed Instance with the Freemium pricing model
 5. accepts `LAB04_SQL_MI_PRICING_MODEL=Regular` when the instructor determines
    that the subscription or region cannot use Freemium
+
+The signed-in deployment user is the default and requires no SQL administrator
+input. To select a different Entra user, set the optional override before
+deployment:
+
+```powershell
+azd env set LAB04_SQL_ADMIN_LOGIN_OVERRIDE '<user-principal-name>'
+azd up
+```
+
+The hook resolves the effective login and object ID on every run. It stores
+those resolved values as `LAB04_SQL_ADMIN_LOGIN` and
+`LAB04_SQL_ADMIN_OBJECT_ID` for the Bicep parameter mapping; they are outputs,
+not administrator-selection inputs.
 
 To select the paid General Purpose fallback before instructor provisioning:
 
