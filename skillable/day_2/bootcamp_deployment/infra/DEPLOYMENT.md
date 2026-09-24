@@ -169,7 +169,12 @@ there is no need to redeploy Lab 04.
 
 ## Select regions
 
-The primary, secondary, and application locations are independent parameters:
+The Bicep `primaryLocation`, `secondaryLocation`, and `applicationLocation`
+parameters are independent and each defaults to `centralus`. The deployment
+script mirrors those defaults, so no location arguments are required for a
+default deployment.
+
+Pass one or more location arguments to override the defaults. For example:
 
 ```powershell
 .\infra\Deploy-Lab04.ps1 `
