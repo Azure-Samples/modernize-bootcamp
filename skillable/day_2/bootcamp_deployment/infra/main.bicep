@@ -23,8 +23,11 @@ param databaseMode string = 'sqlMi'
 ])
 param sqlMiPricingModel string = 'Freemium'
 
-param sqlEntraAdminObjectId string
-param sqlEntraAdminLogin string
+@minLength(1)
+param sqlEntraAdminObjectId string = deployer().objectId
+
+@minLength(1)
+param sqlEntraAdminLogin string = deployer().userPrincipalName
 
 @secure()
 param vmAdminUsername string

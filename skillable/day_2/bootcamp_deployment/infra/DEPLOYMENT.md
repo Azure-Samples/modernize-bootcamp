@@ -61,8 +61,30 @@ for the default signed-in-user lookup. To select a different administrator,
 set the optional `LAB04_SQL_ADMIN_LOGIN_OVERRIDE` AZD value, or pass
 `-SqlEntraAdminLogin` to the direct deployment script, with that user's
 principal name. Both paths query Microsoft Graph to obtain the object ID
-required by Azure SQL. The resolved login and object ID remain required
-internal Bicep parameters because ARM cannot infer the Azure CLI user.
+required by Azure SQL.
+
+When invoking `main.bicep` without the deployment script, the
+`sqlEntraAdminLogin` and `sqlEntraAdminObjectId` parameters are optional. They
+default to the user principal name and object ID returned by Bicep's
+`deployer()` function:
+
+```powershell
+az deployment sub what-if `
+  --name 'lab04-direct-preview' `
+  --location 'centralus' `
+  --template-file .\infra\main.bicep `
+  --parameters `
+    environmentName='lab04-direct' `
+    vmAdminUsername='labadmin' `
+    vmAdminPassword='<strong-password>'
+```
+
+Service principals and managed identities do not normally have a user
+principal name. A workload identity invoking the template must therefore pass
+both `sqlEntraAdminLogin` and `sqlEntraAdminObjectId` explicitly. When
+overriding the default for any deployment identity, always provide the
+matching pair; Bicep cannot resolve an arbitrary login to its Microsoft Entra
+object ID.
 
 Validate the template and parameters:
 
