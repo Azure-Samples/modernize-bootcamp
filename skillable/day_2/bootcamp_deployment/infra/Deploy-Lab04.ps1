@@ -289,10 +289,13 @@ try {
 
     if ($Action -eq 'Deploy') {
         Approve-FrontDoorPrivateLink -DeploymentName $armDeploymentName
+        $configureScriptPath = Join-Path `
+            (Split-Path -Parent $PSScriptRoot) `
+            'assets\scripts\Configure-Lab04GitHub.ps1'
         Write-Host ''
         Write-Host "Subscription deployment name: $armDeploymentName"
-        Write-Host 'Optional GitHub OIDC setup (run from the repository root):'
-        Write-Host ".\assets\scripts\Configure-Lab04GitHub.ps1 -SubscriptionId '$SubscriptionId' -DeploymentName '$armDeploymentName' -RequiredReviewer '<github-user-login>' -DeploymentBranch 'main'"
+        Write-Host 'Optional GitHub OIDC setup (run from this Git checkout):'
+        Write-Host "& '$configureScriptPath' -SubscriptionId '$SubscriptionId' -DeploymentName '$armDeploymentName' -RequiredReviewer '<github-user-login>' -DeploymentBranch 'main'"
     }
 }
 finally {

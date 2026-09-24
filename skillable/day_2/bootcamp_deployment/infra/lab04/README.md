@@ -107,10 +107,11 @@ automatic discovery.
 
 Azure provisioning does not require GitHub. The setup script is
 [`assets/scripts/Configure-Lab04GitHub.ps1`](../../assets/scripts/Configure-Lab04GitHub.ps1).
-Run it from the repository root after a successful AZD deployment:
+Run it from the bootcamp deployment directory after a successful AZD
+deployment:
 
 ```powershell
-Set-Location (git rev-parse --show-toplevel)
+Set-Location (Join-Path (git rev-parse --show-toplevel) 'skillable\day_2\bootcamp_deployment')
 
 .\assets\scripts\Configure-Lab04GitHub.ps1 `
   -SubscriptionId '<subscription-id>' `
@@ -123,7 +124,7 @@ After a direct Bicep deployment, use its successful subscription deployment
 name instead:
 
 ```powershell
-Set-Location (git rev-parse --show-toplevel)
+Set-Location (Join-Path (git rev-parse --show-toplevel) 'skillable\day_2\bootcamp_deployment')
 
 .\assets\scripts\Configure-Lab04GitHub.ps1 `
   -SubscriptionId '<subscription-id>' `
@@ -137,6 +138,12 @@ stores outputs in its local environment, while `Deploy-Lab04.ps1` stores them
 on the subscription deployment named `<EnvironmentName>-deploy`. These output
 stores are independent. A direct deployment must use `-DeploymentName`, even
 when a local AZD environment exists.
+
+If PowerShell says that `DeploymentName` is not a recognized parameter, use
+`Get-Command .\assets\scripts\Configure-Lab04GitHub.ps1` and inspect its
+`Source` and `ParameterSets`. The current script has an `Arm` parameter set
+containing `DeploymentName`; a missing parameter means that PowerShell is
+loading an older script, not that the Azure deployment name is invalid.
 
 Find successful subscription deployments and verify the expected output:
 

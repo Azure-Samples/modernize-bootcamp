@@ -289,6 +289,12 @@ First deploy locally with AZD or the direct script. Then run the setup utility
 from a Git repository where the authenticated GitHub account has `ADMIN`
 permission.
 
+Run these commands from the bootcamp deployment directory:
+
+```powershell
+Set-Location (Join-Path (git rev-parse --show-toplevel) 'skillable\day_2\bootcamp_deployment')
+```
+
 For AZD:
 
 ```powershell
@@ -315,6 +321,21 @@ AZD and direct ARM outputs are stored separately. Always use
 `-DeploymentName <EnvironmentName>-deploy` after `Deploy-Lab04.ps1`.
 If the direct deployment used its optional `-DeploymentName` override, pass
 that exact name to `Configure-Lab04GitHub.ps1` instead.
+
+If PowerShell reports that `DeploymentName` is not a recognized parameter,
+confirm that the command resolves to this checkout and exposes the current
+`Arm` parameter set:
+
+```powershell
+$oidcScript = Get-Command .\assets\scripts\Configure-Lab04GitHub.ps1
+$oidcScript.Source
+$oidcScript.ParameterSets |
+  Select-Object Name, @{ Name = 'Parameters'; Expression = { $_.Parameters.Name -join ', ' } }
+```
+
+The `Arm` row must include `DeploymentName`. If it does not, update the
+checkout or remove the stale script copy being invoked; changing the Azure
+deployment name will not fix a PowerShell parameter-binding error.
 
 The setup creates separate identities for:
 

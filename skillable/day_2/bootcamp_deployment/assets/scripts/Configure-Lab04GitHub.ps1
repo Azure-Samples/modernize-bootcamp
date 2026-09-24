@@ -1,8 +1,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
+    [ValidatePattern('^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$')]
     [string]$SubscriptionId,
 
+    [ValidatePattern('^[^/\s]+/[^/\s]+$')]
     [string]$Repository,
 
     [Parameter(Mandatory, ParameterSetName = 'Azd')]
@@ -11,13 +13,20 @@ param(
 
     [Parameter(Mandatory, ParameterSetName = 'Arm')]
     [ValidateNotNullOrEmpty()]
+    [ValidateLength(1, 64)]
+    [ValidatePattern('^[a-zA-Z0-9._()\-]+$')]
     [string]$DeploymentName,
 
+    [ValidateLength(1, 106)]
+    [ValidatePattern('^[a-zA-Z0-9_-]+$')]
     [string]$GitHubEnvironment = 'lab04',
 
     [Parameter(Mandatory)]
+    [ValidateLength(1, 39)]
+    [ValidatePattern('^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9]))*$')]
     [string]$RequiredReviewer,
 
+    [ValidateNotNullOrEmpty()]
     [string]$DeploymentBranch = 'main'
 )
 
