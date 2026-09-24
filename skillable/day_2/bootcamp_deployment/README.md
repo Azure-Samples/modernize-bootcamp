@@ -152,6 +152,32 @@ The pre-provision hook:
 5. accepts `LAB04_SQL_MI_PRICING_MODEL=Regular` when the instructor determines
    that the subscription or region cannot use Freemium
 
+### Manage deployment locations
+
+The Bicep entry point defines `centralus` as the default for the primary,
+secondary, and application locations. No location configuration is required to
+use those defaults; the pre-provision hook mirrors them into the AZD
+environment before deployment.
+
+To deploy to different supported regions, set one or more location values
+before running `azd up`:
+
+```powershell
+azd env set LAB04_PRIMARY_LOCATION centralus
+azd env set LAB04_SECONDARY_LOCATION eastus2
+azd env set LAB04_APPLICATION_LOCATION centralus
+azd up
+```
+
+The values map to the Bicep `primaryLocation`, `secondaryLocation`, and
+`applicationLocation` parameters, respectively. AZD environment values persist
+for subsequent deployments of that environment.
+
+Confirm VM, DMS, SQL MI or Azure SQL, and zone-redundant Container Apps
+availability and quota before selecting different regions. Do not change
+locations in place for an environment that already contains regional
+resources. Use a new AZD environment or remove the existing deployment first.
+
 The signed-in deployment user is the default and requires no SQL administrator
 input. To select a different Entra user, set the optional override before
 deployment:
