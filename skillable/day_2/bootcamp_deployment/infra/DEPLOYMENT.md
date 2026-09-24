@@ -144,6 +144,11 @@ The deployment script names the subscription deployment
 successful deployment. Direct deployment outputs are stored on that ARM
 deployment; they are not copied into an AZD environment.
 
+`Deploy-Lab04.ps1` also accepts an optional `-DeploymentName` override. This
+controls the ARM subscription deployment record only; `-EnvironmentName`
+continues to control resource naming and tags. If supplied, use that exact
+deployment name when running `Configure-Lab04GitHub.ps1`.
+
 For the default `lab04-direct` environment, run this from the repository root:
 
 ```powershell

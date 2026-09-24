@@ -110,7 +110,8 @@ jobs:
               prefix="${{ vars.LAB04_PREFIX }}" \
               suffix="${{ vars.LAB04_SUFFIX }}" \
               location="${{ vars.LAB04_PRIMARY_LOCATION }}" \
-              codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}" \
+              databaseMode="${{ vars.LAB04_DATABASE_MODE }}" \
+              codeBuildPrincipalId="${{ vars.LAB06_BUILD_AZURE_PRINCIPAL_ID }}" \
               sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
               sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
               vmAdminUsername="$VM_ADMIN_USERNAME" \
@@ -132,7 +133,8 @@ jobs:
               prefix="${{ vars.LAB04_PREFIX }}" \
               suffix="${{ vars.LAB04_SUFFIX }}" \
               location="${{ vars.LAB04_PRIMARY_LOCATION }}" \
-              codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}" \
+              databaseMode="${{ vars.LAB04_DATABASE_MODE }}" \
+              codeBuildPrincipalId="${{ vars.LAB06_BUILD_AZURE_PRINCIPAL_ID }}" \
               sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
               sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
               vmAdminUsername="$VM_ADMIN_USERNAME" \
@@ -192,7 +194,8 @@ jobs:
               prefix="${{ vars.LAB04_PREFIX }}" \
               suffix="${{ vars.LAB04_SUFFIX }}" \
               location="${{ vars.LAB04_PRIMARY_LOCATION }}" \
-              codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}" \
+              databaseMode="${{ vars.LAB04_DATABASE_MODE }}" \
+              codeBuildPrincipalId="${{ vars.LAB06_BUILD_AZURE_PRINCIPAL_ID }}" \
               sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}" \
               sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}" \
               vmAdminUsername="$VM_ADMIN_USERNAME" \
@@ -215,7 +218,9 @@ jobs:
             suffix="${{ vars.LAB04_SUFFIX }}"
             location="${{ vars.LAB04_SECONDARY_LOCATION }}"
             applicationLocation="${{ vars.LAB04_APPLICATION_LOCATION }}"
-            codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}"
+            databaseMode="${{ vars.LAB04_DATABASE_MODE }}"
+            sqlMiPricingModel="${{ vars.LAB04_SQL_MI_PRICING_MODEL }}"
+            codeDeploymentPrincipalId="${{ vars.LAB06_DEPLOY_AZURE_PRINCIPAL_ID }}"
             containerRegistryName="${{ steps.primary.outputs.registry-name }}"
             containerRegistryResourceGroupName="${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}"
             privateDnsZoneResourceGroupName="${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}"
@@ -223,6 +228,8 @@ jobs:
             primaryDatabaseResourceGroupName="${{ vars.LAB04_PRIMARY_RESOURCE_GROUP }}"
             primaryDatabaseVnetName="${{ steps.primary.outputs.database-vnet-name }}"
             primaryDatabaseVnetId="${{ steps.primary.outputs.database-vnet-id }}"
+            sqlEntraAdminObjectId="${{ vars.LAB04_SQL_ADMIN_OBJECT_ID }}"
+            sqlEntraAdminLogin="${{ vars.LAB04_SQL_ADMIN_LOGIN }}"
           )
           az deployment group what-if \
             --resource-group "${{ vars.LAB04_SECONDARY_RESOURCE_GROUP }}" \
@@ -248,7 +255,7 @@ jobs:
             prefix="${{ vars.LAB04_PREFIX }}"
             suffix="${{ vars.LAB04_SUFFIX }}"
             applicationLocation="${{ vars.LAB04_APPLICATION_LOCATION }}"
-            codeDeploymentPrincipalId="${{ vars.LAB06_AZURE_PRINCIPAL_ID }}"
+            codeDeploymentPrincipalId="${{ vars.LAB06_DEPLOY_AZURE_PRINCIPAL_ID }}"
             originFqdn="${{ steps.secondary.outputs.container-app-fqdn }}"
             containerAppsEnvironmentId="${{ steps.secondary.outputs.environment-id }}"
           )

@@ -313,6 +313,8 @@ For direct Bicep:
 
 AZD and direct ARM outputs are stored separately. Always use
 `-DeploymentName <EnvironmentName>-deploy` after `Deploy-Lab04.ps1`.
+If the direct deployment used its optional `-DeploymentName` override, pass
+that exact name to `Configure-Lab04GitHub.ps1` instead.
 
 The setup creates separate identities for:
 
@@ -369,6 +371,12 @@ Build the subscription entry point:
 
 ```powershell
 az bicep build --file .\infra\main.bicep --stdout | Out-Null
+```
+
+Validate the GitHub OIDC, workflow, PowerShell, and Bicep parameter contracts:
+
+```powershell
+.\tests\Validate-Lab04OidcContracts.ps1
 ```
 
 Parse the PowerShell scripts:

@@ -7,6 +7,10 @@ param(
     [ValidatePattern('^[a-zA-Z0-9-]+$')]
     [string]$EnvironmentName = 'lab04-direct',
 
+    [ValidateLength(1, 64)]
+    [ValidatePattern('^[a-zA-Z0-9._()\-]+$')]
+    [string]$DeploymentName,
+
     [ValidatePattern('^[a-z0-9]+$')]
     [string]$PrimaryLocation = 'centralus',
 
@@ -236,7 +240,12 @@ if (
 }
 
 $templateFile = Join-Path $PSScriptRoot 'main.bicep'
-$deploymentName = "$EnvironmentName-deploy"
+$armDeploymentName = if ($DeploymentName) {
+    $DeploymentName
+}
+else {
+    "$EnvironmentName-deploy"
+}
 $deploymentParameters = @(
     "environmentName=$EnvironmentName"
     "primaryLocation=$PrimaryLocation"
@@ -262,7 +271,7 @@ try {
         'sub'
         $deploymentCommand
         '--name'
-        $deploymentName
+        $armDeploymentName
         '--location'
         $PrimaryLocation
         '--template-file'
@@ -279,11 +288,11 @@ try {
     }
 
     if ($Action -eq 'Deploy') {
-        Approve-FrontDoorPrivateLink -DeploymentName $deploymentName
+        Approve-FrontDoorPrivateLink -DeploymentName $armDeploymentName
         Write-Host ''
-        Write-Host "Subscription deployment name: $deploymentName"
+        Write-Host "Subscription deployment name: $armDeploymentName"
         Write-Host 'Optional GitHub OIDC setup (run from the repository root):'
-        Write-Host ".\assets\scripts\Configure-Lab04GitHub.ps1 -SubscriptionId '$SubscriptionId' -DeploymentName '$deploymentName' -RequiredReviewer '<github-user-login>' -DeploymentBranch 'main'"
+        Write-Host ".\assets\scripts\Configure-Lab04GitHub.ps1 -SubscriptionId '$SubscriptionId' -DeploymentName '$armDeploymentName' -RequiredReviewer '<github-user-login>' -DeploymentBranch 'main'"
     }
 }
 finally {
