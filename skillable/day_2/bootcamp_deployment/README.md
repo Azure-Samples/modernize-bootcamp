@@ -233,9 +233,11 @@ After `az login`, the participant runs:
 
 The script asks before using `api.ipify.org`, validates the returned public
 IPv4 address, and idempotently creates or updates one TCP 3342 rule for that
-participant's Entra object ID and `/32`. Multiple participants therefore do not
-overwrite each other's rules. Participants can avoid external discovery and
-supply the address:
+participant's Entra object ID and `/32`. It then waits for the public hostname
+to resolve and for TCP 3342 to be reachable from the participant's machine.
+This verifies the public network path, not a SQL login or query; Microsoft
+Entra authentication and database authorization are still required.
+Participants can avoid external discovery and supply the address:
 
 ```powershell
 .\assets\scripts\Enable-Lab04SqlMiPublicAccess.ps1 `
@@ -407,6 +409,13 @@ Validate the GitHub OIDC, workflow, PowerShell, and Bicep parameter contracts:
 
 ```powershell
 .\tests\Validate-Lab04OidcContracts.ps1
+```
+
+Validate SQL MI public endpoint parsing and DNS/TCP readiness behavior without
+changing Azure resources:
+
+```powershell
+.\tests\Validate-Lab04SqlMiConnectivity.ps1
 ```
 
 Parse the PowerShell scripts:
