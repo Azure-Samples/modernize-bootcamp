@@ -19,4 +19,4 @@ Editing `connectionStrings.config` restarts the app automatically, so a correcti
 
 ## Build, run, and sign in
 
-Restoring packages, building with MSBuild, and launching under IIS Express are covered step by step in [Module 02](../../../labs/02-upgrade-dotnet-with-ghcp/Readme.md). Sign-in credentials are in [Demo logins](../../../docs/logins.md).
+Restoring packages, building with MSBuild, and launching under IIS Express are covered step by step in [Module 02](../../../labs/day-1/02-upgrade-dotnet-with-ghcp/Readme.md). Sign-in credentials are in [Demo logins](../../../docs/logins.md).

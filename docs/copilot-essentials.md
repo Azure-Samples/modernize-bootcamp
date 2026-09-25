@@ -181,4 +181,4 @@ Run `/chronicle:cost-tips` in any session for recommendations based on your own 
 
 ---
 
-Next: [Module 01: Assessment →](../labs/01-assesment/Readme.md)
+Next: [Module 01: Assessment →](../labs/day-1/01-assesment/Readme.md)

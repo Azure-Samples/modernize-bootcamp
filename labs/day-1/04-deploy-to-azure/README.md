@@ -2,7 +2,7 @@
 
 You finished Module 3 with an application that is ready for Azure and a list of settings describing what it expects to find there. None of it exists yet. This lab designs it.
 
-The platform has to serve more than the storefront. The data migration in [Lab 05](../05-modernize-data/README.md) needs servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
+The platform has to serve more than the storefront. The data migration in [Lab 05](../../day-2/05-modernize-data/README.md) needs servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
 
 You will make real architecture decisions inside a set of non-negotiable security and resilience requirements. The instructor has already provisioned the Azure environment used by the later labs, so **you will not deploy the Bicep you generate**. The goal is to practice an effective GitHub Copilot workflow while keeping architectural judgment and approval with you.
 
@@ -29,9 +29,9 @@ By the end of this lab, you will be able to:
 
 ## 🧭 Where This Fits
 
-The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects and that [Lab 05: Modernize Data](../05-modernize-data/README.md) requires. The instructor-preprovisioned environment provides that platform, while your Bicep remains a local learning artifact.
+The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects and that [Lab 05: Modernize Data](../../day-2/05-modernize-data/README.md) requires. The instructor-preprovisioned environment provides that platform, while your Bicep remains a local learning artifact.
 
-The preprovisioned Container App runs a placeholder image so the platform can be verified independently of the workshop application. Your storefront is not deployed here — it arrives in [Lab 06](../06-deploy-code-with-github-actions/README.md), onto the foundation you are about to design.
+The preprovisioned Container App runs a placeholder image so the platform can be verified independently of the workshop application. Your storefront is not deployed here — it arrives in [Lab 06](../../day-2/06-deploy-code-with-github-actions/README.md), onto the foundation you are about to design.
 
 ## ✅ Prerequisites
 
@@ -197,7 +197,7 @@ Analyze this repository and plan the Azure foundation for Lab 04.
 Use the repository inventory we just reviewed.
 
 Treat the Required Final Architecture and Non-Negotiable Requirements in
-labs/04-deploy-to-azure/README.md as a minimum, not a complete design. For every
+labs/day-1/04-deploy-to-azure/README.md as a minimum, not a complete design. For every
 application setting that implies an Azure resource, provision that resource at a
 lab-sized SKU. Report what you added, what you deliberately left out, and why.
 
@@ -285,7 +285,7 @@ Building checks Bicep syntax, types, and compile-time rules. It does **not** pro
 that resource names are available, quotas are sufficient, policies allow the
 configuration, or deployment and runtime behavior will succeed.
 
-The included [student requirements](../../infra/lab04/student/README.md) provide
+The included [student requirements](../../../infra/lab04/student/README.md) provide
 an implementation checklist.
 
 ## 🧪 Challenge 4: Run the Human Review
@@ -308,7 +308,7 @@ to implement only those corrections. Rebuild all generated Bicep after each
 approved review batch and inspect the diff again.
 
 Finally, compare your approach with
-[the complete implementation](../../infra/lab04/complete/README.md). Differences
+[the complete implementation](../../../infra/lab04/complete/README.md). Differences
 are discussion points, not automatic defects. Be prepared to explain:
 
 - which requirements both implementations satisfy
@@ -392,4 +392,4 @@ Entra authentication. SQL authentication is disabled.
 
 ---
 
-[← Previous: Modernize with GitHub Copilot](../03-modernize-with-ghcp/README.md) | [Next: Modernize Data →](../05-modernize-data/README.md)
+[← Previous: Modernize with GitHub Copilot](../03-modernize-with-ghcp/README.md) | [Next: Modernize Data →](../../day-2/05-modernize-data/README.md)

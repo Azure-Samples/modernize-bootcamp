@@ -527,4 +527,4 @@ Instructor debrief questions
 
 ---
 
-[← Previous: Deploy the Azure Foundation](../04-deploy-to-azure/README.md) | [Next: Deploy Code with GitHub Actions →](../06-deploy-code-with-github-actions/README.md)
+[← Previous: Deploy the Azure Foundation](../../day-1/04-deploy-to-azure/README.md) | [Next: Deploy Code with GitHub Actions →](../06-deploy-code-with-github-actions/README.md)

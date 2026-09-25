@@ -19,7 +19,7 @@ By the end of this lab, you will be able to:
 
 ## ✅ Prerequisites
 
-- completed the planning, Bicep generation, validation, and review walkthrough in [Lab 04](../04-deploy-to-azure/README.md)
+- completed the planning, Bicep generation, validation, and review walkthrough in [Lab 04](../../day-1/04-deploy-to-azure/README.md)
 - access to the instructor-preprovisioned Lab 04 platform
 - completed [Lab 05](../05-modernize-data/README.md), including the managed-identity database user
 - Azure access to read the Lab 04 deployment and configure federated credentials
@@ -30,7 +30,7 @@ By the end of this lab, you will be able to:
 The known-good application is under:
 
 ```text
-labs/04-deploy-to-azure/sample-app/
+labs/day-1/04-deploy-to-azure/sample-app/
 ```
 
 That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, and already Azure ready. If you modernized the root application in place, use its corresponding solution and project paths instead.
@@ -204,8 +204,8 @@ Check the result against the contract before you build it:
 Build the application before building its image:
 
 ```powershell
-dotnet restore .\labs\04-deploy-to-azure\sample-app\eShopLiteFx.sln
-dotnet build .\labs\04-deploy-to-azure\sample-app\eShopLiteFx.sln `
+dotnet restore .\labs\day-1\04-deploy-to-azure\sample-app\eShopLiteFx.sln
+dotnet build .\labs\day-1\04-deploy-to-azure\sample-app\eShopLiteFx.sln `
   --configuration Release `
   --no-restore
 ```
@@ -213,7 +213,7 @@ dotnet build .\labs\04-deploy-to-azure\sample-app\eShopLiteFx.sln `
 Then build and test the container locally:
 
 ```powershell
-$context = '.\labs\04-deploy-to-azure\sample-app'
+$context = '.\labs\day-1\04-deploy-to-azure\sample-app'
 $dockerfile = Join-Path $context 'src\eShopLite.StoreFx\Dockerfile'
 $image = 'caldova-retail:lab06-local'
 
@@ -403,7 +403,7 @@ Document:
 If your workflow does not validate and lab time is running short:
 
 1. preserve your workflow and failure logs
-2. compare it with [the completed workflow](../../assets/solutions/lab06/lab06-retail-cicd.yml)
+2. compare it with [the completed workflow](../../../assets/solutions/lab06/lab06-retail-cicd.yml)
 3. copy the completed workflow into `.github/workflows/lab06-retail-cicd.yml`
 4. review every permission, environment, variable, and Azure command before committing
 5. explain the defect in your original workflow during the debrief
@@ -416,4 +416,4 @@ To reduce registry storage, delete only known obsolete tags after confirming tha
 
 ---
 
-[← Previous: Modernize Data](../05-modernize-data/README.md) | [Next: Modernize with the CLI →](../07-modernize-with-cli/README.md)
+[← Previous: Modernize Data](../05-modernize-data/README.md) | [Next: Modernize with the CLI →](../../day-3/07-modernize-with-cli/README.md)

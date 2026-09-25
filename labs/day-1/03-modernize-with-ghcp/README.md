@@ -4,7 +4,7 @@ Module 2 got the storefront onto .NET 10. Because ASP.NET MVC 5 does not run the
 
 In this chapter you will work in **GitHub Copilot Chat** throughout — mostly regular chat, where the job is ordinary refactoring, with the `@upgrade` agent available for the optional question that opens the module. Convert the MVC pages to Blazor components, then ask directly whether the app is ready for Azure and close the gaps that come back.
 
-> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
+> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 ## 📋 What you'll do
 
@@ -93,7 +93,7 @@ If Copilot does not automatically do this verification, then:
 1. Check that:
    - All pages load correctly and render as Blazor components
    - Images and static content display properly
-   - Sign-in still works and the cart still holds its contents — credentials are in [Demo logins](../../docs/logins.md)
+   - Sign-in still works and the cart still holds its contents — credentials are in [Demo logins](../../../docs/logins.md)
    - No MVC views or controllers are left behind in the routing
    - The application starts cleanly from the Visual Studio Code terminal
 

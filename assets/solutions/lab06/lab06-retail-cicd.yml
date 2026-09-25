@@ -3,13 +3,13 @@ name: Lab 06 - Validate and deploy retail app
 on:
   pull_request:
     paths:
-      - labs/03-modernize-with-ghcp/sample-app/**
+      - labs/day-1/03-modernize-with-ghcp/sample-app/**
       - .github/workflows/lab06-retail-cicd.yml
   push:
     branches:
       - main
     paths:
-      - labs/03-modernize-with-ghcp/sample-app/**
+      - labs/day-1/03-modernize-with-ghcp/sample-app/**
       - .github/workflows/lab06-retail-cicd.yml
   workflow_dispatch:
 
@@ -21,9 +21,9 @@ permissions:
   contents: read
 
 env:
-  SOLUTION: labs/03-modernize-with-ghcp/sample-app/eShopLiteFx.sln
-  BUILD_CONTEXT: labs/03-modernize-with-ghcp/sample-app
-  DOCKERFILE: labs/03-modernize-with-ghcp/sample-app/src/eShopLite.StoreFx/Dockerfile
+  SOLUTION: labs/day-1/03-modernize-with-ghcp/sample-app/eShopLiteFx.sln
+  BUILD_CONTEXT: labs/day-1/03-modernize-with-ghcp/sample-app
+  DOCKERFILE: labs/day-1/03-modernize-with-ghcp/sample-app/src/eShopLite.StoreFx/Dockerfile
   IMAGE_REPOSITORY: caldova-retail
 
 jobs:
