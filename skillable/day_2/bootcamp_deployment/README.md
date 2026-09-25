@@ -233,10 +233,13 @@ After `az login`, the participant runs:
 
 The script asks before using `api.ipify.org`, validates the returned public
 IPv4 address, and idempotently creates or updates one TCP 3342 rule for that
-participant's Entra object ID and `/32`. It then waits for the public hostname
-to resolve and for TCP 3342 to be reachable from the participant's machine.
-This verifies the public network path, not a SQL login or query; Microsoft
-Entra authentication and database authorization are still required.
+participant's `/32`. Its default rule name is a deterministic, privacy-safe
+hash of the selected subscription, tenant, and signed-in Azure account, so it
+does not require Microsoft Graph access or expose participant identity. It then
+waits for the public hostname to resolve and for TCP 3342 to be reachable from
+the participant's machine. This verifies the public network path, not a SQL
+login or query; Microsoft Entra authentication and database authorization are
+still required.
 Participants can avoid external discovery and supply the address:
 
 ```powershell
@@ -251,8 +254,8 @@ Participants can avoid external discovery and supply the address:
 
 Rerun the script whenever the participant's public IP changes. Connect from
 SSMS with a Microsoft Entra authentication method; SQL authentication remains
-disabled. Use `-RuleName` only when tenant policy prevents
-`az ad signed-in-user show`; keep the same unique value on every rerun.
+disabled. `-RuleName` remains available as an optional override; keep the same
+unique override value on every rerun.
 
 ## Deploy Bicep directly
 
@@ -416,6 +419,13 @@ changing Azure resources:
 
 ```powershell
 .\tests\Validate-Lab04SqlMiConnectivity.ps1
+```
+
+Validate deterministic, privacy-safe participant NSG rule naming without
+changing Azure resources:
+
+```powershell
+.\tests\Validate-Lab04SqlMiPublicAccess.ps1
 ```
 
 Parse the PowerShell scripts:
