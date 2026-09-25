@@ -19,6 +19,7 @@ $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false
 
 . (Join-Path $PSScriptRoot 'Lab04SqlMiConnectivity.ps1')
+. (Join-Path $PSScriptRoot 'Lab04SqlMiPublicAccess.ps1')
 
 function Test-PublicIpv4Address {
     param([Parameter(Mandatory)][string]$Address)
@@ -60,8 +61,8 @@ if ($SubscriptionId) {
 }
 
 if (-not $IpAddress) {
-    $consent = Read-Host 'Detect your public IPv4 address using api.ipify.org? Type YES to continue'
-    if ($consent -cne 'YES') {
+    $consent = Read-Host 'Detect your public IPv4 address using api.ipify.org? Type Y or YES to continue'
+    if (-not (Test-Lab04AffirmativeResponse -Response $consent)) {
         throw 'Public IP discovery was not approved. Rerun with -IpAddress <your-public-ipv4>.'
     }
 
@@ -75,12 +76,18 @@ if (-not (Test-PublicIpv4Address -Address $IpAddress)) {
 }
 
 if (-not $RuleName) {
-    $participantObjectId = az ad signed-in-user show --query id --output tsv
-    $participantObjectId = "$participantObjectId".Trim()
-    if ($LASTEXITCODE -ne 0 -or $participantObjectId -notmatch '^[0-9a-fA-F-]{36}$') {
-        throw 'Unable to resolve the signed-in Entra user. Rerun with a unique -RuleName supplied by the instructor.'
+    $account = az account show `
+        --query '{subscriptionId:id,tenantId:tenantId,accountName:user.name}' `
+        --output json |
+        ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or $null -eq $account) {
+        throw 'Unable to read the signed-in Azure account metadata used to generate the SQL MI access rule name.'
     }
-    $RuleName = "AllowSqlMi-$($participantObjectId.Replace('-', ''))"
+
+    $RuleName = New-Lab04SqlMiParticipantRuleName `
+        -SubscriptionId ([string]$account.subscriptionId) `
+        -TenantId ([string]$account.tenantId) `
+        -AccountName ([string]$account.accountName)
 }
 
 if ([string]::IsNullOrWhiteSpace($ResourceGroupName) -xor [string]::IsNullOrWhiteSpace($NetworkSecurityGroupName)) {

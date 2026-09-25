@@ -354,10 +354,11 @@ az login
 ```
 
 The script asks before detecting your address, then creates or updates one
-inbound NSG rule named for your Entra object ID and scoped to your `/32` on TCP
-3342. Multiple participants do not overwrite each other. Rerun it if your
-public IP changes. Your instructor must grant Network Contributor on only the
-SQL MI NSG. Connect to the endpoint reported by the script using Microsoft
+inbound NSG rule with a deterministic, privacy-safe name derived from your
+signed-in Azure account and subscription. The rule is scoped to your `/32` on
+TCP 3342, and multiple participants do not overwrite each other. Rerun it if
+your public IP changes. Your instructor must grant Network Contributor on only
+the SQL MI NSG. Connect to the endpoint reported by the script using Microsoft
 Entra authentication. SQL authentication is disabled.
 
 ## ✅ Review Checklist
