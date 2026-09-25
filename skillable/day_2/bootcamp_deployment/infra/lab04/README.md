@@ -96,12 +96,16 @@ This is a training deployment, not a production security baseline. See
 for the public-endpoint inventory, accepted lab trade-offs, production
 recommendations, and Azure Landing Zone guidance.
 
-Participants do not run Bicep. After the instructor deployment, they run
+Participants do not run Bicep. The SQL MI remains VNet-injected with private
+connectivity, but it is not private-only because its public data endpoint is
+enabled. After the instructor deployment, participants run
 `assets/scripts/Enable-Lab04SqlMiPublicAccess.ps1` to create or update a single
-TCP 3342 NSG rule for their current public IPv4 `/32`. The participant needs
-Network Contributor on the SQL MI NSG only. Supply the public endpoint and
-resource names explicitly when the participant does not have Reader access for
-automatic discovery.
+TCP 3342 NSG rule for their current public IPv4 `/32`. The script then waits
+for DNS resolution and TCP 3342 reachability from the participant's machine.
+This validates the network path only, not Microsoft Entra authentication or a
+SQL query. The participant needs Network Contributor on the SQL MI NSG only.
+Supply the public endpoint and resource names explicitly when the participant
+does not have Reader access for automatic discovery.
 
 ## Optional GitHub OIDC setup
 

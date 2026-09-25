@@ -18,6 +18,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false
 
+. (Join-Path $PSScriptRoot 'Lab04SqlMiConnectivity.ps1')
+
 function Test-PublicIpv4Address {
     param([Parameter(Mandatory)][string]$Address)
 
@@ -123,6 +125,8 @@ if (-not $PublicEndpoint) {
     $PublicEndpoint = "$publicFqdn,3342"
 }
 
+$parsedPublicEndpoint = ConvertTo-Lab04SqlMiPublicEndpoint -Endpoint $PublicEndpoint
+
 az network nsg rule create `
     --resource-group $ResourceGroupName `
     --nsg-name $NetworkSecurityGroupName `
@@ -142,4 +146,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Allowed $IpAddress/32 to reach SQL MI on TCP 3342."
-Write-Host "Connect with Microsoft Entra authentication: $PublicEndpoint"
+Write-Host "Waiting for $($parsedPublicEndpoint.DisplayName) to become reachable..."
+Wait-Lab04SqlMiPublicEndpoint `
+    -HostName $parsedPublicEndpoint.HostName `
+    -Port $parsedPublicEndpoint.Port
+Write-Host "Verified DNS resolution and TCP connectivity to $($parsedPublicEndpoint.DisplayName)."
+Write-Host "Connect with Microsoft Entra authentication: $($parsedPublicEndpoint.DisplayName)"
