@@ -17,7 +17,7 @@ plan, and a per-task record of what changed.
 Then browse to the URL it prints.
 
 Sign in as `alice` or `bob` — both are customers with existing order history. Credentials are in
-[Demo logins](../../../docs/logins.md).
+[Demo logins](../../../../docs/logins.md).
 
 ## Prerequisites
 
