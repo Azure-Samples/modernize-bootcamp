@@ -3,13 +3,13 @@ name: Lab 06 - Validate and deploy retail app
 on:
   pull_request:
     paths:
-      - labs/day-1/04-deploy-to-azure/sample-app/**
+      - src/app-modernization/caldova-retail-web-app/**
       - .github/workflows/lab06-retail-cicd.yml
   push:
     branches:
       - main
     paths:
-      - labs/day-1/04-deploy-to-azure/sample-app/**
+      - src/app-modernization/caldova-retail-web-app/**
       - .github/workflows/lab06-retail-cicd.yml
   workflow_dispatch:
 
@@ -21,9 +21,9 @@ permissions:
   contents: read
 
 env:
-  SOLUTION: labs/day-1/04-deploy-to-azure/sample-app/eShopLiteFx.sln
-  BUILD_CONTEXT: labs/day-1/04-deploy-to-azure/sample-app
-  DOCKERFILE: labs/day-1/04-deploy-to-azure/sample-app/src/eShopLite.StoreFx/Dockerfile
+  SOLUTION: src/app-modernization/caldova-retail-web-app/eShopLiteFx.sln
+  BUILD_CONTEXT: src/app-modernization/caldova-retail-web-app
+  DOCKERFILE: src/app-modernization/caldova-retail-web-app/src/eShopLite.StoreFx/Dockerfile
   IMAGE_REPOSITORY: caldova-retail
 
 jobs:
@@ -60,23 +60,19 @@ jobs:
             docker rm --force "$container_name" >/dev/null 2>&1 || true
           }
           trap cleanup EXIT
-
           docker run --detach \
             --name "$container_name" \
             --publish 8080:8080 \
             --env 'ConnectionStrings__StoreDbContext=Server=localhost;Initial Catalog=eShop;User ID=test;Password=not-used;Encrypt=True;TrustServerCertificate=True' \
             caldova-retail:validation
-
           for attempt in {1..30}; do
             if curl --fail --silent --show-error http://127.0.0.1:8080/health; then
               exit 0
             fi
             sleep 2
           done
-
           docker logs "$container_name"
           exit 1
-
   build-and-push:
     name: Push immutable image
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -109,11 +105,9 @@ jobs:
           login_server="${ACR_NAME}.azurecr.io"
           tag="sha-${GITHUB_SHA}"
           tagged_image="${login_server}/${IMAGE_REPOSITORY}:${tag}"
-
           az acr login --name "$ACR_NAME"
           docker build --file "$DOCKERFILE" --tag "$tagged_image" "$BUILD_CONTEXT"
           docker push "$tagged_image"
-
           digest=$(az acr repository show \
             --name "$ACR_NAME" \
             --image "${IMAGE_REPOSITORY}:${tag}" \
@@ -121,7 +115,6 @@ jobs:
             --output tsv)
           test -n "$digest"
           echo "reference=${login_server}/${IMAGE_REPOSITORY}@${digest}" >> "$GITHUB_OUTPUT"
-
   deploy:
     name: Deploy approved revision
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -149,21 +142,30 @@ jobs:
           IMAGE_REFERENCE: ${{ needs.build-and-push.outputs.image }}
         run: |
           set -euo pipefail
-          [[ "$IMAGE_REFERENCE" == "${ACR_NAME}.azurecr.io/${IMAGE_REPOSITORY}@sha256:"* ]]
-          identity_type=$(az containerapp show \
-            --name "$APP_NAME" \
-            --resource-group "$APP_RESOURCE_GROUP" \
-            --query identity.type \
-            --output tsv)
-          [[ "$identity_type" == *SystemAssigned* ]]
+          if [[ "$IMAGE_REFERENCE" != "${ACR_NAME}.azurecr.io/${IMAGE_REPOSITORY}@sha256:"* ]]; then
+            echo "Image reference '$IMAGE_REFERENCE' is not an immutable digest in the expected registry." >&2
+            exit 1
+          fi
           identity_json=$(az containerapp show \
             --name "$APP_NAME" \
             --resource-group "$APP_RESOURCE_GROUP" \
             --query identity.userAssignedIdentities \
             --output json)
-          jq -e --arg id "$RUNTIME_IDENTITY_RESOURCE_ID" 'has($id)' \
-            <<< "$identity_json" > /dev/null
-
+          if ! jq -e --arg id "${RUNTIME_IDENTITY_RESOURCE_ID,,}" \
+            'keys | map(ascii_downcase) | index($id) != null' \
+            <<< "$identity_json" > /dev/null; then
+            echo "Runtime identity '$RUNTIME_IDENTITY_RESOURCE_ID' is not attached to Container App '$APP_NAME'." >&2
+            exit 1
+          fi
+          registry_identity=$(az containerapp show \
+            --name "$APP_NAME" \
+            --resource-group "$APP_RESOURCE_GROUP" \
+            --query "properties.configuration.registries[?server=='${ACR_NAME}.azurecr.io'].identity | [0]" \
+            --output tsv)
+          if [[ "${registry_identity,,}" != "${RUNTIME_IDENTITY_RESOURCE_ID,,}" ]]; then
+            echo "Registry '$ACR_NAME' is not configured to use the expected runtime identity." >&2
+            exit 1
+          fi
           env_names=$(az containerapp show \
             --name "$APP_NAME" \
             --resource-group "$APP_RESOURCE_GROUP" \
@@ -173,10 +175,12 @@ jobs:
             ASPNETCORE_ENVIRONMENT \
             AZURE_CLIENT_ID \
             ConnectionStrings__StoreDbContext; do
-            jq -e --arg name "$required_name" 'index($name) != null' \
-              <<< "$env_names" > /dev/null
+            if ! jq -e --arg name "$required_name" 'index($name) != null' \
+              <<< "$env_names" > /dev/null; then
+              echo "Container App '$APP_NAME' is missing required environment variable '$required_name'." >&2
+              exit 1
+            fi
           done
-
       - name: Deploy image by digest
         id: deploy
         shell: bash
@@ -196,7 +200,6 @@ jobs:
             --output tsv)
           test -n "$revision_name"
           echo "revision=$revision_name" >> "$GITHUB_OUTPUT"
-
       - name: Wait for revision health
         shell: bash
         env:
@@ -223,7 +226,6 @@ jobs:
           done
           echo "Timed out waiting for revision $REVISION_NAME." >&2
           exit 1
-
       - name: Smoke test through Front Door
         shell: bash
         env:

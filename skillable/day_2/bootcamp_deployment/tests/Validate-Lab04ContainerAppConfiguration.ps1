@@ -27,6 +27,12 @@ $foundationWorkflowPath = Join-Path `
 $migrationLabPath = Join-Path `
     $repositoryRoot `
     'labs\day-2\05-modernize-data\README.md'
+$lab06ReadmePath = Join-Path `
+    $repositoryRoot `
+    'labs\day-2\06-deploy-code-with-github-actions\README.md'
+$lab06ContractPath = Join-Path `
+    $repositoryRoot `
+    'labs\day-2\06-deploy-code-with-github-actions\deployment-contract.md'
 $lab06BootstrapPath = Join-Path `
     $repositoryRoot `
     'assets\scripts\Initialize-Lab06Repository.ps1'
@@ -53,6 +59,8 @@ $configure = Get-Content -LiteralPath $configurePath -Raw
 $retailWorkflow = Get-Content -LiteralPath $retailWorkflowPath -Raw
 $foundationWorkflow = Get-Content -LiteralPath $foundationWorkflowPath -Raw
 $migrationLab = Get-Content -LiteralPath $migrationLabPath -Raw
+$lab06Readme = Get-Content -LiteralPath $lab06ReadmePath -Raw
+$lab06Contract = Get-Content -LiteralPath $lab06ContractPath -Raw
 $lab06Bootstrap = Get-Content -LiteralPath $lab06BootstrapPath -Raw
 
 Assert-Contract (
@@ -136,12 +144,15 @@ Assert-Contract (
 ) 'The retail workflow must update only the image, not runtime configuration or registry settings.'
 Assert-Contract (
     $retailWorkflow -match 'identity\.userAssignedIdentities' -and
+    $retailWorkflow -match 'properties\.configuration\.registries' -and
+    $retailWorkflow -match 'RUNTIME_IDENTITY_RESOURCE_ID' -and
+    $retailWorkflow -notmatch 'identity_type.*SystemAssigned' -and
     $retailWorkflow -match 'ConnectionStrings__StoreDbContext'
-) 'The retail workflow must verify the Bicep-owned identity and environment-variable contract.'
+) 'The retail workflow must verify the user-assigned registry identity and environment-variable contract.'
 Assert-Contract (
-    $retailWorkflow -match 'SOLUTION: labs/day-1/04-deploy-to-azure/sample-app/eShopLiteFx\.sln' -and
-    $retailWorkflow -notmatch 'labs/day-1/03-modernize-with-ghcp/sample-app'
-) 'The retail workflow must build the documented Lab 04 application end state.'
+    $retailWorkflow -match 'SOLUTION: src/app-modernization/caldova-retail-web-app/eShopLiteFx\.sln' -and
+    $retailWorkflow -notmatch 'labs/day-1/.*/sample-app'
+) 'The retail workflow must build the participant modernization workspace.'
 foreach ($name in @(
     'LAB06_RUNTIME_IDENTITY_RESOURCE_ID',
     'LAB06_RUNTIME_IDENTITY_CLIENT_ID'
@@ -164,6 +175,26 @@ Assert-Contract (
     $migrationLab -notmatch 'ALTER ROLE db_owner' -and
     $migrationLab -notmatch 'ALTER ROLE db_ddladmin'
 ) 'Lab 05 must grant the runtime identity only the approved post-migration database roles.'
+Assert-Contract (
+    $lab06Readme -match '\]\(deployment-contract\.md\)' -and
+    $lab06Readme -notmatch 'read infra/lab04/complete' -and
+    $lab06Readme -notmatch 'labs[\\/]day-1[\\/]04-deploy-to-azure[\\/]sample-app' -and
+    $lab06Readme -match 'src/app-modernization/caldova-retail-web-app' -and
+    $lab06Readme -match 'user-assigned retail runtime identity'
+) 'Lab 06 must use the participant deployment contract instead of requiring the Lab 04 Bicep source.'
+foreach ($contractTerm in @(
+    'src/app-modernization/caldova-retail-web-app/eShopLiteFx.sln',
+    'port `8080`',
+    '/health/ready',
+    'ConnectionStrings__StoreDbContext',
+    'LAB06_RUNTIME_IDENTITY_RESOURCE_ID',
+    'registry/repository@sha256:<digest>',
+    'Known application and platform mismatches',
+    'Verification and stop conditions'
+)) {
+    Assert-Contract ($lab06Contract.Contains($contractTerm)) `
+        "The Lab 6 deployment contract is missing '$contractTerm'."
+}
 
 if ($failures.Count -gt 0) {
     throw "Lab 04 Container App configuration validation failed:`n- $($failures -join "`n- ")"
