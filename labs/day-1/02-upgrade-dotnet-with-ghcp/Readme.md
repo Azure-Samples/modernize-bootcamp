@@ -46,34 +46,36 @@ The rest of this module happens on your own machine, so the first job is to get 
 
 > The upgrade agent creates branches and git commits as it works, so run this module against **your own fork** rather than the workshop repository.
 
-**1. Sign in to GitHub.** Open PowerShell from your applications and run the command below, then respond to each prompt with the default option, as shown:
+**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and go to [https://github.com/Skillable-Events/caldova-retail](https://github.com/Skillable-Events/caldova-retail).
 
-```powershell
-gh auth login
-```
+1. On the Skillable Events single sign-on page, select **Continue**.
+2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
+3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead.
 
-![Log in to GitHub](./images/gh-auth.png)
+**2. Fork and clone the repository.**
 
-*TBA once Skillable confirms login*
+1. On the repository page, select **Fork**, then **Create fork**.
+2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/caldova-retail.git`.
+3. Open PowerShell from your applications and clone your fork, pasting the URL you copied:
 
-**2. Fork and clone the repository.** Back in PowerShell, run the command:
+   ```powershell
+   git clone <your-fork-url>
+   ```
 
-```powershell
-gh repo fork Skillable-Events/caldova-retail --clone
-cd caldova-retail
-```
+   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization, then return to PowerShell. The clone starts once you are signed in.
 
 **3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
 
 ```powershell
+cd caldova-retail
 code .
 ```
 
-If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the `caldova-retail` folder.
+If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the `caldova-retail` folder. If VSCode asks you to sign into GitHub again, authorize access there as well.
 
 You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
 
-**4. Give the app its database password.** The app pulls its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file and replace the placeholder password with the SQL password from your instructor. Leave the server, database, and user exactly as they are.
+**4. Give the app its database password.** The app reads its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions. Leave the server, database, and user exactly as they are.
 
 ## ▶️ Run the App
 
