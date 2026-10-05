@@ -423,7 +423,3 @@ If your workflow does not validate and lab time is running short:
 This lab adds images and revisions but no new Azure service.
 
 To reduce registry storage, delete only known obsolete tags after confirming that no active or rollback revision references their digest. Do not delete the Lab 04 resource groups until all remaining labs are complete.
-
----
-
-[← Previous: Modernize Data](../05-modernize-data/README.md) | [Next: Modernize with the CLI →](../../day-3/07-modernize-with-cli/README.md)

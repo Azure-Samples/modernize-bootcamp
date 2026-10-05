@@ -1,4 +1,4 @@
-# ☁️ Get the App Ready for Azure
+# ☁️ Lab 03: Get the App Ready for Azure
 
 Module 2 got the storefront onto .NET 10. Because ASP.NET MVC 5 does not run there, that upgrade also had to move the app to dependency injection, `appsettings.json`, and the modern hosting model — whether you wanted it to or not. What it did not do is make the app ready to run **in Azure**.
 
@@ -10,39 +10,6 @@ In this chapter you will work in **GitHub Copilot Chat** throughout — mostly r
 
 - 🚀 Convert the MVC pages to Blazor components
 - ☁️ Ask whether the app is Azure ready, and fix what comes back
-
-### Choose your starting point
-
-Pick whichever fits where you landed in Module 2:
-
-**Option A — continue with your own code.** Your Module 2 output should already be running on .NET 10 and is ready for the work in this module. If that run did not finish cleanly, get the app building and running before you start — everything below assumes a working .NET 10 solution.
-
-**Option B — start fresh from the sample.** We have provided a sample of the Caldova storefront already on .NET 10, still rendering through MVC, with nothing else modernized. If you want to start fresh from a known good version, follow these steps:
-
-1. Open **PowerShell from your applications** — not the VS Code terminal, which is still rooted in the Module 2 app folder — and run:
-
-   ```powershell
-   cd modernize-bootcamp
-   code labs\day-1\03-modernize-with-ghcp\sample-app
-   ```
-
-   If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick `modernize-bootcamp\labs\day-1\03-modernize-with-ghcp\sample-app`.
-
-   You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
-
-2. Open `src/eShopLite.StoreFx/appsettings.json` and replace `REPLACE_ME` in the `StoreDbContext` connection string with the SQL password from your instructor. Everything else in the connection string is already correct.
-3. Run the app and confirm the catalog loads before going further.
-
-> 💡 Both options put you in the same place. Option B just skips re-running Module 2 if your upgrade did not finish or you want a known-good starting point.
-
-### Verify the upgrade agent
-
-Everything in this module runs through GitHub Copilot Chat. Confirm the agent is available before you start:
-
-1. Open whichever folder you picked above in Visual Studio Code. With Option A you should already be in that view from the last module.
-2. Open the **GitHub Copilot Chat** view, send `@upgrade`, and confirm the agent responds (or select Upgrade agent from the dropdown).
-
-![GitHub Copilot Agent Mode](./images/copilot-agent-mode.png)
 
 ## 1️⃣ Convert to Blazor pages
 
@@ -178,6 +145,3 @@ By the end of this section, you should have:
 - 🔹 Kept the application buildable and its behavior unchanged throughout
 
 > **Next module preview:** Module 4 designs the Azure foundation this app now expects — networking, managed identity, and the container platform it will run on. You plan it and generate the Bicep for it; the live environment is already provisioned for you, so your implementation stays a local artifact to review rather than something you deploy. The app itself is deployed in Module 6.
-
----
-[← Previous: Upgrade .NET Applications](../02-upgrade-dotnet-with-ghcp/Readme.md) | [Next: Design the Azure Foundation →](../04-deploy-to-azure/README.md)

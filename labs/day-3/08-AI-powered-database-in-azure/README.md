@@ -515,6 +515,3 @@ Imagine your next weekend escape: the smell of pine, the sound of a crackling fi
 - [Deploy Foundry models with Azure CLI](https://learn.microsoft.com/azure/foundry/foundry-models/how-to/create-model-deployments)
 - [Azure OpenAI-compatible v1 API](https://learn.microsoft.com/azure/foundry/openai/api-version-lifecycle)
 - [Azure CLI: `az cognitiveservices account deployment`](https://learn.microsoft.com/cli/azure/cognitiveservices/account/deployment)
-
----
-[← Previous: Modernize with the CLI](../07-modernize-with-cli/README.md)

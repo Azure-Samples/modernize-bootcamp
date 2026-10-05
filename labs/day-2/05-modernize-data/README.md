@@ -376,7 +376,3 @@ Suggested class schedule
 9. Which steps should be automated for repeatable delivery?
 
 **Lab principle:** A migration is complete only after compatibility, connectivity, schema, data, application behavior, security, and operational readiness have all been validated with evidence.
-
----
-
-[← Previous: Deploy the Azure Foundation](../04-deploy-to-azure/README.md) | [Next: Deploy Code with GitHub Actions →](../06-deploy-code-with-github-actions/README.md)
