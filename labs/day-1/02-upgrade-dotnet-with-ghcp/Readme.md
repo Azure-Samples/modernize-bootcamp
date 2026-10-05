@@ -1,4 +1,4 @@
-# 🚀 Upgrade with GitHub Copilot Modernization
+# 🚀 Lab 02: Upgrade with GitHub Copilot Modernization
 
 The Caldova Retail storefront runs on .NET Framework 4.8 — a platform that is out of active development and tied to Windows, which narrows the Azure hosting options open to it. Before anything else can be modernized, it has to move onto current .NET.
 
@@ -37,10 +37,8 @@ Caldova Retail is already running on-premises, on a Windows Server behind IIS. B
 Walk around the storefront for a minute and notice how it behaves:
 
 - The product catalog loads, with images
-- Sign-in works for both accounts — credentials are in [Demo logins](../../../docs/logins.md)
-- Adding an item to the cart persists across page loads
-
-This is the application exactly as a customer has it today: one Windows server, one IIS site, no containers and no cloud.
+- Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Skillable-Events/caldova-retail/blob/main/README.md)
+- Adding an item to the cart works
 
 The rest of this module happens on your own machine, so the first job is to get this same app running locally.
 
@@ -48,37 +46,40 @@ The rest of this module happens on your own machine, so the first job is to get 
 
 > The upgrade agent creates branches and git commits as it works, so run this module against **your own fork** rather than the workshop repository.
 
-**1. Fork and clone the repository.** Open PowerShell from your applications and run the command:
+**1. Sign in to GitHub.** Open PowerShell from your applications and run the command below, then respond to each prompt with the default option, as shown:
 
 ```powershell
-gh repo fork Azure-Samples/modernize-bootcamp --clone
-cd modernize-bootcamp
+gh auth login
 ```
 
-**2. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
+![Log in to GitHub](./images/gh-auth.png)
+
+*TBA once Skillable confirms login*
+
+**2. Fork and clone the repository.** Back in PowerShell, run the command:
 
 ```powershell
-code src\app-modernization\caldova-retail-web-app
+gh repo fork Skillable-Events/caldova-retail --clone
+cd caldova-retail
 ```
 
-If `code` is not recognised, start VS Code from your applications and use **File → Open Folder…**, then pick `modernize-bootcamp\src\app-modernization\caldova-retail-web-app`.
-
-You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder, and nothing about labs or infra. Open a terminal inside VS Code from the top menu bar.
-
-![Open VS Code terminal](./images/open-vscode-terminal.png)
-
-**3. Give the app its database password.** The app pulls the connection string from `connectionStrings.config`, which is kept out of the repository on purpose so passwords are not accidentally committed. From your newly opened terminal, copy this template and fill it in yourself:
+**3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
 
 ```powershell
-Copy-Item src\eShopLite.StoreFx\connectionStrings.config.example `
-          src\eShopLite.StoreFx\connectionStrings.config
+code .
 ```
 
-Open the new file and replace `REPLACE_ME` with the SQL password from your instructor. Leave the server, database, and user exactly as they are.
+If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the `caldova-retail` folder.
+
+You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
+
+**4. Give the app its database password.** The app pulls its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file and replace the placeholder password with the SQL password from your instructor. Leave the server, database, and user exactly as they are.
 
 ## ▶️ Run the App
 
 To make sure the setup was completed correctly, ask Copilot Chat to build and launch the legacy app for you.
+
+> 💡 Running this .NET Framework app locally requires **MSBuild** and **IIS Express**, because legacy ASP.NET apps like this one can't be started with the usual `dotnet run`. Both tools are already installed on your lab machine, so there is nothing to set up. Keep it in mind for future customer scenarios where you need to run a legacy app yourself.
 
 Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
@@ -90,11 +91,13 @@ Then, type in the chatbox and submit this prompt:
 This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express. Tell me the URL when it is running.
 ```
 
+A plain "run this app" prompt would also work. Copilot would inspect the project and work out the build and launch steps itself. Spelling them out up front just gets you there faster and avoids potential trial and error.
+
 Once it loads, walk the app and confirm your local copy matches the on-premises one you looked at earlier:
 
 - [ ] The product catalog loads, with images
-- [ ] Sign-in works for both accounts — credentials are in [Demo logins](../../../docs/logins.md)
-- [ ] Adding an item to the cart persists across page loads
+- [ ] Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Skillable-Events/caldova-retail/blob/main/README.md#-demo-logins)
+- [ ] Adding an item to the cart works
 
 If the build fails with a missing `csc.exe`, see [Handling Common Issues](#-handling-common-issues) below.
 
@@ -460,6 +463,3 @@ This is the difference between modernizing one app and modernizing two hundred o
 You've completed the framework upgrade using GitHub Copilot Modernization. The app runs on .NET 10 — but running on modern .NET is not the same as being ready for Azure. The code still assumes it is the only copy of itself running on a server it owns.
 
 In the next module you'll convert the MVC pages to Blazor components, then run a cloud readiness assessment against the result and work through what it finds — and what it misses.
-
----
-[← Previous: Assessment](../01-assesment/Readme.md) | [Next: Get the App Ready for Azure →](../03-modernize-with-ghcp/README.md)

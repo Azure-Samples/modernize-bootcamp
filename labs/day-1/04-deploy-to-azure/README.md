@@ -2,15 +2,13 @@
 
 You finished Module 3 with an application that is ready for Azure and a list of settings describing what it expects to find there. None of it exists yet. This lab designs it.
 
-The platform has to serve more than the storefront. The data migration in [Lab 05](../../day-2/05-modernize-data/README.md) needs servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
+The platform has to serve more than the storefront. The data migration in later modules need servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
 
 You will make real architecture decisions inside a set of non-negotiable security and resilience requirements. The instructor has already provisioned the Azure environment used by the later labs, so **you will not deploy the Bicep you generate**. The goal is to practice an effective GitHub Copilot workflow while keeping architectural judgment and approval with you.
 
 A tested Bicep implementation is included for comparison, and the instructor-preprovisioned environment keeps infrastructure provisioning time from blocking the workshop.
 
 This lab takes approximately **90-120 minutes**.
-
-> 💡 **Need an Azure-ready application?** [`sample-app/`](./sample-app/) in this folder is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, reading every Azure setting from configuration, and exposing health endpoints. Use it if your own Module 3 run did not finish, or as the known-good application for Lab 06.
 
 ## 🎯 Objectives
 
@@ -389,7 +387,3 @@ Entra authentication. SQL authentication is disabled.
 - [Managed identities for Azure resources](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview)
 - [Azure Bastion](https://learn.microsoft.com/azure/bastion/bastion-overview)
 - [Azure SQL private endpoints](https://learn.microsoft.com/azure/azure-sql/database/private-endpoint-overview)
-
----
-
-[← Previous: Modernize with GitHub Copilot](../03-modernize-with-ghcp/README.md) | [Next: Modernize Data →](../../day-2/05-modernize-data/README.md)
