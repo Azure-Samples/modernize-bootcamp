@@ -125,6 +125,39 @@ $postprovision = Get-Content -LiteralPath $postprovisionPath -Raw
 $deployScript = Get-Content -LiteralPath $deployScriptPath -Raw
 $helperScript = Get-Content -LiteralPath $helperPath -Raw
 $importScript = Get-Content -LiteralPath $importScriptPath -Raw
+$deployTokens = $null
+$deployParseErrors = $null
+$deployAst = [System.Management.Automation.Language.Parser]::ParseInput(
+    $deployScript,
+    [ref]$deployTokens,
+    [ref]$deployParseErrors
+)
+$httpStatusFunction = $deployAst.Find(
+    {
+        param($ast)
+
+        $ast -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+            $ast.Name -eq 'Get-HttpStatusSummary'
+    },
+    $true
+)
+Assert-Contract ($null -ne $httpStatusFunction) `
+    'The Front Door HTTP status formatter must be defined.'
+if ($httpStatusFunction) {
+    Invoke-Expression $httpStatusFunction.Extent.Text
+    Assert-Contract (
+        (Get-HttpStatusSummary -Response ([pscustomobject]@{
+            StatusCode = 503
+            StatusDescription = 'Service Unavailable'
+        })) -eq 'HTTP 503 Service Unavailable'
+    ) 'The HTTP status formatter must support Windows PowerShell responses.'
+    Assert-Contract (
+        (Get-HttpStatusSummary -Response ([pscustomobject]@{
+            StatusCode = 503
+            ReasonPhrase = 'Service Unavailable'
+        })) -eq 'HTTP 503 Service Unavailable'
+    ) 'The HTTP status formatter must support PowerShell 7 responses.'
+}
 Assert-Contract (
     $helperScript -notmatch '\$IsWindows\s*\?' -and
     $helperScript -notmatch '\[Convert\]::ToHexString' -and
@@ -150,9 +183,12 @@ Assert-Contract (
 Assert-Contract (
     $deployScript -notmatch '-SkipHttpErrorCheck' -and
     $deployScript -match 'Invoke-WebRequest[\s\S]*?-UseBasicParsing' -and
+    $deployScript -match 'function Get-HttpStatusSummary' -and
+    $deployScript -match '''StatusDescription'', ''ReasonPhrase''' -and
+    $deployScript -notmatch '\$webResponse\.StatusDescription' -and
     $deployScript -match 'Last probe: \$lastProbeFailure' -and
     $deployScript -notmatch 'if \(\$attempt -eq \d+\) \{\s*throw'
-) 'Front Door verification must use Windows PowerShell parameters and report the final HTTP failure.'
+) 'Front Door verification must support Windows PowerShell and PowerShell 7 HTTP responses and report the final failure.'
 Assert-Contract (
     $helperScript -match 'dotnet tool install Microsoft\.SqlPackage' -and
     $helperScript -match '--tool-path\s+\$temporaryPath' -and

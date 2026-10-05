@@ -67,6 +67,28 @@ function Get-RequiredDeploymentOutput {
     return [string]$value
 }
 
+function Get-HttpStatusSummary {
+    param(
+        [Parameter(Mandatory)][object]$Response
+    )
+
+    $description = $null
+    foreach ($propertyName in @('StatusDescription', 'ReasonPhrase')) {
+        $property = $Response.PSObject.Properties[$propertyName]
+        if ($property -and -not [string]::IsNullOrWhiteSpace("$($property.Value)")) {
+            $description = [string]$property.Value
+            break
+        }
+    }
+
+    $summary = "HTTP $([int]$Response.StatusCode)"
+    if ($description) {
+        $summary += " $description"
+    }
+
+    return $summary
+}
+
 function Approve-FrontDoorPrivateLink {
     param(
         [Parameter(Mandatory)][string]$DeploymentName
@@ -167,12 +189,12 @@ function Approve-FrontDoorPrivateLink {
                 $endpointReady = $true
                 break
             }
-            $lastProbeFailure = "HTTP $([int]$response.StatusCode) $($response.StatusDescription)"
+            $lastProbeFailure = Get-HttpStatusSummary -Response $response
         }
         catch {
             $webResponse = $_.Exception.Response
             if ($webResponse) {
-                $lastProbeFailure = "HTTP $([int]$webResponse.StatusCode) $($webResponse.StatusDescription)"
+                $lastProbeFailure = Get-HttpStatusSummary -Response $webResponse
             }
             else {
                 $lastProbeFailure = $_.Exception.Message
