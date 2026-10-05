@@ -37,7 +37,7 @@ Caldova Retail is already running on-premises, on a Windows Server behind IIS. B
 Walk around the storefront for a minute and notice how it behaves:
 
 - The product catalog loads, with images
-- Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Azure-Samples/caldova-retail/blob/main/README.md)
+- Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Skillable-Events/caldova-retail/blob/main/README.md)
 - Adding an item to the cart works
 
 The rest of this module happens on your own machine, so the first job is to get this same app running locally.
@@ -59,7 +59,7 @@ gh auth login
 **2. Fork and clone the repository.** Back in PowerShell, run the command:
 
 ```powershell
-gh repo fork Azure-Samples/caldova-retail --clone
+gh repo fork Skillable-Events/caldova-retail --clone
 cd caldova-retail
 ```
 
@@ -96,7 +96,7 @@ A plain "run this app" prompt would also work. Copilot would inspect the project
 Once it loads, walk the app and confirm your local copy matches the on-premises one you looked at earlier:
 
 - [ ] The product catalog loads, with images
-- [ ] Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Azure-Samples/caldova-retail/blob/main/README.md#-demo-logins)
+- [ ] Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Skillable-Events/caldova-retail/blob/main/README.md#-demo-logins)
 - [ ] Adding an item to the cart works
 
 If the build fails with a missing `csc.exe`, see [Handling Common Issues](#-handling-common-issues) below.
