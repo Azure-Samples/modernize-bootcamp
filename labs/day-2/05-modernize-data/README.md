@@ -92,6 +92,10 @@ Two things to validate before begining.
 
 ![SQLMI_ENTRA](./images/sqlmi_entra.png)
 
+To retrieve the public endpoint FQDN and port number to use as part of the connection information, navigate to the Azure SQL Managed Instance in the portal.  Go to *Connection strings* an lookup the public endpoint examples.
+
+![AZSQLMIPE](./images/AzSQLMIPE.png)
+
 Use that Entra ID to login using SSMS.
 
 ![SSMS_LOGIN](./images/ssms_login.png)
@@ -259,29 +263,27 @@ If all is well, both the full and differential backups have been restored.
 
 ![DMS_13](./images/DMS_13.png)
 
-The work is not done yet.  Since this is an online migration, transaction logs need to be replayed.  The LRS can only be triggered via Azure CLI or PowerShell. The *datamigration* extension needs to be installed on the VM.
+The work is not done yet.  Since this is an online migration, transaction logs need to be replayed.  As a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command to insert a row into the *dbo.Store* table.
 
-*az extension add --name datamigration --upgrade*
-
-Once that is done, as a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command.
+```powershell
+INSERT INTO dbo.Store
+           (Name
+           ,City
+           ,State
+           ,Hours)
+     VALUES
+           ('Test'
+           ,'Test'
+           ,'Test'
+           ,'Test');
+GO
+```
 
 ![DMS_14](./images/DMS_14.png)
 
 Next we need to backup the transaction logs to the storage account, in the same folder/location as the database backups.  Use SSMS to do this as well. Opt for *Transactions Logs* as the back up type.
 
 ![DMS_15](./images/DMS_15.png)
-
-From command line login to azure:
-
-*az login*
-
-Start the log replay service in continuous mode  by issuing the following command making sure to replace the place holders with your lab's Azure environment information.  If you don't have the SAS for the Storage account from the earlier steps, generate a new one.
-
-az sql midb log-replay start -g mygroup --mi myinstance -n mymanageddb --storage-uri "https://*my storage accountname*.blob.core.windows.net/*container name*/*database backup folder*" --storage-sas "*SAS token for the container*"
-
-Command should look like this:
-
-![DMS_16](./images/DMS_16.png)
 
 You can follow the progress of the log replay from the portal, same place as where the progress of the migration was being followed.
 
