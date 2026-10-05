@@ -49,13 +49,26 @@ The rest of this module happens on your own machine, so the first job is to get 
 **1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and go to [https://github.com/Skillable-Events/caldova-retail](https://github.com/Skillable-Events/caldova-retail).
 
 1. On the Skillable Events single sign-on page, select **Continue**.
+
+   ![Skillable Events single sign-on](./images/sso-skillable.png)
+
 2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
 3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead.
 
 **2. Fork and clone the repository.**
 
-1. On the repository page, select **Fork**, then **Create fork**.
+1. On the repository page, select **Fork**, then **Create fork** with the defaults left alone.
+
+   ![Fork button](./images/fork-button.png)
+
+   ![Create fork](./images/fork-creation.png)
+
 2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/caldova-retail.git`.
+
+   ![Code button](./images/code-button.png)
+
+   ![Copy HTTPS URL](./images/copy-https.png)
+
 3. Open PowerShell from your applications and clone your fork, pasting the URL you copied:
 
    ```powershell
@@ -113,6 +126,8 @@ GitHub Copilot Modernization works through a three-stage workflow: **Assessment 
 - **Planning:** The tool generates a detailed upgrade plan document based on assessment findings
 - **Execution:** You review the plan, add custom requirements, and Copilot performs the automated upgrade
 
+This lab uses two VS Code extensions that work together. **GitHub Copilot modernization** runs the application assessment and is where you start the upgrade. **GitHub Copilot upgrade** provides the **Upgrade** agent in Copilot Chat that carries out the assessment, planning, and execution for the .NET upgrade. Both are already installed on your lab machine. They are expected to merge into a single tool over time.
+
 We're going to upgrade our application to achieve one goal: **move the storefront from .NET Framework 4.8 to .NET 10**, with its existing behavior intact.
 
 ## Run the GHCP Modernization Application Assessment
@@ -157,18 +172,25 @@ The rest of this module is the upgrade itself, in five steps.
 
 ## 1️⃣ Initiate the Upgrade
 
-1. Open the GitHub Copilot modernization extension
+1. Open the GitHub Copilot modernization extension.
+
+   > 💡 Can't find it? Select **Extensions** in the Activity Bar, search for `modernization`, and select **GitHub Copilot modernization**.
+   >
+   > ![Finding the GitHub Copilot modernization extension](./images/find-modernization-extension.png)
+
 2. Select "Upgrade to a newer version of .NET"
 
    ![Selecting the .NET version upgrade scenario](./images/pick-new-dotnet-version.png)
 
-3. Copilot chat should open with the **Upgrade** agent already selected. If the Upgrade agent is not selected please select the agent picker, and navigate to the "Upgrade" one. Unlike the general agents, which work from model memory and improvise, the Upgrade agent runs a structured, tool-verified migration workflow — loading current tested scenario instructions, using real compiler and dependency analysis to find breaking changes, and validating each task with a build before moving on.
+3. Copilot Chat should open with the **Upgrade** agent already selected. If it is not, open the **agent picker** at the bottom of the chat box and select **Upgrade**. If **Upgrade** is not listed, check that the **GitHub Copilot upgrade** extension is installed: select **Extensions** in the Activity Bar and search for `GitHub Copilot upgrade` (install it if it is not installed).
+
+   Unlike the general agents, which work from model memory and improvise, the Upgrade agent runs a structured, tool-verified migration workflow — loading current tested scenario instructions, using real compiler and dependency analysis to find breaking changes, and validating each task with a build before moving on.
 
    ![Copilot Chat opens with the Upgrade agent selected](./images/upgrade-agent-chat.png)
 
    > 💡 **PICKING A MODEL**
    >
-   > **The default is fine for this lab.** If you do change it, prefer a reasoning model over a `mini`, `fast`, or `lite` variant — see [Copilot Essentials](../../../docs/copilot-essentials.md).
+   > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus.
 
 4. A modal will load that offers options on the upgrade. You can see it already detected the app is running on .NET Framework 4.8 and has pulled out the solution file. Select the following options:
 
@@ -189,6 +211,23 @@ The rest of this module is the upgrade itself, in five steps.
 > ‼️ **IMPORTANT**
 >
 > The agent runs many tool calls. If VS Code prompts you to approve each one, be ready to stand by and approve. Optionally, you can choose the option to allow them for the rest of the session — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
+
+### 🧭 Steering the agent
+
+The upgrade is an agentic flow: the agent decides its next step from what it just saw, so it does not always move in a straight line. It can occasionally stall, drift, or stop early. You stay in control the whole time:
+
+- **It seems slow or stalled.** If the chat is not producing output as quickly as you expect, stop the run and type `continue`.
+- **You want to see what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to open the background work the agent is running, such as a subagent reviewing or validating a task, for more detail.
+
+  ![Arrow on a background step in the chat](./images/background-process-arrow.png)
+
+- **You want to redirect it mid-task.** Type your message while the agent is still working and send it as a **steering** message (hover over the message and select steering). Copilot reads it before carrying on, instead of queuing it until the current step finishes.
+- **It is badly stuck or off track.** You can always start a fresh chat with the Upgrade agent and ask it to pick the upgrade back up from where it left off, or restart entirely.
+- **It stops with an error.** Ask it to keep going, or ask why it stopped, for example `Try to continue` or `Why did you get this error?`. In the example below, the agent stopped during initialization; a follow-up message is enough to get it moving again.
+
+  ![Agent stopped with an error during upgrade initialization](./images/agent-stopped-error.png)
+
+- **The dashboard is not updating.** The dashboard can get stuck, and you may see an error in the chat saying the agent failed to save state. This is a known issue. The upgrade still continues in order, so keep an eye on the chat and the Source Control view instead. If commits are still landing, the upgrade is fine and only the dashboard is behind.
 
 ## 2️⃣ Initial Assessment
 
@@ -343,8 +382,7 @@ Check the activity tab of the dashboard. It records the timeline, log, and commi
 > 💡 **TIPS**
 >
 > - The agent runs a lot of commands. Rather than approving each one individually, once you are used to the dynamic, you can choose the option to allow all commands for the rest of the session.
-> - Sometimes the dashboard gets stuck. It reflects state the agent reports rather than polling the repo, so it can lag behind the real work. Check the chat and the Source Control view before assuming anything has actually stalled — if commits are still landing, the upgrade is fine and only the display is behind.
-> - If the agent gets stuck (no new chat output and no tasks being checked off) tell it to continue in the chat.
+> - If the dashboard stops updating or the agent stalls, see [Steering the agent](#-steering-the-agent).
 
 ## 5️⃣ Finalize the Migration
 
