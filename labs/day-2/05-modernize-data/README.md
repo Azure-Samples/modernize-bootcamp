@@ -78,9 +78,28 @@ DBCC CHECKDB (N'eShop') ;
 SSMS 22 is the latest version of Microsoft’s SQL Server Management Studio, a 64-bit graphical tool for managing, developing, and administering SQL Server and Azure databases. We will use it in the lab to perform the database assessment, querying and performing the necessary backups to upload to Azure storage for the migration. To launch the tool, locate on the labs desktop the shortcut:
 
  ![SSMS](./images/ssms_22.png)
+
+The Azure SQL Managed Instance configured in this lab is configured to use Entra authentication.  To login, you must select Entra with Password.  The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used. 
+
+Two things to validate before begining.
+
+1- Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is using is allowing 3342.  If not add an inbound rule for port 3342.
+
+
+ ![NSG1](./images/NSG1.png)
+
+2- Select the right option in SSMS when loging in. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left.
+
+![SQLMI_ENTRA](./images/sqlmi_entra.png)
+
+Use that Entra ID to login using SSMS.
+
+![SSMS_LOGIN](./images/ssms_login.png)
+
 ## Student tasks
 
-1. Using SSMS, right click on the server and choose "Migrate SQL Server"
+
+1. Using SSMS, connect to the SQL Server 2016  that is is resides on a VM in this lab environment. The connection is preconfigured in the lab. Right click on the server and choose "Migrate SQL Server"
  ![SSMS](./images/Challenge_2_assessment_launch_1.png)
 2. <u>Do not Migrate or Upgrade the database</u>. Run a "Migration rediness assessment". An html file will open in your browser once the assessment completes. This is the report.
  ![SSMS](./images/Challenge_2_assessment_launch_2.png)
@@ -89,7 +108,7 @@ SSMS 22 is the latest version of Microsoft’s SQL Server Management Studio, a 6
 
 ## Success criteria
 
-* You learn different options of running SQL on Azure
+* You learn how to run an assessment using SSMS 22.
 * Understand the assessment report and the comptatibility issues.
 
 ## Challenge 3 — Create the required azure resources
@@ -145,7 +164,7 @@ Create a Blob container in the storage account and a folder within the container
 
 ### 4. Database Migration Service (DMS)
 
-In the same region where Azure SQL MI is deployed in the lab subscription, deploy Azure Data Migration Services (DMS).
+In the same region where Azure SQL MI is deployed in the lab subscription, deploy Azure Database Migration Services (DMS).
 
 ![DMS1](./images/DMS_1.png)
 ![DMS2](./images/DMS_2.png)
@@ -216,7 +235,7 @@ Select *Blob Storage* as the location of the backup files and *Online* as the mi
 
 ![DMS_7](./images/DMS_7.png)
 
-Configure details as shown. For the Instance details, the details referenced are not those of the source server, rather the *Migration Project* we are configuring. 
+Configure details as shown. For the Instance details, the details referenced are not those of the source server, rather the *Migration SQL Instance* we are configuring and is required by DMS. You need not manage this instance for this lab.
 
 ![DMS_8](./images/DMS_8.png)
 
@@ -276,7 +295,7 @@ Perform the cutover. Wait for it to complete.
 
 ![DMS_18](./images/DMS_18.png)
 
-Navigate to the Azure SQL Managed instance and confirm the database is there and in good state. Click on *DAtabases* in the left to list all databases on this managed instance.
+Navigate to the Azure SQL Managed instance and confirm the database is there and in good state. Click on *Databases* in the left to list all databases on this managed instance.
 
 ![DMS_19](./images/DMS_19.png)
 
