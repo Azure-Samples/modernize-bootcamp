@@ -79,6 +79,8 @@ You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `
 
 To make sure the setup was completed correctly, ask Copilot Chat to build and launch the legacy app for you.
 
+> 💡 Running this .NET Framework app locally requires **MSBuild** and **IIS Express**, because legacy ASP.NET apps like this one can't be started with the usual `dotnet run`. Both tools are already installed on your lab machine, so there is nothing to set up. Keep it in mind for future customer scenarios where you need to run a legacy app yourself.
+
 Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
 ![Open chat](./images/open-chat.png)
@@ -88,6 +90,8 @@ Then, type in the chatbox and submit this prompt:
 ```plaintext
 This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express. Tell me the URL when it is running.
 ```
+
+A plain "run this app" prompt would also work. Copilot would inspect the project and work out the build and launch steps itself. Spelling them out up front just gets you there faster and avoids potential trial and error.
 
 Once it loads, walk the app and confirm your local copy matches the on-premises one you looked at earlier:
 
