@@ -49,13 +49,26 @@ The rest of this module happens on your own machine, so the first job is to get 
 **1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and go to [https://github.com/Skillable-Events/caldova-retail](https://github.com/Skillable-Events/caldova-retail).
 
 1. On the Skillable Events single sign-on page, select **Continue**.
+
+   ![Skillable Events single sign-on](./images/sso-skillable.png)
+
 2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
 3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead.
 
 **2. Fork and clone the repository.**
 
-1. On the repository page, select **Fork**, then **Create fork**.
+1. On the repository page, select **Fork**, then **Create fork** with the defaults left alone.
+
+   ![Fork button](./images/fork-button.png)
+
+   ![Create fork](./images/fork-creation.png)
+
 2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/caldova-retail.git`.
+
+   ![Code button](./images/code-button.png)
+
+   ![Copy HTTPS URL](./images/copy-https.png)
+
 3. Open PowerShell from your applications and clone your fork, pasting the URL you copied:
 
    ```powershell
