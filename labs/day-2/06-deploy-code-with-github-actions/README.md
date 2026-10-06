@@ -83,12 +83,105 @@ explicitly:
   -DeploymentBranch 'main'
 ```
 
-The Azure account needs permission to read subscription deployments, resources,
-and role assignments, and to create or update federated credentials on the two
-preprovisioned managed identities. The GitHub account needs `ADMIN` permission
-on the repository. The script fails with an actionable error if either account
-lacks access or if the repository plan does not support the required deployment
-protection.
+If the hosting provider deployed the platform through separate
+resource-group-scope deployments, use the resource-group discovery variant
+instead:
+
+```powershell
+.\assets\scripts\Initialize-Lab06RepositoryFromResourceGroups.ps1 `
+  -SubscriptionId $subscriptionId `
+  -RequiredReviewer '<github-user-login>' `
+  -DeploymentBranch 'main'
+```
+
+This variant examines successful deployments in each supplied resource group,
+matches bootstrap, primary, secondary, and global deployments by their Bicep
+output contracts, and selects the newest match. It verifies that all four
+deployments have the same `prefix` and `suffix` parameters before changing
+GitHub. If deployment history requires an older record, pass one or more of
+`-BootstrapDeploymentName`, `-PrimaryDeploymentName`,
+`-SecondaryDeploymentName`, and `-GlobalDeploymentName`.
+
+Each resource group is discovered independently from its
+`rg-caldova-lab04-bootstrap-`, `rg-caldova-lab04-primary-`,
+`rg-caldova-lab04-secondary-`, or `rg-caldova-lab04-global-` prefix. If more
+than one resource group matches a prefix, supply the corresponding
+`-BootstrapResourceGroup`, `-PrimaryResourceGroup`, `-SecondaryResourceGroup`,
+or `-GlobalResourceGroup` override.
+
+Required reviewers are available for public repositories and private
+repositories on GitHub Enterprise. GitHub Free, Pro, and Team do not support
+required reviewers for private repositories. For a lab repository where
+manual approval is intentionally unavailable, use the explicit fallback and
+omit `-RequiredReviewer`:
+
+```powershell
+.\assets\scripts\Initialize-Lab06RepositoryFromResourceGroups.ps1 `
+  -SubscriptionId $subscriptionId `
+  -AllowDeploymentWithoutRequiredReviewer `
+  -DeploymentBranch 'main'
+```
+
+This keeps the `main` branch restriction but removes the manual approval gate.
+The script emits a warning whenever this fallback is used.
+
+To test discovery and print the selected deployments and reconstructed values
+without changing Azure resources or GitHub, run:
+
+```powershell
+.\assets\scripts\Test-Lab06ResourceGroupDeploymentValues.ps1 `
+  -SubscriptionId $subscriptionId
+```
+
+The probe emits JSON and accepts the same four optional deployment-name
+overrides.
+
+## Standalone Lab 04 post-deployment actions
+
+When a hosting provider deploys the Bicep through resource-group-scope
+deployments, run the post-deployment actions independently without rerunning
+the infrastructure deployment:
+
+```powershell
+$subscriptionId = az account show --query id --output tsv
+.\assets\scripts\Invoke-Lab04PostDeploymentFromResourceGroups.ps1 `
+  -SubscriptionId $subscriptionId
+```
+
+The script discovers the bootstrap, secondary, and global resource groups by
+prefix, then discovers the newest matching deployments by output contract. It:
+
+1. approves only the expected Front Door Private Link request
+2. verifies the origin and waits for the Front Door HTTPS endpoint
+3. preserves an existing `eshop_ai` database or imports `eshop.bacpac`
+   through temporary SQL MI NSG access
+4. removes the temporary NSG rule even when import fails
+5. updates and verifies only `AZURE_CLIENT_ID` and
+   `ConnectionStrings__StoreDbContext` on the Container App
+
+Inspect discovery without changing Azure:
+
+```powershell
+.\assets\scripts\Invoke-Lab04PostDeploymentFromResourceGroups.ps1 `
+  -SubscriptionId $subscriptionId `
+  -DiscoveryOnly
+```
+
+Use `-WhatIf` for the same discovery plus an action summary. If multiple
+resource groups or matching deployments exist, use the corresponding
+resource-group or deployment-name override. Use `-BacpacPath` for a different
+BACPAC. When import is required and no path is supplied, the script searches
+beside itself, in local and ancestor `data` directories, and under the current
+working directory. It uses a per-user SqlPackage cache and does not require a
+Git repository or a separate helper script. Database deletion and reimport
+require the explicit `-ReplaceExistingDatabase` switch.
+
+The Azure account needs permission to read the selected subscription or
+resource-group deployment records, resources, and role assignments, and to
+create or update federated credentials on the two preprovisioned managed
+identities. The GitHub account needs `ADMIN` permission on the repository. The
+scripts fail with an actionable error if either account lacks access or if the
+repository plan does not support the required deployment protection.
 
 > [!IMPORTANT]
 > Do not run `assets/scripts/Initialize-Lab04Repository.ps1` for this step. That
@@ -425,3 +518,7 @@ If your workflow does not validate and lab time is running short:
 This lab adds images and revisions but no new Azure service.
 
 To reduce registry storage, delete only known obsolete tags after confirming that no active or rollback revision references their digest. Do not delete the Lab 04 resource groups until all remaining labs are complete.
+
+---
+
+[← Previous: Modernize Data](../05-modernize-data/README.md) | [Next: Modernize with the CLI →](../../day-3/07-modernize-with-cli/README.md)
