@@ -37,7 +37,10 @@ Students will learn to:
 Use master;
 select @@version ;
 ```
-5. Right click on database eshop and click on peroperties to determine database size, collation, disk file name and size of database files and "recovery mode", like [![this](./images/Challenge_1_db_properties.png)](./images/Challenge_1_db_properties.png)
+5. Right click on database eshop and click on peroperties to determine database size, collation, disk file name and size of database files and "recovery mode", like 
+
+[![this](./images/Challenge_1_db_properties.png)](./images/Challenge_1_db_properties.png)
+
 6. While there, also note down all the "page" names displayed when checking on database "properties" section.
 7. From the "Files" section, note down the data files and transaction log file name.
 8. You connected to the SQL server using SQL authentication. What are other ways to authenticate to a SQL server?
@@ -89,8 +92,7 @@ The Azure SQL Managed Instance configured in this lab is configured to authentic
 
  ![NSG1](./images/NSG1.png)
 
-<<<<<<< HEAD
-2- Select the right option in SSMS when loging in. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left.
+2- Select the right option in SSMS when loging in. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left under Security.
 
 ![SQLMI_ENTRA](./images/sqlmi_entra.png)
 
@@ -98,8 +100,6 @@ To retrieve the public endpoint FQDN and port number to use as part of the conne
 
 ![AZSQLMIPE](./images/AzSQLMIPE.png)
 
-=======
->>>>>>> 906f367 (minor fix, simplification till challenge 3 and part of 4)
 Use that Entra ID to login using SSMS.
 
 ![SSMS_LOGIN](./images/ssms_login.png)
@@ -120,7 +120,7 @@ Use that Entra ID to login using SSMS.
 
 * You learn how to run an assessment using SSMS 22.
 * Understand the assessment report and the comptatibility issues.
-* You are able to connect to the SQL MI from the lab VM.
+* You are able to connect to the SQL MI from the lab VM using Entra ID.
 
 ## Challenge 3 — Create the required azure resources
 
@@ -180,7 +180,7 @@ Create a Blob container in the storage account and a folder within the container
 
 - Resource provider is registered for data migrations
 - SQL MI configured for System Assigned Managed Identity
-- Storage account is created with a Blob container in it
+- Storage account is created in the same region as MI, with a Blob container in it
 - DMS is deployed in the same region as SQL MI
 
 
@@ -273,33 +273,11 @@ If all is well,  the full backups would have been restored.
 
 ![DMS_13](./images/DMS_13.png)
 
-<<<<<<< HEAD
-The work is not done yet.  Since this is an online migration, transaction logs need to be replayed.  As a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command to insert a row into the *dbo.Store* table.
+The work is not done yet.  Since this is an online migration, transaction logs need to be replayed.  The LRS can only be triggered via Azure CLI or PowerShell. The *datamigration* extension needs to be installed on the VM.
 
-```powershell
-INSERT INTO dbo.Store
-           (Name
-           ,City
-           ,State
-           ,Hours)
-     VALUES
-           ('Test'
-           ,'Test'
-           ,'Test'
-           ,'Test');
-GO
-```
-=======
-Database migration is not complete yet.  Since this is an online migration, transaction logs need to be replayed.  The LRS can only be triggered via Azure CLI or PowerShell. The *datamigration* extension needs to be installed on the commandline. 
-
-Launch Azure CLI and then run this command
-
-```shell
-az extension add --name datamigration --upgrade
-```
+*az extension add --name datamigration --upgrade*
 
 Once that is done, as a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command.
->>>>>>> 906f367 (minor fix, simplification till challenge 3 and part of 4)
 
 ![DMS_14](./images/DMS_14.png)
 
