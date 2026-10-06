@@ -90,7 +90,6 @@ The Azure SQL Managed Instance configured in this lab is configured to authentic
  ![NSG1](./images/NSG1.png)
 
 <<<<<<< HEAD
-=======
 2- Select the right option in SSMS when loging in. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left.
 
 ![SQLMI_ENTRA](./images/sqlmi_entra.png)
@@ -99,7 +98,8 @@ To retrieve the public endpoint FQDN and port number to use as part of the conne
 
 ![AZSQLMIPE](./images/AzSQLMIPE.png)
 
->>>>>>> d2e2ae8 (Added clarification for SQL MI PE connection in SSMS and removed command line LRS)
+=======
+>>>>>>> 906f367 (minor fix, simplification till challenge 3 and part of 4)
 Use that Entra ID to login using SSMS.
 
 ![SSMS_LOGIN](./images/ssms_login.png)
@@ -274,16 +274,6 @@ If all is well,  the full backups would have been restored.
 ![DMS_13](./images/DMS_13.png)
 
 <<<<<<< HEAD
-Database migration is not complete yet.  Since this is an online migration, transaction logs need to be replayed.  The LRS can only be triggered via Azure CLI or PowerShell. The *datamigration* extension needs to be installed on the commandline. 
-
-Launch Azure CLI and then run this command
-
-```shell
-az extension add --name datamigration --upgrade
-```
-
-Once that is done, as a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command.
-=======
 The work is not done yet.  Since this is an online migration, transaction logs need to be replayed.  As a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command to insert a row into the *dbo.Store* table.
 
 ```powershell
@@ -299,7 +289,17 @@ INSERT INTO dbo.Store
            ,'Test');
 GO
 ```
->>>>>>> d2e2ae8 (Added clarification for SQL MI PE connection in SSMS and removed command line LRS)
+=======
+Database migration is not complete yet.  Since this is an online migration, transaction logs need to be replayed.  The LRS can only be triggered via Azure CLI or PowerShell. The *datamigration* extension needs to be installed on the commandline. 
+
+Launch Azure CLI and then run this command
+
+```shell
+az extension add --name datamigration --upgrade
+```
+
+Once that is done, as a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command.
+>>>>>>> 906f367 (minor fix, simplification till challenge 3 and part of 4)
 
 ![DMS_14](./images/DMS_14.png)
 
