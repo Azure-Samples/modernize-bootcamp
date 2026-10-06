@@ -112,6 +112,9 @@ updates.
 | [`infra/Deploy-Lab04.ps1`](./infra/Deploy-Lab04.ps1) | Direct validation, what-if, deployment, Private Link approval, and smoke test |
 | [`infra/DEPLOYMENT.md`](./infra/DEPLOYMENT.md) | Detailed direct-deployment and troubleshooting guide |
 | [`assets/scripts/Configure-Lab04GitHub.ps1`](./assets/scripts/Configure-Lab04GitHub.ps1) | Optional GitHub OIDC, identities, RBAC, environments, and variables |
+| [`assets/scripts/Initialize-Lab06RepositoryFromResourceGroups.ps1`](./assets/scripts/Initialize-Lab06RepositoryFromResourceGroups.ps1) | Lab 06-only GitHub OIDC setup from separate resource-group deployment records |
+| [`assets/scripts/Test-Lab06ResourceGroupDeploymentValues.ps1`](./assets/scripts/Test-Lab06ResourceGroupDeploymentValues.ps1) | Read-only resource-group deployment discovery and Lab 06 value output |
+| [`assets/scripts/Invoke-Lab04PostDeploymentFromResourceGroups.ps1`](./assets/scripts/Invoke-Lab04PostDeploymentFromResourceGroups.ps1) | Standalone Private Link approval, Front Door verification, SQL MI BACPAC import, and Container App database configuration |
 | [`assets/scripts/Remove-Lab04Environment.ps1`](./assets/scripts/Remove-Lab04Environment.ps1) | Exact-name resource-group cleanup |
 | [`.github/workflows/lab04-deploy.yml`](./.github/workflows/lab04-deploy.yml) | Protected AZD provisioning workflow |
 
@@ -401,6 +404,88 @@ The `Arm` row must include `DeploymentName`. If it does not, update the
 checkout or remove the stale script copy being invoked; changing the Azure
 deployment name will not fix a PowerShell parameter-binding error.
 
+For a hosted platform deployed through separate resource-group-scope
+deployments, configure only the Lab 06 build and deployment environments with:
+
+```powershell
+.\assets\scripts\Initialize-Lab06RepositoryFromResourceGroups.ps1 `
+  -SubscriptionId '<subscription-id>' `
+  -Repository 'owner/repository' `
+  -RequiredReviewer '<github-user-login>' `
+  -DeploymentBranch 'main'
+```
+
+The script discovers the newest successful deployment in each resource group
+by its output contract rather than its name. It requires consistent `prefix`
+and `suffix` parameters across the selected deployments, validates the existing
+identities, resources, and RBAC, and then configures `lab06` and
+`lab06-deploy`. Use the optional `-BootstrapDeploymentName`,
+`-PrimaryDeploymentName`, `-SecondaryDeploymentName`, or
+`-GlobalDeploymentName` parameters to select a specific historical deployment.
+The script discovers each resource group independently from its
+`rg-caldova-lab04-bootstrap-`, `rg-caldova-lab04-primary-`,
+`rg-caldova-lab04-secondary-`, or `rg-caldova-lab04-global-` prefix. If more
+than one group matches a prefix, pass that role's resource-group override.
+
+Required reviewers are available for public repositories and private
+repositories on GitHub Enterprise. For a private lab repository on GitHub
+Free, Pro, or Team, explicitly opt out of the unsupported manual approval rule:
+
+```powershell
+.\assets\scripts\Initialize-Lab06RepositoryFromResourceGroups.ps1 `
+  -SubscriptionId '<subscription-id>' `
+  -Repository 'owner/repository' `
+  -AllowDeploymentWithoutRequiredReviewer `
+  -DeploymentBranch 'main'
+```
+
+Fallback mode retains the `main` branch restriction, emits a warning, and does
+not create a manual approval gate.
+
+Test the same discovery and print its JSON result without changing Azure
+resources or GitHub:
+
+```powershell
+.\assets\scripts\Test-Lab06ResourceGroupDeploymentValues.ps1 `
+  -SubscriptionId '<subscription-id>'
+```
+
+### Standalone post-deployment automation
+
+For infrastructure deployed as separate resource-group deployments, run all
+Lab 04 post-deployment actions without rerunning Bicep:
+
+```powershell
+.\assets\scripts\Invoke-Lab04PostDeploymentFromResourceGroups.ps1 `
+  -SubscriptionId '<subscription-id>'
+```
+
+The script independently discovers the bootstrap, secondary, and global
+resource groups by their fixed prefixes and selects the newest deployments
+matching the required output contracts. It supports the hosted SQL Managed
+Instance layout, approves only the expected Front Door Private Link request,
+waits for Front Door health, imports `eshop.bacpac` through temporary
+`/32` NSG access, removes that access in a `finally` block, and configures the
+Container App managed-identity database settings.
+
+Preview discovered values without mutation:
+
+```powershell
+.\assets\scripts\Invoke-Lab04PostDeploymentFromResourceGroups.ps1 `
+  -SubscriptionId '<subscription-id>' `
+  -DiscoveryOnly
+```
+
+`-WhatIf` prints the same discovery with an action summary. Resource-group and
+deployment-name parameters remain available as ambiguity overrides.
+`-BacpacPath` overrides local discovery. When import is needed, the standalone
+script searches beside itself, local and ancestor `data` directories, and the
+current working directory. It embeds its SqlPackage helper logic, uses a
+per-user tool cache, and can run from a copied directory such as
+`C:\Labfiles` without a Git checkout. Existing `eshop_ai` databases are
+preserved by default; deletion and reimport require
+`-ReplaceExistingDatabase`.
+
 The setup creates separate identities for:
 
 - infrastructure preview
@@ -465,6 +550,18 @@ Validate the GitHub OIDC, workflow, PowerShell, and Bicep parameter contracts:
 
 ```powershell
 .\tests\Validate-Lab04OidcContracts.ps1
+```
+
+Validate the Lab 06 resource-group deployment discovery and OIDC contracts:
+
+```powershell
+.\tests\Validate-Lab06ResourceGroupOidcContracts.ps1
+```
+
+Validate standalone resource-group post-deployment automation contracts:
+
+```powershell
+.\tests\Validate-Lab04PostDeploymentContracts.ps1
 ```
 
 Validate BACPAC import naming, module, hook, path, and temporary-rule
