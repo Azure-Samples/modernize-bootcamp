@@ -2,9 +2,11 @@
 
 Module 2 got the storefront onto .NET 10. Because ASP.NET MVC 5 does not run there, that upgrade also had to move the app to dependency injection, `appsettings.json`, and the modern hosting model — whether you wanted it to or not. What it did not do is make the app ready to run **in Azure**.
 
+> 🎯 **This module: make the app ready for the cloud.** You work on the **application code**: modernize the UI to Blazor, then close the gaps that would stop the app running well in Azure. Everything stays on your machine, and nothing is created in Azure. Module 4 then designs the Azure environment the app will run in.
+
 In this chapter you will work in **GitHub Copilot Chat** throughout — mostly regular chat, where the job is ordinary refactoring, with the `@upgrade` agent available for the optional question that opens the module. Convert the MVC pages to Blazor components, then ask directly whether the app is ready for Azure and close the gaps that come back.
 
-> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
+> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 ## 📋 What you'll do
 
@@ -38,11 +40,15 @@ Leverage Blazor components to make it look more modern, sleek, and aesthetic.
 >
 > The same applies when something breaks. If a page renders blank, a component goes missing, or routing misbehaves, describe that specific problem in the chat and let Copilot fix it before moving on.
 
-![Blazor Migration](./images/blazor-migration.png)
+![The Upgrade agent finds no MVC-to-Blazor scenario and proceeds with a direct code change](./images/blazor-migration.png)
 
-Copilot will convert the MVC pages to Blazor components, ensuring that all functionality is preserved and adding some new features.
+If the agent asks you to confirm any options, choose the one it recommends. If it does not give a recommendation, ask it which option it recommends and why.
 
-This is our final page:
+Notice what the agent says: no upgrade scenario covers MVC → Blazor, so it will do this as a **direct code change**. The Upgrade agent ships with tested scenarios for common migrations, but it is not limited to them. It is strong at understanding languages and frameworks and converting between them, and it still runs structured checks as it works, such as reading the app before it edits and building to verify its changes. Because the Upgrade agent is built on top of GitHub Copilot, you can also ask it questions and give it requests outside its predefined scenarios, just as you would any other Copilot agent.
+
+Copilot will convert the MVC pages to Blazor components, ensuring that all functionality is preserved and adding some new features. Expect this update to take ~10-30 min.
+
+This is our final page (yours may look different):
 
 ![Blazor Final Page](./images/blazor-homescreen.png)
 
@@ -50,7 +56,7 @@ This is our final page:
 
 ![Blazor Products](./images/blazor-products.png)
 
-## 2️⃣ Build and test
+### ✅ Build and test the Blazor conversion
 
 If Copilot does not automatically do this verification, then prompt copilot to build and run the app:
 
@@ -60,40 +66,51 @@ If Copilot does not automatically do this verification, then prompt copilot to b
 1. Check that:
    - All pages load correctly and render as Blazor components
    - Images and static content display properly
-   - Sign-in still works and the cart still holds its contents — credentials are in [Demo logins](../../../docs/logins.md)
+   - Sign-in still works for alice and bob (password Password1!) and the cart still holds its contents
    - No MVC views or controllers are left behind in the routing
    - The application starts cleanly from the Visual Studio Code terminal
 ```
+
+Use these demo logins when you check sign-in yourself:
+
+| Username | Password | Role | Notes |
+| --- | --- | --- | --- |
+| `alice` | `Password1!` | Admin, Manager | Has existing order history |
+| `bob` | `Password1!` | Employee | Has existing order history |
 
 ![Modernized Application Running](./images/blazor-order.png)
 
 > 💡 The app does the same things it did at the end of Module 2 — that is the point. Everything so far changed *how* the app runs and renders, not *what* it does.
 
-## 3️⃣ Get the app cloud ready
+## 2️⃣ Get the app cloud ready
 
-The app runs on .NET 10 and renders through Blazor, but it may not be ready for the Azure components we plan to put around it — such as Key Vault and managed identity. Nothing so far has touched that, because a framework upgrade has no reason to.
+The app runs on .NET 10 and renders through Blazor, but its code does not yet know how to work with Azure services such as Key Vault or managed identity. Nothing so far has touched that, because a framework upgrade has no reason to.
 
-So ask.
+**In this step you make code changes only.** You add the code the app needs to use Azure services, but you do not create the services themselves. We will create the IaC for services in later modules.
+
+For example, if the app has the database password hard-coded in a config file today, in this step, you wire the code to read that secret from **Azure Key Vault** instead.
 
 1. **Ask the question in plan mode.** In Copilot Chat, switch the mode dropdown to **Plan** and send:
 
    ```plaintext
    Is this app Azure ready? Create a plan for any gaps if not.
-   ```
 
-   ![Azure Readiness Prompt](./images/azure-ready.png)
-
-2. **Read the plan.** The plan file should come back in the chat. Select **Open in Editor** to view it as a markdown file. It is reading your actual codebase, so what comes back is grounded rather than generic — expect concrete gaps like no HTTPS redirection, no forwarded headers, no health endpoint, and `"AllowedHosts": "*"`.
-
-3. **Scope it before you run it.** Two things in the plan belong to later modules, so say so explicitly rather than letting the agent do them and undoing it afterwards:
-
-   ```plaintext
-   Proceed with the Azure readiness plan. Do not create a Dockerfile or touch the database -- these changes will come later. Create a new branch for the changes and please show a summary of changes after each phase.
+   Do not create a Dockerfile, infrastructure, or Bicep files, or touch the database -- these changes will come later. Create a new branch for the changes and please show a summary of changes after each phase.
 
    Keep every Azure integration optional: read it from configuration and fall back to current local behavior when that configuration is absent, so the app still builds and runs with no Azure resources. Don't hardcode endpoints, keys, or connection strings.
    ```
 
-   The branch matters. It gives you one clean thing to diff, review, and throw away if the run goes sideways. The "must still run locally" constraint is your acceptance test. Readiness work that only functions once Azure resources exist can't be verified in this module, since we have not provisioned Azure resources yet. A broken local run is the fastest signal that the agent overreached. Every integration it adds should read its own configuration and fall back quietly when that configuration is absent, so the app you run at the end behaves exactly like the one you ran at the start.
+   ![Copilot asking which optional Azure integrations the readiness plan should include](./images/azure-ready.png)
+
+   Copilot may ask a few questions before it writes the plan, such as which optional Azure integrations to include. Keep the options it selects by default and continue.
+
+2. **Read the plan.** The plan file should come back in the chat. Select **Open in Editor** to view it as a markdown file. It is reading your actual codebase, so what comes back is grounded rather than generic — expect concrete gaps like no HTTPS redirection, no forwarded headers, no health endpoint, and `"AllowedHosts": "*"`.
+
+3. **Run the plan**. When the plan looks right, send:
+
+   ```plaintext
+   Proceed with the Azure readiness plan.
+   ```
 
 4. **Approve as it goes.** It will re-run the build and ask for approval to run commands. Grant them, and read the per-phase summaries as they appear instead of waiting until the end.
 

@@ -2,6 +2,8 @@
 
 You finished Module 3 with an application that is ready for Azure and a list of settings describing what it expects to find there. None of it exists yet. This lab designs it.
 
+> 🎯 **This module: design the cloud the app will run on.** Module 3 changed the **application code**. This module works on the **Azure infrastructure** around it: you plan and generate a secure, resilient Azure foundation as infrastructure as code (Bicep). You do not change the app, and you do not deploy what you generate.
+
 The platform has to serve more than the storefront. The data migration in later modules need servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
 
 You will make real architecture decisions inside a set of non-negotiable security and resilience requirements. The instructor has already provisioned the Azure environment used by the later labs, so **you will not deploy the Bicep you generate**. The goal is to practice an effective GitHub Copilot workflow while keeping architectural judgment and approval with you.
@@ -27,72 +29,13 @@ By the end of this lab, you will be able to:
 
 ## 🧭 Where This Fits
 
-The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects and that [Lab 05: Modernize Data](../../day-2/05-modernize-data/README.md) requires. The instructor-preprovisioned environment provides that platform, while your Bicep remains a local learning artifact.
+The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects. The instructor-preprovisioned environment provides that platform, while your Bicep remains a local learning artifact.
 
-The preprovisioned Container App runs a placeholder image so the platform can be verified independently of the workshop application. Your storefront is not deployed here — it arrives in [Lab 06](../../day-2/06-deploy-code-with-github-actions/README.md), onto the foundation you are about to design.
-
-## ✅ Prerequisites
-
-- Visual Studio Code with GitHub Copilot
-- PowerShell 7 or later
-- Azure CLI
-- Bicep CLI through the Azure CLI
-- a local clone of this repository
-
-Verify the tools:
-
-```powershell
-$PSVersionTable.PSVersion
-az version
-az bicep version
-git status --short
-```
-
-> [!NOTE]
-> The instructor owns deployment and cleanup of the billable workshop
-> environment. Do not run the Lab 04 deployment workflow or provision a second
-> copy of the architecture unless your instructor explicitly directs you to do
-> so.
+The preprovisioned Container App runs a placeholder image so the platform can be verified independently of the workshop application. Your storefront is not deployed in this module. On Day 2, you will deploy it onto the foundation you are about to design.
 
 ## 🏗️ Required Final Architecture
 
-```mermaid
-flowchart TB
-    GH[GitHub Actions<br/>OIDC federation] -. scoped RBAC .-> UAMI[Deployment managed identity]
-    UAMI --> DEPLOY[Bicep deployments]
-    USER((HTTPS client)) --> AFD[Azure Front Door Premium<br/>Private Link origin]
-
-    subgraph APP[Central US by default - application VNet 10.20.0.0/20]
-        ACA[Internal, zone-redundant<br/>Container Apps environment]
-        APP01[Placeholder Container App<br/>port 8080 / min 2 / bounded HTTP scale]
-        ACA --> APP01
-    end
-
-    AFD == Private Link ==> APP01
-
-    subgraph DB1[North Central US database VNet 10.0.0.0/20]
-        BASTION[Azure Bastion]
-        WIN[Windows VM<br/>SQL Server / SSMS / SHIR<br/>no public IP]
-        LINUX[Ubuntu test VM<br/>no public IP]
-        SQLEP[Azure SQL private endpoint]
-        BASTION --> WIN
-        BASTION --> LINUX
-    end
-
-    subgraph DB2[Central US database VNet 10.1.0.0/20]
-        SQLMI[(Optional Azure SQL MI<br/>manual workflow)]
-    end
-
-    DB1 <-- VNet peering --> DB2
-    SQLDB[(Azure SQL Database<br/>Entra-only / public access disabled)] --- SQLEP
-    DMS[Azure Database Migration Service] -. SHIR registration .-> WIN
-    WIN --> SQLEP
-    WIN --> SQLMI
-    KV[Bootstrap Key Vault<br/>generated VM credentials] -. secure retrieval .-> DEPLOY
-    ACR[Azure Container Registry] --> APP01
-```
-
-The editable diagram source is in [target-architecture.mmd](images/target-architecture.mmd).
+![Target Azure architecture: Front Door routes HTTPS traffic over Private Link to the Container App in the application VNet; the peered database VNets hold Azure Bastion, the Windows and Ubuntu VMs, the Azure SQL private endpoint, and the optional SQL MI; GitHub Actions deploys Bicep through a scoped managed identity](./images/azure-architecture.png)
 
 > [!IMPORTANT]
 > **This is a workshop architecture, not a universal production reference
@@ -151,15 +94,7 @@ Your plan and implementation must:
 
 ## 🧪 Challenge 1: Explore Before You Plan
 
-Start with what you carried out of Module 3. Open the `appsettings.json` from your
-Azure-ready application and list every setting the agent added — Key Vault URIs,
-managed identity client IDs, storage or telemetry endpoints, health check paths.
-Those empty settings are the application's own statement of what it expects Azure
-to provide, and they are the evidence your plan is graded against. If your Module 3
-run did not finish, use [`sample-app/`](./sample-app/) and read its `appsettings.json`
-instead.
-
-Do not begin by asking Copilot to create files. First, use **Ask** mode to learn
+Start with what you carried out of Module 3. Do not begin by asking Copilot to create files. First, use **Ask** mode to learn
 what is already in the repository and to identify the evidence behind the
 requirements.
 
@@ -170,7 +105,7 @@ Identify:
 - the application and database requirements established by earlier labs
 - every existing Lab 04 Bicep entry point, module, workflow, and script
 - the Azure resources implied by application configuration, including every setting
-  the Module 3 readiness work added to appsettings.json
+  the Module 3 readiness work added to appsettings.json (or equivalent Azure resource file)
 - security, identity, networking, availability, operations, and cost constraints
 - assumptions or conflicts that require human review
 
@@ -179,9 +114,7 @@ facts from recommendations. Do not create an implementation plan yet.
 ```
 
 Review the inventory. Ask follow-up questions when a conclusion is unsupported
-or a repository requirement has been missed. Check the result against your own
-`appsettings.json` list — a setting the app reads but the inventory does not
-account for is a gap in the plan, not a detail to sort out later. This step keeps
+or a repository requirement has been missed. This step keeps
 the plan grounded in evidence instead of accepting a plausible but generic Azure
 design.
 
