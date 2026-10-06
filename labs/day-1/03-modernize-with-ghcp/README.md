@@ -86,15 +86,9 @@ Use these demo logins when you check sign-in yourself:
 
 The app runs on .NET 10 and renders through Blazor, but its code does not yet know how to work with Azure services such as Key Vault or managed identity. Nothing so far has touched that, because a framework upgrade has no reason to.
 
-**In this step you make code changes only.** You add the code the app needs to use Azure services, but you do not create the services themselves. We are building this up one layer at a time: the code now, the Azure resources in Module 4.
+**In this step you make code changes only.** You add the code the app needs to use Azure services, but you do not create the services themselves. We will create the IaC for services in later modules.
 
-| Code change you make now (Module 3) | Azure resource it will use later (Module 4) |
-| --- | --- |
-| Read secrets through a Key Vault configuration provider instead of from a local file | The Key Vault that stores those secrets |
-| Add a `/health` endpoint the app answers | The Container Apps health probes that call it |
-| Send logs and metrics through Application Insights | The Application Insights resource that receives them |
-
-Because none of those Azure resources exist yet, every change must be optional. If the Azure setting is missing, the app falls back to how it works today, so it still runs on your machine exactly as before.
+For example, if the app has the database password hard-coded in a config file today, in this step, you wire the code to read that secret from **Azure Key Vault** instead.
 
 1. **Ask the question in plan mode.** In Copilot Chat, switch the mode dropdown to **Plan** and send:
 
