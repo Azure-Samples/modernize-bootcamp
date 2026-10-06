@@ -53,17 +53,7 @@ These outcomes matter more than naming an Azure service. The assessment must hel
 | `CR-SQL-01` | Storefront database | Windows Server 2019, SQL Server 2016 Standard, 8 vCPU, 32 GB RAM, 1 TB disk | AD DS/DNS, backup target |
 | `CR-AD-01` | AD DS domain controller and DNS | Windows Server 2019, 2 vCPU, 8 GB RAM, 128 GB disk | Network connectivity, time source, directory replication |
 
-```mermaid
-flowchart LR
-    CUSTOMER[Customers] --> LB[On-premises load balancer]
-    LB --> WEB1[CR-WEB-01<br/>IIS]
-    LB --> WEB2[CR-WEB-02<br/>IIS]
-    WEB1 --> SQL[(CR-SQL-01<br/>SQL Server)]
-    WEB2 --> SQL
-    AD[(CR-AD-01<br/>AD DS and DNS)] -. domain, DNS, policy .-> WEB1
-    AD -. domain, DNS, policy .-> WEB2
-    AD -. domain, DNS, service identity .-> SQL
-```
+![Caldova on-premises architecture: customers reach a load balancer that fronts CR-WEB-01 and CR-WEB-02 (IIS), both backed by CR-SQL-01 (SQL Server), with CR-AD-01 providing domain, DNS, policy, and service identity](./images/on-prem-architecture.png)
 
 The diagram exposes an immediate concern: `CR-AD-01` is Caldova's only documented domain controller. A server assessment might find that its CPU, memory, disks, and operating system are compatible with an Azure VM, but that does **not** make migrating the only domain controller as an ordinary VM a safe identity plan.
 
