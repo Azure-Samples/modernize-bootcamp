@@ -12,8 +12,6 @@ The repository contains deliberately legacy .NET Framework applications and a SQ
 
 The app we will be working with is **Caldova Retail**, an ASP.NET MVC 5 storefront on .NET Framework 4.8, backed by Entity Framework 6 and a SQL Server database. Its dated project structure, dependencies, authentication, and hosting assumptions are what the labs assess and modernize.
 
-The source code is in [`src/app-modernization/caldova-retail-web-app/`](../src/app-modernization/caldova-retail-web-app/), and its [README](../src/app-modernization/caldova-retail-web-app/README.md) covers what the app does and how to point it at the database.
-
 ## ![Audience](../assets/icons/audience.svg) Who This Is For
 
 The bootcamp is designed primarily for infrastructure and cloud architects who participate in application and data modernization discussions. It is especially relevant to architects who need to connect infrastructure concerns with application architecture, security, operations, data platforms, and software delivery practices.
