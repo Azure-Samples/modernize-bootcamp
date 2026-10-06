@@ -37,8 +37,13 @@ Caldova Retail is already running on-premises, on a Windows Server behind IIS. B
 Walk around the storefront for a minute and notice how it behaves:
 
 - The product catalog loads, with images
-- Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Skillable-Events/caldova-retail/blob/main/README.md)
+- Sign-in works for both accounts — use the demo logins below
 - Adding an item to the cart works
+
+| Username | Password | Role | Notes |
+| --- | --- | --- | --- |
+| `alice` | `Password1!` | Admin, Manager | Has existing order history |
+| `bob` | `Password1!` | Employee | Has existing order history |
 
 The rest of this module happens on your own machine, so the first job is to get this same app running locally.
 
@@ -46,14 +51,16 @@ The rest of this module happens on your own machine, so the first job is to get 
 
 > The upgrade agent creates branches and git commits as it works, so run this module against **your own fork** rather than the workshop repository.
 
-**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser +++https://github.com/Skillable-Events/caldova-retail+++.
+**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser +++https://github.com/Skillable-Events/caldova-retail+++
 
 1. On the Skillable Events single sign-on page, select **Continue**.
 
    ![Skillable Events single sign-on](./images/sso-skillable.png)
 
+   > 💡 If the sign-in keeps returning to the same page or shows an error, wait a few minutes and try again; this is a transient error. If it takes you to the Skillable GH Enterprise main page [Skillable-Events GH](https://github.com/enterprises/Skillable-Events) search for "caldova-retail" in the search bar and access the repository that way.
+
 2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
-3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead.
+3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead. If it prompts you to stay signed in, hit **Yes**.
 
 **2. Fork and clone the repository.**
 
@@ -69,13 +76,14 @@ The rest of this module happens on your own machine, so the first job is to get 
 
    ![Copy HTTPS URL](./images/copy-https.png)
 
-3. Open PowerShell from your applications and clone your fork, pasting the URL you copied:
+3. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location -- C:\Users\Admin):
 
    ```powershell
    git clone <your-fork-url>
    ```
 
-   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization, then return to PowerShell. The clone starts once you are signed in.
+   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in.
+   > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, +++https://github.com/Skillable-Events/caldova-retail+++, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
 **3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
 
@@ -86,9 +94,15 @@ code .
 
 If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the `caldova-retail` folder. If VSCode asks you to sign into GitHub again, authorize access there as well.
 
+If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
+
+![Restricted Mode banner](./images/restricted-mode-banner.png)
+
+![VS Code showing the folder is trusted](./images/trusted-folder.png)
+
 You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
 
-**4. Give the app its database password.** The app reads its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions. Leave the server, database, and user exactly as they are.
+**4. Give the app its database password.** The app reads its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions. Leave the server, database, and user exactly as they are.
 
 ## ▶️ Run the App
 
@@ -99,6 +113,8 @@ To make sure the setup was completed correctly, ask Copilot Chat to build and la
 Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
 ![Open chat](./images/open-chat.png)
+
+> 💡 If Copilot prompts you to sign in, select **Continue with GitHub**. An authorization page opens in the browser; select **Continue**, then **Authorize Visual-Studio-Code**. Return to VS Code once you are signed in.
 
 Then, type in the chatbox and submit this prompt:
 
@@ -111,10 +127,16 @@ A plain "run this app" prompt would also work. Copilot would inspect the project
 Once it loads, walk the app and confirm your local copy matches the on-premises one you looked at earlier:
 
 - [ ] The product catalog loads, with images
-- [ ] Sign-in works for both accounts — credentials are in [Demo logins](https://github.com/Skillable-Events/caldova-retail/blob/main/README.md#-demo-logins)
+- [ ] Sign-in works for both accounts — use these demo logins:
+
+  | Username | Password | Role | Notes |
+  | --- | --- | --- | --- |
+  | `alice` | `Password1!` | Admin, Manager | Has existing order history |
+  | `bob` | `Password1!` | Employee | Has existing order history |
+
 - [ ] Adding an item to the cart works
 
-If the build fails with a missing `csc.exe`, see [Handling Common Issues](#-handling-common-issues) below.
+If the build fails, continue prompting Copilot to investigate the error.
 
 You now have the on-premises app reproduced on your own machine, on .NET Framework 4.8, behaving exactly as it does on the server. That is the baseline everything that follows is measured against. Time to modernize it.
 
@@ -142,15 +164,15 @@ You can run one at any time, without committing to an upgrade.
 
 **2. Click Start Assessment.**
 
-![Selecting the .NET version upgrade scenario](./images/pick-new-dotnet-version.png)
+![Selecting Start Assessment in the modernization extension](./images/start-assessment.png)
 
 **3. Choose Recommended Assessment.** You are offered a Recommended or a Custom assessment. For this lab, we will proceed with Recommended. You would use Custom Assessment if you want a full analysis of the source code, including architecture, API contracts, and data models — that takes considerably longer than issue-only analysis.
 
 ![Selecting the Recommended Assessment](./images/recommended-assessment.png)
 
-**4. Leave the default target as Cloud Readiness.** This measures how ready the app is for Azure. The extension writes a prompt into the chat, which dispatches subagents to analyze the project. Expect it to run for a couple of minutes.
+**4. Leave the default target as Cloud Readiness.** Select **OK** with the Cloud Readiness box checked. This measures how ready the app is for Azure. It may take ~30 seconds to appear as running. Expect it to run for a couple of minutes.
 
-**5. Read the results.** Cloud readiness issues are grouped into **Mandatory**, **Potential**, and **Optional**. The summary estimates the effort to reach the highlighted target Azure service (Azure App Service, Azure Container Apps, or Azure Kubernetes Service) by grouping it into T-shirt sizes, and correctly identifies the app as running on .NET Framework 4.8.
+**5. Read the results.** Cloud readiness issues are grouped into **Mandatory**, **Potential**, and **Optional**. The summary estimates the effort to reach the highlighted target Azure service (Azure App Service, Azure Container Apps, or Azure Kubernetes Service) by grouping it into T-shirt sizes, and correctly identifies the app as running on .NET Framework 4.8. Try changing the Target Service dropdown from Azure App Service to Azure Container Apps. Note how issues may disappear/appear/change criticality since this is a different hosting service.
 
 ![Assessment](./images/full-assessment.png)
 
@@ -192,7 +214,7 @@ The rest of this module is the upgrade itself, in five steps.
    >
    > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus.
 
-4. A modal will load that offers options on the upgrade. You can see it already detected the app is running on .NET Framework 4.8 and has pulled out the solution file. Select the following options:
+4. After a minute or two, a modal will load that offers options on the upgrade. You can see it already detected the app is running on .NET Framework 4.8 and has pulled out the solution file. Select the following options:
 
    - Target Framework: .NET 10
    - Flow Mode: Guided. It stops after assessment and again after planning, so you can inspect what the agent found and redirect it before a line of code changes — which is what you want while you are still learning the tool. It is also the right choice in an unfamiliar or high-risk codebase, or when you are sitting with a customer who wants to approve each stage. Automatic runs end-to-end, pausing only when blocked; reach for it once the tool is familiar and the work is low-risk.
@@ -210,24 +232,11 @@ The rest of this module is the upgrade itself, in five steps.
 
 > ‼️ **IMPORTANT**
 >
-> The agent runs many tool calls. If VS Code prompts you to approve each one, be ready to stand by and approve. Optionally, you can choose the option to allow them for the rest of the session — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
-
-### 🧭 Steering the agent
-
-The upgrade is an agentic flow: the agent decides its next step from what it just saw, so it does not always move in a straight line. It can occasionally stall, drift, or stop early. You stay in control the whole time:
-
-- **It seems slow or stalled.** If the chat is not producing output as quickly as you expect, stop the run and type `continue`.
-- **You want to see what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to open the background work the agent is running, such as a subagent reviewing or validating a task, for more detail.
-
-  ![Arrow on a background step in the chat](./images/background-process-arrow.png)
-
-- **You want to redirect it mid-task.** Type your message while the agent is still working and send it as a **steering** message (hover over the message and select steering). Copilot reads it before carrying on, instead of queuing it until the current step finishes.
-- **It is badly stuck or off track.** You can always start a fresh chat with the Upgrade agent and ask it to pick the upgrade back up from where it left off, or restart entirely.
-- **It stops with an error.** Ask it to keep going, or ask why it stopped, for example `Try to continue` or `Why did you get this error?`. In the example below, the agent stopped during initialization; a follow-up message is enough to get it moving again.
-
-  ![Agent stopped with an error during upgrade initialization](./images/agent-stopped-error.png)
-
-- **The dashboard is not updating.** The dashboard can get stuck, and you may see an error in the chat saying the agent failed to save state. This is a known issue. The upgrade still continues in order, so keep an eye on the chat and the Source Control view instead. If commits are still landing, the upgrade is fine and only the dashboard is behind.
+> The agent runs many tool calls. If VS Code prompts you to approve each one, be ready to stand by and approve. Optionally, you can choose the option to allow them for the rest of the session (select **Default Permissions** at the bottom underneath the chat and change it to **Allow All**) — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
+>
+> If VS Code asks **Allow MCP tools from "Upgrade" to make LLM requests?**, select **Allow in this Session**. The Upgrade agent needs this to run its analysis.
+>
+> ![Allow MCP tools from Upgrade to make LLM requests](./images/allow-mcp-llm-requests.png)
 
 ## 2️⃣ Initial Assessment
 
@@ -235,7 +244,7 @@ Once the scenario starts, the agent runs the assessment before it plans or chang
 
 ### Dashboard initialization
 
-You will see the scenario has been initialized and shows links to Dashboard and Activity. Open the dashboard link.
+You will see the scenario has been initialized and shows links to Dashboard and Activity. Open the dashboard link (it may open automatically).
 
 ![Scenario links modal](./images/scenario-links.png)
 
@@ -355,6 +364,8 @@ Once you approve the plan, the tool begins the upgrade. In Guided mode nothing i
 - Git commits will be created for each major change
 - Progress will be displayed in the chat interface and on the modernization dashboard
 
+> 💡 When the agent finishes a task and tries to commit, it may report that no Git identity is set up. Reply in the chat with `Commit with <your lab email>`, using the **Username** listed under **Azure portal** on the **Resources** tab.
+
 Keep the dashboard or tasks.md file open.
 
 As the tool works through each task, monitor the chat box to observe the agent's behavior. You can see how it is going about changes and what files it is altering. The Copilot Chat is also available to help you understand the changes being made and to provide context on any issues that arise.
@@ -379,10 +390,22 @@ Check the activity tab of the dashboard. It records the timeline, log, and commi
 
 ![Activity log](./images/activity-log.png)
 
-> 💡 **TIPS**
->
-> - The agent runs a lot of commands. Rather than approving each one individually, once you are used to the dynamic, you can choose the option to allow all commands for the rest of the session.
-> - If the dashboard stops updating or the agent stalls, see [Steering the agent](#-steering-the-agent).
+### 🧭 Steering the agent
+
+The upgrade is an agentic flow: the agent decides its next step from what it just saw, so it does not always move in a straight line. It can occasionally stall, drift, or stop early. You stay in control the whole time:
+
+- **It seems slow or stalled.** If the chat is not producing output as quickly as you expect, stop the run and type `continue`.
+- **You want to see what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to open the background work the agent is running, such as a subagent reviewing or validating a task, for more detail.
+
+  ![Arrow on a background step in the chat](./images/background-process-arrow.png)
+
+- **You want to redirect it mid-task.** Type your message while the agent is still working and send it as a **steering** message (hover over the message and select steering). Copilot reads it before carrying on, instead of queuing it until the current step finishes.
+- **It is badly stuck or off track.** You can always start a fresh chat with the Upgrade agent and ask it to pick the upgrade back up from where it left off, or restart entirely.
+- **It stops with an error.** Ask it to keep going, or ask why it stopped, for example `Try to continue` or `Why did you get this error?`. In the example below, the agent stopped during initialization; a follow-up message is enough to get it moving again.
+
+  ![Agent stopped with an error during upgrade initialization](./images/agent-stopped-error.png)
+
+- **The dashboard is not updating.** The dashboard can get stuck, and you may see an error in the chat saying the agent failed to save state. This is a known issue. The upgrade still continues in order, so keep an eye on the chat and the Source Control view instead. If commits are still landing, the upgrade is fine and only the dashboard is behind.
 
 ## 5️⃣ Finalize the Migration
 
@@ -397,7 +420,13 @@ Run the application and confirm it works end to end. Check that the product cata
 The agent will build the project, start it, and report what it finds. Open the URL yourself as well and walk the same paths you used before the upgrade:
 
 - The product catalog loads, with images
-- Sign-in works for both accounts
+- Sign-in works for both accounts — use these demo logins:
+
+  | Username | Password | Role | Notes |
+  | --- | --- | --- | --- |
+  | `alice` | `Password1!` | Admin, Manager | Has existing order history |
+  | `bob` | `Password1!` | Employee | Has existing order history |
+
 - Adding to the cart persists across page loads
 - Placing an order writes back to SQL Server
 
@@ -429,25 +458,6 @@ By using GitHub Copilot's modernization capabilities, you've:
 The framework upgrade alone would typically take days of manual work chasing breaking changes and package incompatibilities, but with GitHub Copilot's assistance, you've accomplished it in a fraction of the time — and with a change set small enough to actually review.
 
 ## 🔧 Handling Common Issues
-
-### Cannot find `csc.exe` when building the original app
-
-Before the upgrade even starts, building the .NET Framework 4.8 project can fail like this:
-
-![Screenshot of the nuget error stating cannot find csc.exe](./images/nuget-error.png)
-
-This means the `Microsoft.CodeDom.Providers.DotNetCompilerPlatform` package did not lay down `csc.exe`. VS Code has no **Package Manager Console**, so repair it from the integrated terminal (`` Ctrl+` ``) instead. Run this from the root of your copy of the app, next to `eShopLiteFx.sln`:
-
-```powershell
-nuget restore eShopLiteFx.sln
-```
-
-If the error persists, delete the package folder to force a clean reinstall, then restore again:
-
-```powershell
-Remove-Item packages/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.* -Recurse -Force
-nuget restore eShopLiteFx.sln
-```
 
 ### Error Recovery
 
