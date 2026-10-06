@@ -4,12 +4,6 @@
 
 **Scenario:** Migrate the eShop database from SQL Server on VM to Azure SQL Database by using Azure Database Migration Service (DMS).
 
-Lab 04 now provisions exactly one target. The standard path selects
-`LAB04_DATABASE_MODE=azureSql`; complete the Azure SQL Database challenges
-below. If an instructor selected `sqlMi`, use the SQL Managed Instance challenge
-as the target-specific path and do not expect an Azure SQL logical server or
-private endpoint to exist.
-
 Now that the application is upgraded and moved to Azure PaaS services, it is time to modernize and migrate the database. 
 
 ***Security rule:*** *Never expose passwords, storage keys, SAS tokens, or connection strings in screenshots or submissions. Do not enable public RDP or public Azure SQL access unless the instructor explicitly requires it.*
@@ -26,9 +20,7 @@ Students will learn to:
 * Use the managed database target selected during Lab 04.
 * Configure private connectivity to the Azure SQL Database from both the Azure VM and also target PaaS services
 * Create Azure Data Migration Service (DMS) and configure to run the "Self hosted Integration Runtime" on the Azure VM.
-* Run DMS offline migration to Azure SQLDB
-* Run and monitor an offline migration. Verify migrated data by query only.
-* When `sqlMi` was selected in Lab 04, run DMS online migration to SQL MI and verify migration.
+* Run DMS online migration to SQL MI and verify migration.
 * Configure the application with the database FQDN exported by Lab 04.
 * Document differences between Azre SQLDB and Azire SQL MI and lessons learned. 
 
@@ -36,29 +28,41 @@ Students will learn to:
 
 ### Student tasks
 
-1. Connect to the provided VM using the instructor-approved method.
-2. Confirm that SQL Server services are running - service named "SQL Server (MSSQLSERVER)"
-3. Determine the database credential the retail app is using. You can use Github coplilot chat to find out from the application source codebase.
-4. Connect to the local SQL Server with SQL Server Management Studio (SSMS) using "sa" SQL login given to you
-5. Record the SQL Server version,edition - right click on the server and type "new query". Execute the following SQL
+1. Using SQL Server Management Studio, connect to the source database using the instructor-approved method.
+2. Confirm that SQL Server services are running on the source database VM - windows service named "SQL Server (MSSQLSERVER)"
+3. Connect to the local SQL Server with SQL Server Management Studio (SSMS) using "sa" SQL login given to you
+4. Record the SQL Server version,edition - right click on the server and type "new query". Execute the following SQL
 
 ```sql
 Use master;
 select @@version ;
 ```
-7. Right click on database eshop and click on peroperties to determine database size, collation, disk file name and size of database files and "recovery mode", like [![this](./images/Challenge_1_db_properties.png)](./images/Challenge_1_db_properties.png)
-8. While there, also note down all the "page" names displayed when checking on database "properties" section.
-9. <u>Note do this only if this database VM is on Azure or some other cloud -->  </u>Map the VM data drives to azure disks. You can do find the SQL data and log file information from the "Files" page. Besides size what else is different between the two disks and why so ?
-10. Verify that the VM has no unintended public exposure.
-11. What are the different ways tuauthenticate to this eshop SQL database ?
-12. (Research on this) What is a logical and physical backup of SQL server ? How is recovery mode and logical backup related ?
-13. Put the database into full recovery mode in SSMS running this query
+5. Right click on database eshop and click on peroperties to determine database size, collation, disk file name and size of database files and "recovery mode", like [![this](./images/Challenge_1_db_properties.png)](./images/Challenge_1_db_properties.png)
+6. While there, also note down all the "page" names displayed when checking on database "properties" section.
+7. From the "Files" section, note down the data files and transaction log file name.
+8. You connected to the SQL server using SQL authentication. What are other ways to authenticate to a SQL server?
+9. (Research on this) What is a logical and physical backup of SQL database ?
+10. How is recovery mode and logical and/or physical backup related ?
+11. Put the database into full recovery mode in SSMS running this query
 
 ```sql
-alter database eshop set recovery full ;
+ALTER DATABASE
+ eshop 
+SET RECOVERY 
+ full ;
+```
+12. Verify that the eshop database was placed in full recovery mode 
+
+```sql
+SELECT 
+  name, recovery_model_desc 
+FROM 
+  sys.databases 
+WHERE 
+  name = 'eshop' ;
 ```
 
-11. Run this query using SSMS. Investigate the results.
+13. Run this query using SSMS. Investigate the results. Which table has the most number of rows ?
 
 ```text
 DBCC CHECKDB (N'eShop') ;
@@ -67,11 +71,9 @@ DBCC CHECKDB (N'eShop') ;
 ## Success criteria
 
 * SSMS connects to the source instance.
-* The student records the source version, edition etc.
-* You can explain at least 4 different authentication mechanisms and show at least 2 ways to connnect
-* You can explain recovery model and different backups.
-
-
+* The student records the source version, edition, size etc.
+* You can explain at least four different authentication mechanisms and show at least two ways to connnect
+* You can explain recovery model and different types of backups.
 
 ## Challenge 2 — Pre-migration assessment of the source database 
 
@@ -79,18 +81,13 @@ SSMS 22 is the latest version of Microsoft’s SQL Server Management Studio, a 6
 
  ![SSMS](./images/ssms_22.png)
 
-The Azure SQL Managed Instance configured in this lab is configured to use Entra authentication.  To login, you must select Entra with Password.  The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used. 
+The Azure SQL Managed Instance configured in this lab is configured to authenticate using <u>Entra only.</u> Notice that there are several ways you can authenticate to SQL server using Entra. In this lab, you must select authentication method <b>Entra with Password.</b>  The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used. 
 
-Two things to validate before begining.
+### Validate firewall access to SQL MI before begining.
 
-1- Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is using is allowing 3342.  If not add an inbound rule for port 3342.
-
+ Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is using is allowing inbount access to port 3342.  If not, add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
 
  ![NSG1](./images/NSG1.png)
-
-2- Select the right option in SSMS when loging in. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left.
-
-![SQLMI_ENTRA](./images/sqlmi_entra.png)
 
 Use that Entra ID to login using SSMS.
 
@@ -98,22 +95,25 @@ Use that Entra ID to login using SSMS.
 
 ## Student tasks
 
-
-1. Using SSMS, connect to the SQL Server 2016  that is is resides on a VM in this lab environment. The connection is preconfigured in the lab. Right click on the server and choose "Migrate SQL Server"
+1. Using SSMS, connect to the SQL Server 2016  that is is resides on a VM in this lab environment. The connection to "on-premises" SQL server is preconfigured in the lab. Right click on the server and choose "Migrate SQL Server"
  ![SSMS](./images/Challenge_2_assessment_launch_1.png)
 2. <u>Do not Migrate or Upgrade the database</u>. Run a "Migration rediness assessment". An html file will open in your browser once the assessment completes. This is the report.
  ![SSMS](./images/Challenge_2_assessment_launch_2.png)
 3. Investigate the report. Find out compatibility issues with different SQL targets ![Assessment](./images/Challenge_2_assessment_full_report.png)
+4. Connect to the target SQL MI using SSMS. Select the right option in SSMS when loging in. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left under settings. In this lab, this Entra ID is same as your Azure login - also shared under <b>"Resources"</b> section on the top.
+
+![SQLMI_ENTRA](./images/sqlmi_entra.png)
 
 
 ## Success criteria
 
 * You learn how to run an assessment using SSMS 22.
 * Understand the assessment report and the comptatibility issues.
+* You are able to connect to the SQL MI from the lab VM.
 
 ## Challenge 3 — Create the required azure resources
 
-Azure SQL Managed Instance, the target database service, is already provisionned on your lab subscription to save time. You will need to validate that *System Assigned Managed Identity* is enabled for the server.  
+Azure SQL Managed Instance, the target database service, is already provisioned on your lab subscription to save time. You will need to validate that *System Assigned Managed Identity* is enabled for the server.  
 
 In this part of the lab you will create the necesary Azure resources to perform the migration. Deploy the resources in the same region that Azure SQL MI is deployed.  You will:
 
@@ -126,35 +126,32 @@ In this part of the lab you will create the necesary Azure resources to perform 
 
 ### 1. Resource provider
 
-From the Azure portal, go to *Subscriptions*.  Clicck on *Ressource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
+From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Ressource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
 
 ![ResourceProvider](./images/dms_resource_provider.png)
 
 ### 2. Azure SQL MI System Assigned Managed Identity
 
-Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go to the *Identity* blade and confirm that *System Assigned Managed Identity* is enabled.  If it is not then enable it.
+Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go to the *Identity* blade under Security and confirm that *System Assigned Managed Identity* is enabled.  If it is not then enable it.
 
 ![SQLMI_SAMI](./images/SQLMI_SAMI.png)
 
 ### 3. Storage Account
 
-Provision an Azure Storage Account and create a Blob container. 
+Provision an Azure Storage Account <b>in the same region as your SQL MI </b>and create a Blob container in it to store source database backup. 
 
 ![Storage1](./images/Storage_1.png)
-![Storage2](./images/Storage_2.png)
 ![Storage3](./images/Storage_3.png)
-![Storage4](./images/Storage_4.png)
 
-Once the storage account is created you need to grant to your current Azure user the permission to view and list Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* role.
+Once the storage account is created, you will need to grant to your current Azure user the permission to manage Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* role to your own Entra ID.
 
 ![Storage5](./images/Storage_5.png)
 ![Storage6](./images/Storage_6.png)
 ![Storage7](./images/Storage_7.png)
 ![Storage8](./images/Storage_8.png)
 
-You will also need to grant the Azure SQL MI, System Managed Identity the blob reader permission. The identity has the same name as the SQL MI instance your lab subscription.
+Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Bolb Data Reader" role assigned. The identity has the same name as the SQL MI instance your lab subscription.
 
-![Storage9](./images/Storage_9.png)
 ![Storage10](./images/Storage_10.png)
 
 Create a Blob container in the storage account and a folder within the container.
@@ -164,21 +161,16 @@ Create a Blob container in the storage account and a folder within the container
 
 ### 4. Database Migration Service (DMS)
 
-In the same region where Azure SQL MI is deployed in the lab subscription, deploy Azure Database Migration Services (DMS).
+<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS).
 
 ![DMS1](./images/DMS_1.png)
-![DMS2](./images/DMS_2.png)
-![DMS3](./images/DMS_3.png)
-![DMS4](./images/DMS_4.png)
-
-
 
 ## Success criteria
 
 - Resource provider is registered for data migrations
 - SQL MI configured for System Assigned Managed Identity
-- Storage account is created with a Blob container
-- DMS is deployed 
+- Storage account is created with a Blob container in it
+- DMS is deployed in the same region as SQL MI
 
 
 ## Challenge 4 — Online Migraton to SQL Managed Instance
@@ -209,33 +201,44 @@ Login to the lab's subscription and select the storage account and container cre
 
 ![SSMS22_4](./images/SSMS22_4.png)
 
-Make sure to prefix the *Backup File* with the directory name *backups/* of the Blob container that was created earlier. Otherwise the backup file will be created in the root of the container. Click OK.
+Note: DMS can restore a backup stored either in the root level of a container or inside a container - not any level further below it. Complete the backup - it should take less than a minute. 
 
 ![SSMS22_5](./images/SSMS22_5.png)
 
-Repeat the task this time taking a differential backup.
+Repeat the task this time taking a differential backup instead of a full backup.
 
 ![SSMS22_6](./images/SSMS22_6.png)
 
 The backups should be listed in the Blob container in the storage account.
+Notice the size of the full and the differential backups. 
+
+Do you think it is ever possible to have a differential backup larger than full backup ?
 
 ![SSMS22_7](./images/SSMS22_7.png)
 
 ### 2. Migrate the database online using DMS
 
-Navigate to the Azure portal to the DMS service created earlier.  Select Migrate database.
+Navigate to the Azure portal to the DMS service created earlier.  Select "New Migration"
 
-![DMS_5](./images/DMS_5.png)
+![DMS_6](./images/DMS_1.png)
 
-Select *New Migration*
-
-![DMS_6](./images/DMS_6.png)
-
-Select *Blob Storage* as the location of the backup files and *Online* as the migration mode.
+Next, choose the migration scenario - from Sql Server to Azure SQL MI.
+Choose Blob as backup location and online as backup mode.
 
 ![DMS_7](./images/DMS_7.png)
 
-Configure details as shown. For the Instance details, the details referenced are not those of the source server, rather the *Migration SQL Instance* we are configuring and is required by DMS. You need not manage this instance for this lab.
+Select *Blob Storage* as the location of the backup files and *Online* as the migration mode.
+
+
+Configure details as shown. 
+
+<b>Note: </b> that DMS needs to configure a SQL datanase to track progress of migration for restartability. What you are entering here is information for that tracking database - not your source or target database. You need not manage this instance for this lab. 
+
+**Also note**
+
+- This tracking database can be in a different region also. 
+- Furthermore, if for some reason you want to try the migration again, you would need to provide a new tracking database name.
+
 
 ![DMS_8](./images/DMS_8.png)
 
@@ -243,25 +246,29 @@ Select the Azure SQL managed Instance that already exists as a target.
 
 ![DMS_9](./images/DMS_9.png)
 
-Specify the location of the backup files in the Azure storage account as well as the target database name you eShop.
+Specify the location of the backup files ( full backup only is fine in this case ) in the Azure storage account as well as the target database name you eShop. Notice that the DMS restore creates the eShop database, in other words the database should not exist already there.
 
 ![DMS_10](./images/DMS_10.png)
 
-Start the migration.
+Start the migration. 
 
 ![DMS_11](./images/DMS_11.png)
 
-Follow the migration progress.
+Follow the migration progress. Notice the migration details.
 
 ![DMS_12](./images/DMS_12.png)
 
-If all is well, both the full and differential backups have been restored.
+If all is well,  the full backups would have been restored.
 
 ![DMS_13](./images/DMS_13.png)
 
-The work is not done yet.  Since this is an online migration, transaction logs need to be replayed.  The LRS can only be triggered via Azure CLI or PowerShell. The *datamigration* extension needs to be installed on the VM.
+Database migration is not complete yet.  Since this is an online migration, transaction logs need to be replayed.  The LRS can only be triggered via Azure CLI or PowerShell. The *datamigration* extension needs to be installed on the commandline. 
 
-*az extension add --name datamigration --upgrade*
+Launch Azure CLI and then run this command
+
+```shell
+az extension add --name datamigration --upgrade
+```
 
 Once that is done, as a test to prove that transactions logs completed successfully and no data loss occured, go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command.
 
@@ -287,7 +294,7 @@ You can follow the progress of the log replay from the portal, same place as whe
 
 ![DMS_122](./images/DMS_12.png)
 
-The transaction logs have all been played when there are no files leeft to restore.
+The transaction logs have all been played when there are no files left to restore.
 
 ![DMS_17](./images/DMS_17.png)
 
@@ -388,11 +395,8 @@ Suggested class schedule
 1. Why must compatibility assessment occur before migration?
 2. What roles do Private Link and private DNS play?
 3. Why should clients use the Azure SQL FQDN instead of its private IP?
-4. What is the role of SHIR in an offline DMS migration?
-5. How did you isolate error 2060 from network connectivity?
-6. Why is independently deploying schema a valid migration strategy?
-7. What evidence is required before declaring the migration successful?
-8. What would change for a production migration with minimal downtime?
-9. Which steps should be automated for repeatable delivery?
+4. What evidence is required before declaring the migration successful?
+5. What would change for a production migration with minimal downtime?
+6. Which steps should be automated for repeatable delivery?
 
 **Lab principle:** A migration is complete only after compatibility, connectivity, schema, data, application behavior, security, and operational readiness have all been validated with evidence.
