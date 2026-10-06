@@ -4,7 +4,7 @@ The Caldova Retail storefront runs on .NET Framework 4.8 — a platform that is 
 
 In this module you'll use **GitHub Copilot Modernization** to make that move. Rather than working through breaking changes by hand, you'll direct an AI agent that assesses the codebase, produces a plan you can review and edit, and then executes it task by task.
 
-> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](../../../docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
+> 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 ## 💼 Business case
 
@@ -46,7 +46,7 @@ The rest of this module happens on your own machine, so the first job is to get 
 
 > The upgrade agent creates branches and git commits as it works, so run this module against **your own fork** rather than the workshop repository.
 
-**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and go to [https://github.com/Skillable-Events/caldova-retail](https://github.com/Skillable-Events/caldova-retail).
+**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser +++https://github.com/Skillable-Events/caldova-retail+++.
 
 1. On the Skillable Events single sign-on page, select **Continue**.
 
