@@ -1,12 +1,28 @@
 # ☁️ Lab 04: Design the Azure Foundation with GitHub Copilot
 
-You finished Module 3 with an application that is ready for Azure and a list of settings describing what it expects to find there. None of it exists yet. This lab designs it.
+In Module 3, you set up the app's code to use Azure services, such as reading its database password from Key Vault. Those services do not exist yet. In this module, you use GitHub Copilot to write the infrastructure as code (Bicep files) for them, and to build the secure cloud foundation the app will be deployed into.
 
-The platform has to serve more than the storefront. The data migration in later modules need servers, private connectivity, migration services, and managed database targets before it can begin, so you are designing one foundation that answers both sets of requirements. In this lab, you will use GitHub Copilot to plan that foundation, generate a Bicep implementation, validate it locally, and critically review the result.
+> 🎯 **This module: build the cloud foundation the app will run on.** Module 3 changed the **app's code**. This module designs the **Azure resources** around it: the networks, databases, Key Vault, and container hosting the app needs. You will work with GitHub Copilot in agent mode to write them as Bicep files.
 
-You will make real architecture decisions inside a set of non-negotiable security and resilience requirements. The instructor has already provisioned the Azure environment used by the later labs, so **you will not deploy the Bicep you generate**. The goal is to practice an effective GitHub Copilot workflow while keeping architectural judgment and approval with you.
+The same foundation also supports the database migration in later modules, so it includes the servers, private network connections, and database targets that migration needs.
 
-A tested Bicep implementation is included for comparison, and the instructor-preprovisioned environment keeps infrastructure provisioning time from blocking the workshop.
+Your instructor has already set up the real Azure environment used by the later labs, so **you will not deploy the Bicep you write**. The goal is to practice designing infrastructure with GitHub Copilot while you stay in charge of the decisions. A tested, finished version of the Bicep is included so you can compare your work. Expect some differences: Copilot does not produce the exact same output every time, so your files will not match the finished version line for line.
+
+## 🗺️ How This Lab Works
+
+If you have not designed Azure infrastructure before, here is the whole process in plain terms:
+
+- **Infrastructure as code (IaC)** means describing Azure resources (networks, databases, Key Vaults, container hosting) in files instead of clicking through the Azure portal. The files can be reviewed, versioned, and redeployed the same way every time.
+- **Bicep** is Azure's IaC language. Each `.bicep` file declares the resources to create and how they connect.
+- **The app tells you what to build.** In Module 3, Copilot wired the app to use Azure services through configuration, for example reading its database password from **Key Vault**. Each of those settings needs a real Azure resource behind it. If the app expects a Key Vault, the foundation must include one. If the app stores shopping carts in **Redis** so they survive across multiple app instances, the foundation must include a Redis cache.
+- **The requirements tell you how to build it.** The required architecture and non-negotiable rules below cover security, networking, and resilience: private networking, no public IPs on VMs, no stored passwords, and at least two app replicas.
+
+You will work through four steps with GitHub Copilot, and you approve each one before moving on:
+
+1. **Explore:** Copilot reads the repository and lists what the app needs from Azure and what the requirements demand.
+2. **Plan:** Copilot proposes the resources, networks, and identities, and how they map to those needs. You review and correct the plan.
+3. **Generate:** Copilot writes the Bicep files for the approved plan, and you check that they build.
+4. **Review:** Copilot reviews the Bicep against the plan and requirements. You decide which findings to fix, then compare your design with a known-good implementation.
 
 This lab takes approximately **90-120 minutes**.
 
@@ -14,85 +30,23 @@ This lab takes approximately **90-120 minutes**.
 
 By the end of this lab, you will be able to:
 
+- map the Azure settings the app reads to the Azure resources that must exist to support them
 - turn a detailed workload brief into a reviewed infrastructure plan
 - compare container compute options and justify Azure Container Apps for this workload
-- use Azure Bastion instead of public VM management endpoints
 - separate application, migration, and database network boundaries
 - design bounded autoscaling and multi-region application resilience
-- explain how GitHub Actions authenticates to Azure with OpenID Connect (OIDC)
-- apply managed identity and least-privilege Azure RBAC
 - guide GitHub Copilot from an approved plan to a Bicep implementation
-- build and review Bicep without deploying it
 - identify where lab constraints require deeper production architecture review
 
 ## 🧭 Where This Fits
 
-The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects and that [Lab 05: Modernize Data](../../day-2/05-modernize-data/README.md) requires. The instructor-preprovisioned environment provides that platform, while your Bicep remains a local learning artifact.
+The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects.
 
-The preprovisioned Container App runs a placeholder image so the platform can be verified independently of the workshop application. Your storefront is not deployed here — it arrives in [Lab 06](../../day-2/06-deploy-code-with-github-actions/README.md), onto the foundation you are about to design.
-
-## ✅ Prerequisites
-
-- Visual Studio Code with GitHub Copilot
-- PowerShell 7 or later
-- Azure CLI
-- Bicep CLI through the Azure CLI
-- a local clone of this repository
-
-Verify the tools:
-
-```powershell
-$PSVersionTable.PSVersion
-az version
-az bicep version
-git status --short
-```
-
-> [!NOTE]
-> The instructor owns deployment and cleanup of the billable workshop
-> environment. Do not run the Lab 04 deployment workflow or provision a second
-> copy of the architecture unless your instructor explicitly directs you to do
-> so.
+You design the foundation **for the storefront**, but you do not deploy the storefront in this module. The preprovisioned Container App runs a placeholder image so the platform can be checked on its own first. On Day 2, you will deploy the storefront onto the foundation you are about to design.
 
 ## 🏗️ Required Final Architecture
 
-```mermaid
-flowchart TB
-    GH[GitHub Actions<br/>OIDC federation] -. scoped RBAC .-> UAMI[Deployment managed identity]
-    UAMI --> DEPLOY[Bicep deployments]
-    USER((HTTPS client)) --> AFD[Azure Front Door Premium<br/>Private Link origin]
-
-    subgraph APP[Central US by default - application VNet 10.20.0.0/20]
-        ACA[Internal, zone-redundant<br/>Container Apps environment]
-        APP01[Placeholder Container App<br/>port 8080 / min 2 / bounded HTTP scale]
-        ACA --> APP01
-    end
-
-    AFD == Private Link ==> APP01
-
-    subgraph DB1[North Central US database VNet 10.0.0.0/20]
-        BASTION[Azure Bastion]
-        WIN[Windows VM<br/>SQL Server / SSMS / SHIR<br/>no public IP]
-        LINUX[Ubuntu test VM<br/>no public IP]
-        SQLEP[Azure SQL private endpoint]
-        BASTION --> WIN
-        BASTION --> LINUX
-    end
-
-    subgraph DB2[Central US database VNet 10.1.0.0/20]
-        SQLMI[(Optional Azure SQL MI<br/>manual workflow)]
-    end
-
-    DB1 <-- VNet peering --> DB2
-    SQLDB[(Azure SQL Database<br/>Entra-only / public access disabled)] --- SQLEP
-    DMS[Azure Database Migration Service] -. SHIR registration .-> WIN
-    WIN --> SQLEP
-    WIN --> SQLMI
-    KV[Bootstrap Key Vault<br/>generated VM credentials] -. secure retrieval .-> DEPLOY
-    ACR[Azure Container Registry] --> APP01
-```
-
-The editable diagram source is in [target-architecture.mmd](images/target-architecture.mmd).
+![Target Azure architecture: Front Door routes HTTPS traffic over Private Link to the Container App in the application VNet; the peered database VNets hold Azure Bastion, the Windows and Ubuntu VMs, the Azure SQL private endpoint, and the optional SQL MI; GitHub Actions deploys Bicep through a scoped managed identity](./images/azure-architecture.png)
 
 > [!IMPORTANT]
 > **This is a workshop architecture, not a universal production reference
@@ -151,15 +105,7 @@ Your plan and implementation must:
 
 ## 🧪 Challenge 1: Explore Before You Plan
 
-Start with what you carried out of Module 3. Open the `appsettings.json` from your
-Azure-ready application and list every setting the agent added — Key Vault URIs,
-managed identity client IDs, storage or telemetry endpoints, health check paths.
-Those empty settings are the application's own statement of what it expects Azure
-to provide, and they are the evidence your plan is graded against. If your Module 3
-run did not finish, use [`sample-app/`](./sample-app/) and read its `appsettings.json`
-instead.
-
-Do not begin by asking Copilot to create files. First, use **Ask** mode to learn
+Continue in the same VSCode chat you were using. Use **Ask** mode to learn
 what is already in the repository and to identify the evidence behind the
 requirements.
 
@@ -167,10 +113,8 @@ requirements.
 Explore this repository for Lab 04 without changing any files.
 
 Identify:
-- the application and database requirements established by earlier labs
-- every existing Lab 04 Bicep entry point, module, workflow, and script
-- the Azure resources implied by application configuration, including every setting
-  the Module 3 readiness work added to appsettings.json
+- the Lab 04 requirements in infra/lab04/requirements.md
+- the Azure resources implied by application configuration
 - security, identity, networking, availability, operations, and cost constraints
 - assumptions or conflicts that require human review
 
@@ -179,9 +123,7 @@ facts from recommendations. Do not create an implementation plan yet.
 ```
 
 Review the inventory. Ask follow-up questions when a conclusion is unsupported
-or a repository requirement has been missed. Check the result against your own
-`appsettings.json` list — a setting the app reads but the inventory does not
-account for is a gap in the plan, not a detail to sort out later. This step keeps
+or a repository requirement has been missed. This step keeps
 the plan grounded in evidence instead of accepting a plausible but generic Azure
 design.
 
@@ -195,7 +137,7 @@ Analyze this repository and plan the Azure foundation for Lab 04.
 Use the repository inventory we just reviewed.
 
 Treat the Required Final Architecture and Non-Negotiable Requirements in
-labs/day-1/04-deploy-to-azure/README.md as a minimum, not a complete design. For every
+infra/lab04/requirements.md as a minimum, not a complete design. For every
 application setting that implies an Azure resource, provision that resource at a
 lab-sized SKU. Report what you added, what you deliberately left out, and why.
 
@@ -283,17 +225,17 @@ Building checks Bicep syntax, types, and compile-time rules. It does **not** pro
 that resource names are available, quotas are sufficient, policies allow the
 configuration, or deployment and runtime behavior will succeed.
 
-The included [student requirements](../../../infra/lab04/student/README.md) provide
-an implementation checklist.
+Use the [Lab 04 requirements](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/requirements.md)
+(`infra/lab04/requirements.md` in your fork) as the implementation checklist.
 
 ## 🧪 Challenge 4: Run the Human Review
 
 Ask Copilot for a review before asking it to fix anything:
 
 ```text
-Review my generated files under infra/lab04/student/ against the approved plan,
-the Required Final Architecture, the Non-Negotiable Requirements, and
-infra/lab04/student/README.md.
+Review my generated files under infra/lab04/student/ against the approved plan
+and the Required Final Architecture and Non-Negotiable Requirements in
+infra/lab04/requirements.md.
 
 Report findings first, ordered by severity. Cite the affected file and explain the
 deployment or runtime consequence. Check Bicep correctness, dependency ordering,
@@ -306,7 +248,8 @@ to implement only those corrections. Rebuild all generated Bicep after each
 approved review batch and inspect the diff again.
 
 Finally, compare your approach with
-[the complete implementation](../../../infra/lab04/complete/README.md). Differences
+[the complete implementation](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/complete/README.md)
+(`infra/lab04/complete/` in your fork). Differences
 are discussion points, not automatic defects. Be prepared to explain:
 
 - which requirements both implementations satisfy
@@ -363,6 +306,7 @@ Entra authentication. SQL authentication is disabled.
 
 - [ ] Every generated Bicep file builds locally without errors.
 - [ ] The implementation matches the approved plan or records an approved deviation.
+- [ ] Every Azure setting the app reads (for example Key Vault, Application Insights, or Redis) is backed by a planned resource, or the gap is recorded with a reason.
 - [ ] Front Door uses Private Link to reach one internal Container Apps origin.
 - [ ] The placeholder has a minimum of two replicas and a bounded maximum.
 - [ ] The Container Apps environment is internal and zone-redundant.
