@@ -8,6 +8,23 @@ In this chapter you will work in **GitHub Copilot Chat** throughout — mostly r
 
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
+> 💡 **Didn't finish the .NET 10 upgrade in Module 2?** Use our copy of the app that already runs on .NET 10, and start this module from there:
+>
+> 1. In Microsoft Edge, go to +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++. Sign in the same way you did in Module 2 if you are asked.
+> 2. Select **Fork**, then **Create fork** with the defaults left alone.
+> 3. In your new fork, select **Code**, then copy the **HTTPS** URL.
+> 4. Open PowerShell from your applications and run these commands from the default location (`C:\Users\Admin`), pasting the URL you copied:
+>
+>    ```powershell
+>    git clone <your-fork-url>
+>    cd caldova-retail-dotnet10
+>    code .
+>    ```
+>
+> 5. If VS Code opens the folder in **Restricted Mode**, select **Manage**, then **Trust**.
+> 6. Open `src\eShopLite.StoreFx\appsettings.json` and replace the placeholder password in the `StoreDbContext` connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions.
+> 7. Run the app and confirm the catalog loads before you continue.
+
 ## 📋 What you'll do
 
 - 🚀 Convert the MVC pages to Blazor components
