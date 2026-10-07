@@ -94,7 +94,9 @@ Your plan and implementation must:
 
 ## 🧪 Challenge 1: Explore Before You Plan
 
-Start with what you carried out of Module 3. Do not begin by asking Copilot to create files. First, use **Ask** mode to learn
+Start with what you carried out of Module 3, in the same `caldova-retail` fork you have open. Every path in this lab is relative to the root of that repository. The Lab 04 requirements are in `infra/lab04/requirements.md`, and the known-good implementation is in `infra/lab04/complete/`.
+
+Do not begin by asking Copilot to create files. First, use **Ask** mode to learn
 what is already in the repository and to identify the evidence behind the
 requirements.
 
@@ -102,6 +104,7 @@ requirements.
 Explore this repository for Lab 04 without changing any files.
 
 Identify:
+- the Lab 04 requirements in infra/lab04/requirements.md
 - the application and database requirements established by earlier labs
 - every existing Lab 04 Bicep entry point, module, workflow, and script
 - the Azure resources implied by application configuration, including every setting
@@ -128,7 +131,7 @@ Analyze this repository and plan the Azure foundation for Lab 04.
 Use the repository inventory we just reviewed.
 
 Treat the Required Final Architecture and Non-Negotiable Requirements in
-labs/day-1/04-deploy-to-azure/README.md as a minimum, not a complete design. For every
+infra/lab04/requirements.md as a minimum, not a complete design. For every
 application setting that implies an Azure resource, provision that resource at a
 lab-sized SKU. Report what you added, what you deliberately left out, and why.
 
@@ -216,17 +219,17 @@ Building checks Bicep syntax, types, and compile-time rules. It does **not** pro
 that resource names are available, quotas are sufficient, policies allow the
 configuration, or deployment and runtime behavior will succeed.
 
-The included [student requirements](../../../infra/lab04/student/README.md) provide
-an implementation checklist.
+Use the [Lab 04 requirements](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/requirements.md)
+(`infra/lab04/requirements.md` in your fork) as the implementation checklist.
 
 ## 🧪 Challenge 4: Run the Human Review
 
 Ask Copilot for a review before asking it to fix anything:
 
 ```text
-Review my generated files under infra/lab04/student/ against the approved plan,
-the Required Final Architecture, the Non-Negotiable Requirements, and
-infra/lab04/student/README.md.
+Review my generated files under infra/lab04/student/ against the approved plan
+and the Required Final Architecture and Non-Negotiable Requirements in
+infra/lab04/requirements.md.
 
 Report findings first, ordered by severity. Cite the affected file and explain the
 deployment or runtime consequence. Check Bicep correctness, dependency ordering,
@@ -239,7 +242,8 @@ to implement only those corrections. Rebuild all generated Bicep after each
 approved review batch and inspect the diff again.
 
 Finally, compare your approach with
-[the complete implementation](../../../infra/lab04/complete/README.md). Differences
+[the complete implementation](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/complete/README.md)
+(`infra/lab04/complete/` in your fork). Differences
 are discussion points, not automatic defects. Be prepared to explain:
 
 - which requirements both implementations satisfy
