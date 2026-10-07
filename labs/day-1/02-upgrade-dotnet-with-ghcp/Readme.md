@@ -407,6 +407,8 @@ The upgrade is an agentic flow: the agent decides its next step from what it jus
 
 - **The dashboard is not updating.** The dashboard can get stuck, and you may see an error in the chat saying the agent failed to save state. This is a known issue. The upgrade still continues in order, so keep an eye on the chat and the Source Control view instead. If commits are still landing, the upgrade is fine and only the dashboard is behind.
 
+> 🛟 **Still really stuck, or has the upgrade been running for a very long time (>1 hour)?** Don't let it block the rest of the day. We have a copy of the app already upgraded to .NET 10. You can stop here and start the following module; its first note shows how to fork and clone it.
+
 ## 5️⃣ Finalize the Migration
 
 ![Upgrade complete!](./images/net-upgrade-finished.png)
