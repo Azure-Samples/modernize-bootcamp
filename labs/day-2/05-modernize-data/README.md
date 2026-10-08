@@ -595,7 +595,7 @@ The same information retrieved from the CLI can also be viewed in the portal.
 ```powershell
 az datamigration sql-managed-instance show `
     --managed-instance-name $ManagedInstance `
-    --resource-group $MigrationResourceGroup`
+    --resource-group $MigrationResourceGroup `
     --target-db-name $TargetDatabase `
     --expand MigrationStatusDetails
 ```
