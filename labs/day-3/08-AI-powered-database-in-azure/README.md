@@ -8,7 +8,27 @@ This guide discovers an existing Azure SQL Managed Instance and connects it to a
 
 All Azure control-plane commands use Azure CLI. Run them from PowerShell. The database configuration and model call are T-SQL because Azure CLI doesn't execute queries inside Azure SQL Managed Instance.
 
-## 1. Discover the SQL managed instance and set the lab values
+
+## 1. Connect to the SQL Managed Instance and find the product 
+Launch SSMS and connect to the SQL Managed instance.  You can browse for Azure SQL MI as shown here.
+Remember to use the public endpoint on port 3342 and use Entra with password option.
+
+![Picture](../08-AI-powered-database-in-azure/images/SSMS_easier_connect_SQL_MI.png)
+
+Now lookup a particular product. In eshop database, run this query
+
+```sql
+select * from dbo.Product where ID = 9 ;
+```
+You will come back to this at the end of this lab. Now we need to create some AI resources. Ypu can view the product image - it is a camping tent.
+
+[![View the Product 9 AI advertisement](./images/AI_Data_Product_9.png)](./images/AI_Data_Product_9.png)
+
+
+
+## 2. Discover the SQL managed instance and set the lab values
+
+Go to Azure portal and find out the name of the resource group that hosts your SQL MI.
 
 Enter the name of the resource group that contains the SQL managed instance:
 
@@ -36,7 +56,7 @@ $managedInstanceDetails | Format-Table -AutoSize
 $managedInstance = $managedInstanceDetails[0].SQLMI
 ```
 
-Use the managed instance region for Foundry when the selected model is available there:
+You will use the managed instance region for Foundry when the selected model is available there:
 
 ```powershell
 $location = az sql mi show `
@@ -61,34 +81,6 @@ $location
 - The credential name must match the request URL's scheme and fully qualified domain name.
 - This lab assumes that the Foundry public data endpoint is enabled and that the SQL managed instance subnet can reach `*.openai.azure.com` over outbound HTTPS port 443. Enabling the SQL managed instance public data endpoint isn't required.
 - The sample query assumes the target database contains `dbo.Product` with the columns `ID`, `Name`, and `Description`, and that product ID `9` exists.
-
-## 2. Verify Azure CLI, subscription, resource group, and SQL MI
-
-The current Foundry resource and project commands require Azure CLI 2.80.0 or later.
-
-```powershell
-$minimumAzVersion = [version]"2.80.0"
-$azVersionInfo = az version --output json | ConvertFrom-Json
-
-$currentAzVersion = [version]$azVersionInfo.'azure-cli'
-
-if ($currentAzVersion -lt $minimumAzVersion)
-{
-    Write-Host "Azure CLI $currentAzVersion is below the required version $minimumAzVersion. Upgrading..."
-    az upgrade --yes
-
-    if ($LASTEXITCODE -ne 0)
-    {
-        throw "Azure CLI upgrade failed."
-    }
-
-    Write-Host "Azure CLI upgrade completed. Open a new PowerShell session before continuing."
-}
-else
-{
-    Write-Host "Azure CLI $currentAzVersion meets the minimum requirement."
-}
-```
 
 ## 3. Enable the required SQL MI update policy (if needed)
 
@@ -153,17 +145,37 @@ $modelName = "gpt-5-mini"
 $modelSkuName = "GlobalStandard"
 $modelCapacity = 10
 
-$availableModels = @(
-    az cognitiveservices model list `
-        --location $location `
-        --query "[?kind=='AIServices' && model.name=='$modelName'].{Name:model.name, Version:model.version, Format:model.format, SKUs:model.skus[].name}" `
-        --output json |
-        ConvertFrom-Json
-)
+
+$modelJson = az cognitiveservices model list `
+    --location $location `
+    --query "[?model.name=='$modelName'].{Name:model.name, Version:model.version, Format:model.format, SKUs:model.skus[].name}" `
+    --output json `
+    --only-show-errors
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to retrieve the model catalog for location '$location'."
+}
+
+$availableModels = @($modelJson | ConvertFrom-Json)
+
+if ($availableModels.Count -eq 0) {
+    throw "Model '$modelName' is not available in '$location'."
+}
 
 $availableModels |
-    Select-Object Name, Version, Format, @{Name = "SKUs"; Expression = { $_.SKUs -join ", " }} |
+    Select-Object Name, Version, Format,
+        @{Name = "SKUs"; Expression = { $_.SKUs -join ", " }} |
     Format-Table -AutoSize
+
+$selectedModel = $availableModels |
+    Where-Object { $_.SKUs -contains $modelSkuName } |
+    Select-Object -First 1
+
+if (-not $selectedModel) {
+    throw "Model '$modelName' does not support SKU '$modelSkuName' in '$location'."
+}
+
+Write-Host "Model validation succeeded:`n  Model:    $($selectedModel.Name)`n  Version:  $($selectedModel.Version)`n  Format:   $($selectedModel.Format)`n  SKU:      $modelSkuName`n  Capacity: $modelCapacity"
 ```
 
 Select the newest OpenAI model version that supports the standard deployment SKU:
@@ -232,7 +244,7 @@ Create a Foundry project under the same Foundry resource:
 
 ```powershell
 # The project name doesn't need to be globally unique; it must only be unique within this Foundry resource.
-$foundryProject = Read-Host "Enter a foundry project name - anything unique inside this foundry resource" :
+$foundryProject = Read-Host "Enter a foundry project name - anything unique inside this foundry resource" 
 
 az cognitiveservices account project create `
     -n $foundryResource `
@@ -348,7 +360,7 @@ instance selected in `$managedInstance` as a login with `ALTER SETTINGS`, such a
 ```sql
 USE [master];
 
-EXEC sys.sp_configure 'external rest endpoint enabled', 1;
+EXEC sys.sp_configure 'external rest endpoint enabled', 
 RECONFIGURE WITH OVERRIDE;
 
 EXEC sys.sp_configure 'external rest endpoint enabled';
