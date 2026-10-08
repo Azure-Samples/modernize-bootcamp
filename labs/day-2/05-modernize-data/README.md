@@ -393,7 +393,7 @@ The challenge uses Azure CLI from PowerShell. The `az datamigration` command gro
 
 Use online migration when the source database must remain available while data is copied.
 
-## 2. Prerequisites
+### 2. Prerequisites
 
 Before starting:
 
