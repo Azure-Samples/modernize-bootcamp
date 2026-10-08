@@ -32,9 +32,9 @@ You work in **GitHub Copilot Chat** for the whole module: first with the **Upgra
 
 ## 1️⃣ Convert to Blazor pages
 
-The storefront is still built with **ASP.NET MVC**. MVC (Model-View-Controller) is a way of organizing the code, not a visual style: *models* hold the data, *views* are the page templates, and *controllers* are the code that handles each request. That structure works on .NET 10, but **Blazor** is Microsoft's newer way to build web pages in .NET: each page is made of reusable pieces called components, written in C#.
+Right now, the storefront's pages are built with **ASP.NET MVC**. Each page is a *view* (an HTML template with blanks), and a separate *controller* handles each request, gets the data, and fills in the template. In this step you move the pages to **Blazor**, Microsoft's newer way to build web pages in .NET. With Blazor, each page is a *component*: a single file that holds both the page's layout and its code, built from reusable pieces such as a product card or the cart. The app still runs on .NET 10; only the way its pages are built changes.
 
-Unlike Module 2, this step does change the pages themselves. You will rebuild them as Blazor components, and ask for a more modern look while you are at it.
+Unlike Module 2, this step does change the pages themselves. Copilot will rebuild each page as a Blazor component. Because the pages are being rebuilt anyway, this is also a good moment to give the store a more modern look, so the prompt below asks for that too.
 
 With the Upgrade agent selected in the chat, use the following prompt to guide Copilot:
 
@@ -123,12 +123,13 @@ For example, if the app has the database password hard-coded in a config file to
 
    Copilot may ask a few questions before it writes the plan, such as which optional Azure integrations to include. Keep the options it selects by default and continue.
 
-2. **Read the plan.** The plan comes back in the chat. Select **Open in Editor** to read it as a file. Copilot built it from your actual code, so expect specific gaps such as:
+2. **Read the plan.** The plan comes back in the chat. Select **Open in Editor** to read it as a file.
 
-   - **No HTTPS redirection:** the app doesn't automatically switch visitors to a secure (HTTPS) connection.
-   - **No forwarded headers:** in Azure, every request passes through Azure's front door first, and the app doesn't yet know how to read the visitor's real address from it.
-   - **No health endpoint:** there's no simple page Azure can check to see whether the app is running.
-   - **`"AllowedHosts": "*"`:** the app accepts requests for any web address, instead of only its own.
+   If any item in your plan doesn't make sense, ask Copilot to explain it:
+
+   ```plaintext
+   For each item in the plan, explain in plain language what would go wrong in Azure without it.
+   ```
 
 3. **Run the plan**. When the plan looks right, send:
 

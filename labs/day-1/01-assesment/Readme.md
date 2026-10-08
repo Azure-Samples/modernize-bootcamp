@@ -74,7 +74,7 @@ The diagram shows an immediate concern: `CR-AD-01` is Caldova's only domain cont
 
 ## 🧭 Where Azure Migrate fits
 
-Azure Migrate is one place to find, assess, and track the move of on-premises servers, apps, and databases to Azure. In a customer project, it is used across several stages, not as a one-time scan.
+Azure Migrate is a central hub for discovering, assessing, and tracking the migration of on-premises infrastructure, applications, and data. In a customer project, it is used across several stages, not as a one-time scan.
 
 ### 1. Establish scope
 
@@ -331,15 +331,15 @@ An assessment engagement should leave the customer with more than a portal scree
 
 ## 🔗 How this connects to the bootcamp
 
-Azure Migrate assesses the servers, the apps it finds on them, and the databases. It does not change Caldova's code, and it can't prove the store still works after moving to a newer version of .NET.
+Azure Migrate assesses the infrastructure, the servers, the apps it finds on them, and the databases.
 
 The next labs continue the same initiative:
 
-- [Lab 02](../02-upgrade-dotnet-with-ghcp/Readme.md) assesses and upgrades the .NET application.
-- [Lab 03](../03-modernize-with-ghcp/README.md) removes application assumptions that prevent cloud-ready hosting.
-- [Lab 04](../04-deploy-to-azure/README.md) designs the governed Azure foundation.
-- [Lab 05](../../day-2/05-modernize-data/README.md) assesses and migrates the SQL workload.
-- [Lab 06](../../day-2/06-deploy-code-with-github-actions/README.md) establishes repeatable application delivery.
+- Lab 02 assesses and upgrades the .NET application.
+- Lab 03 modernizes the UI and scaffolds the app to support Azure services.
+- Lab 04 designs the governed Azure foundation.
+- Lab 05 assesses and migrates the SQL workload.
+- Lab 06 deploys the app and establishes repeatable application delivery.
 
 Together, these labs demonstrate why infrastructure discovery, application modernization, data modernization, platform engineering, and operational readiness must inform one roadmap.
 

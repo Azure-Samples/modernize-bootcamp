@@ -269,7 +269,7 @@ You can see the dashboard is on the "Assess" phase. Observe the other aspects of
 
 > 💡 **NOTE**
 >
-> During the upgrade, Copilot may ask permission to read files outside your project folder. This is safe to approve: the agent is reading its own instruction files, which come with the Upgrade extension, so it can follow a structured process.
+> During the upgrade, Copilot may ask permission to read files outside your project folder. This is safe to approve: the agent is reading instruction files from the **Upgrade MCP server**, which comes with the GitHub Copilot upgrade extension, so it can follow a structured process.
 
 ![Approving outside files modal](./images/approve-outside-files.png)
 
@@ -277,7 +277,7 @@ You can see the dashboard is on the "Assess" phase. Observe the other aspects of
 
 - **Project structure** — How the code is organized, which project file format it uses, and which .NET version it targets
 - **NuGet packages** — The third-party code libraries the app uses, and whether each one has a version that works on .NET 10
-- **Old code features** — Code that uses .NET Framework features that were removed or changed in .NET 10
+- **API usage patterns** — Deprecated .NET Framework APIs, categorized as binary incompatible, source incompatible, or behavioral change
 - **Old web framework** — Parts of the app built on the old ASP.NET web framework (`System.Web`), which does not exist in .NET 10 and has to be rewritten
 - **Binding redirects** — Old settings that tell the app which library versions to load; if they are wrong, the app crashes when it runs
 - **Effort and risk** — Roughly how many lines of code need to change, how hard each part is, and whether to add tests first that record how the app behaves today
@@ -298,7 +298,7 @@ You can also find the files yourself in the **Explorer** view. Expand `.github` 
 
 ![Upgrade scenario files in the VS Code Explorer](./images/assessment-files-explorer.png)
 
-Open `assessment.md` and read it. The report is long — these four sections carry the decisions.
+Open `assessment.md` and read it. The report is long, so focus on these four sections. They are the most important ones to look at.
 
 | Section | What to look for | Why it matters |
 |---|---|---|
@@ -337,7 +337,7 @@ Once you confirm, the agent writes the plan.
 
 > 💡 **NOTE**
 >
-> If prompted, keep approving requests to read files outside your project. These are the agent's own instruction files, which help it build the plan step by step.
+> If prompted, keep approving requests to read files outside your project. These are instruction files from the **Upgrade MCP server**, which help the agent build the plan step by step. (MCP, the Model Context Protocol, is how extensions give Copilot extra tools and reference files. The Upgrade MCP server comes with the GitHub Copilot upgrade extension.)
 
 ![Approving outside files modal - upgrade options](./images/upgrade-options-external.png)
 
@@ -517,17 +517,9 @@ For runtime errors:
 2. Copy the error message from the **Terminal** or **Debug Console** panel
 3. Paste it into the Copilot chat for analysis and resolution
 
-## 🛠️ Advanced: teach the agent your own patterns
-
-Everything the agent did here came from its built-in instructions (called scenarios and skills): updating project files, upgrading libraries, and replacing old code. That works because those steps are the same in every .NET app.
-
-Your own patterns are not. If your team wraps every database call a particular way, or structures service layers to a house standard, the agent has no way to know that. You can teach it: create Markdown files under `.github/skills/` in the repository, one per pattern, and the agent picks them up as reusable instructions the same way it uses the built-in ones.
-
-This is the difference between modernizing one app and modernizing two hundred of them. The first app is where you work out the pattern; the skills folder is how the next ninety-nine get it for free.
-
-> 💡 **Tip**
+> 💡 **Going further: custom skills**
 >
-> Custom skills are out of scope for this workshop, but worth knowing about. See [GitHub Copilot upgrade scenarios and skills](https://learn.microsoft.com/dotnet/core/porting/github-copilot-upgrade/scenarios-and-skills) for the documented scenarios and built-in skills.
+> The agent's built-in instructions cover steps that are the same in every .NET app. If a customer has their own coding standards, you can add them as Markdown files under `.github/skills/` in the repository, and the agent will follow them too. This matters most when a customer has many apps to modernize: you work out the pattern once, and every later app gets it automatically. Custom skills are out of scope for this workshop; see [GitHub Copilot upgrade scenarios and skills](https://learn.microsoft.com/dotnet/core/porting/github-copilot-upgrade/scenarios-and-skills) to learn more.
 
 ## ➡️ What's Next
 
