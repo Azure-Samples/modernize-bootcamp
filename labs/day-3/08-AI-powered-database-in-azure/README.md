@@ -113,6 +113,7 @@ az sql mi update `
     -g $resourceGroup `
     -n $managedInstance `
     --database-format SqlServer2025 `
+    --gpv2 true `
     --yes `
     --output table
 ```
@@ -134,54 +135,64 @@ Don't continue until the state is ready and `DatabaseFormat` is `SQLServer2025` 
 ```powershell
 az provider register `
     --namespace Microsoft.CognitiveServices
+```
 
+*It may take a few minutes to get it registered. Wait until the provider state is `Registered`.*
+
+```powershell
 az provider show `
     --namespace Microsoft.CognitiveServices `
     --query registrationState `
     --output tsv
 ```
 
-Wait until the provider state is `Registered`.
-
 List the versions and SKUs of the example model available in the selected region:
 
 ```powershell
-az cognitiveservices model list `
-    --location $location `
-    --query "[?kind=='AIServices' && model.name=='$modelName'].{Name:model.name, Version:model.version, Format:model.format, SKUs:join(', ', model.skus[].name)}" `
-    --output table
-```
-
-For `gpt-5-mini` in `centralus`, the currently verified standard deployment values are:
-
-| Setting | Value |
-| --- | --- |
-| Version | `2025-08-07` |
-| Format | `OpenAI` |
-| SKU | `GlobalStandard` |
-| Capacity | `10` |
-
-Set these values in the same PowerShell session before continuing:
-
-```powershell
-$modelVersion = "2025-08-07"
-$modelFormat = "OpenAI"
+$modelName = "gpt-5-mini"
 $modelSkuName = "GlobalStandard"
 $modelCapacity = 10
+
+$availableModels = @(
+    az cognitiveservices model list `
+        --location $location `
+        --query "[?kind=='AIServices' && model.name=='$modelName'].{Name:model.name, Version:model.version, Format:model.format, SKUs:model.skus[].name}" `
+        --output json |
+        ConvertFrom-Json
+)
+
+$availableModels |
+    Select-Object Name, Version, Format, @{Name = "SKUs"; Expression = { $_.SKUs -join ", " }} |
+    Format-Table -AutoSize
 ```
 
-The model-list output must contain version `2025-08-07` and SKU `GlobalStandard`. If it doesn't, don't run the deployment command; choose a version and SKU shown for your selected region and update these variables accordingly.
+Select the newest OpenAI model version that supports the standard deployment SKU:
 
-If Azure CLI reports `argument --model-version: expected one argument`, `$modelVersion` is empty in the current PowerShell session. Run the assignment block above again.
+```powershell
+$selectedModel = $availableModels |
+    Where-Object { $_.Format -eq "OpenAI" -and $_.SKUs -contains $modelSkuName } |
+    Sort-Object Version -Descending |
+    Select-Object -First 1
+
+if (-not $selectedModel)
+{
+    throw "Model '$modelName' with format 'OpenAI' and SKU '$modelSkuName' isn't available in '$location'."
+}
+
+$modelVersion = $selectedModel.Version
+$modelFormat = $selectedModel.Format
+
+$selectedModel | Format-List Name, Version, Format, SKUs
+```
+
+If no matching model is available, don't run the deployment command. Set `$location` to a region where the model and SKU are offered, rerun the model availability and selection blocks, and then continue.
 
 ## 5. Create the Foundry resource and project in the MI resource group
 
-All Foundry and OpenAI resources in the remaining steps use `$resourceGroup`. Set their names and the model values:
+All Foundry and OpenAI resources in the remaining steps use `$resourceGroup`. Set the deployment name:
 
 ```powershell
-# This guide uses the current Microsoft quickstart model as an example.
-$modelName = "gpt-5-mini"
-$modelDeployment = "gpt-5-mini"
+$modelDeployment = $modelName
 ```
 
 If the model isn't offered in that region, set `$location` to another Foundry-supported Azure region. The Foundry resources will still be created in the SQL managed instance resource group stored in `$resourceGroup`.
@@ -190,9 +201,6 @@ Create a Foundry resource of kind `AIServices`. The custom domain supplies the `
 ```powershell
 # Must be globally unique. Use lowercase letters, numbers, and hyphens.
 $foundryResource = Read-Host "Enter a globally unique Foundry resource name"
-
-# The project name doesn't need to be globally unique; it must only be unique within this Foundry resource.
-$foundryProject = "<foundry-project-name>"
 
 az cognitiveservices account create `
     -n $foundryResource `
@@ -223,6 +231,9 @@ The expected provisioning state is `Succeeded`. This lab also expects `PublicNet
 Create a Foundry project under the same Foundry resource:
 
 ```powershell
+# The project name doesn't need to be globally unique; it must only be unique within this Foundry resource.
+$foundryProject = Read-Host "Enter a foundry project name - anything unique inside this foundry resource" :
+
 az cognitiveservices account project create `
     -n $foundryResource `
     -g $resourceGroup `
@@ -328,7 +339,11 @@ Azure role assignments can take several minutes to propagate.
 
 ## 8. Enable external REST calls on SQL MI
 
-Connect to the SQL managed instance selected in `$managedInstance` as a login with `ALTER SETTINGS`, such as a member of `sysadmin`, and run this in `master`:
+Connect to the SQL managed using SSMS.
+
+ ![SSMS](../../day-2/05-modernize-data/images/ssms_22.png)
+
+instance selected in `$managedInstance` as a login with `ALTER SETTINGS`, such as a member of `sysadmin`, and run this in `master` database:
 
 ```sql
 USE [master];
