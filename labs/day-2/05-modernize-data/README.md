@@ -352,3 +352,291 @@ WHERE
 
 #### Congratulations - you have migrated to Azure SQL
 
+## Challenge 5 - Perform online migration using CLI
+
+### VM SQL Server to Azure SQL Managed Instance with Azure DMS Via CLI
+
+### Objective
+
+Migrate on-premises SQL Server databases to Azure SQL Managed Instance using Azure CLI and Azure Database Migration Service (DMS). The flow includes assessment, remediation, provisioning, data migration, cutover, and post-migration validation.
+
+#### End-to-End Flow
+
+```text
+Compatibility assessment
+        |
+Remediate blockers and reassess
+        |
+Prepare storage and backups
+        |
+Create Azure Database Migration Service
+        |
+Start online migration
+        |
+Monitor backup restoration
+        |
+Cut over applications
+        |
+Validate
+```
+
+For simplicity, the exercise will use the same Database Migration Service (DMS) and the same storage account 
+and backups as the previous exercise.
+
+The challenge uses Azure CLI from PowerShell. The `az datamigration` command group is an Azure CLI extension and requires Azure CLI 2.75.0 or later.
+
+### 1. The Migration Mode
+
+| Mode | Behavior | Downtime |
+|---|---|---|
+| Online | DMS restores a full backup and continually restores transaction-log backups. An explicit cutover completes the migration. | Usually limited to final cutover |
+
+Use online migration when the source database must remain available while data is copied.
+
+## 2. Prerequisites
+
+Before starting:
+
+1. Locate the Azure SQL Managed Instance already provisioned in your lab environnment's subscription.
+3. Establish connectivity by using SSMS 22 installed on the lab VM's desktop, use the sa account.
+
+![SSMS22](./images/ssms_22.png).
+
+
+### 3. Install and Configure Azure CLI
+
+```powershell
+az version
+az upgrade
+
+az extension add --name datamigration --upgrade
+
+az login
+
+az provider register --namespace Microsoft.DataMigration
+
+az provider show `
+    --namespace Microsoft.DataMigration `
+    --query registrationState `
+    --output tsv
+```
+
+The expected provider registration state is `Registered`.
+
+### 4. Run the Migration Assessment
+
+The assessment runs locally and does not require a DMS resource.
+
+Using SSMS 22, connect to the *master* database in a query window and create a sysadmin user.
+Avoid using special characters in the user and password in these exercises as to not spend time escaping characters
+in the commands that need to run from command line.  Use this account to perform the assessment.
+
+```
+USE [master]
+GO
+-- Step 1: Create a SQL Server Login
+CREATE LOGIN [AdminUser]
+WITH PASSWORD = 'Test123';
+
+-- Step 2: Add the Login to the Sysadmin Role
+ALTER SERVER ROLE [sysadmin]
+ADD MEMBER [AdminUser];
+GO
+```
+
+Create a folder locally on the machine where the output will be generated ex. *C:\Migration\Assessment*.
+Connectivity to the SQL server will use SQL Server authentication.  The *AdminUser* account created above will be used.  
+Run the cmdlet below, replace all values with those of your lab environment. You will be prompted for the password.
+
+#### SQL Server Authentication
+
+```powershell
+$AssessmentFolder = "C:\Migration\Assessment"
+
+$AssessmentConnection = "Data Source=<put SQL Server IP here>;Initial Catalog=master;Integrated Security=False;User Id=<put user here>;Password=<put password here>"
+
+az datamigration get-assessment `
+    --connection-string $AssessmentConnection `
+    --output-folder $AssessmentFolder `
+    --overwrite
+```
+
+![cli_assess](./images/cli_assessment.png)
+
+Review the resulting HTML or JSON for:
+
+- Server-level assessment issues
+- Database-level assessment issues
+- `TargetReadinesses.AzureSqlManagedInstance`
+- Warnings and errors
+- `DatabaseRestoreFails`
+- Impacted objects
+- Recommended remediation
+
+![cli_report](./images/cli_report.png)
+
+Pay particular attention to unsupported features, cross-database dependencies, CLR, linked servers, SQL Agent dependencies, Windows authentication dependencies, file layouts, database sizes, and encryption.
+
+Resolve blocking issues and rerun the assessment. Retain the before-and-after reports as migration evidence.
+
+## 5. Collect Performance Data and Obtain SKU Recommendations (optional)
+
+The extension provides these commands:
+
+```powershell
+az datamigration performance-data-collection --help
+az datamigration get-sku-recommendation --help
+```
+
+Collect performance data during normal operations, peak business hours, batch windows, reporting periods, and maintenance activity.  
+There is no load placed on the database for this lab hence nothing meaningful will be produced.
+
+Use the results to select:
+
+- General Purpose or Business Critical
+- vCore count
+- Storage capacity and performance tier
+- Zone redundancy
+
+Include enough headroom for workload growth and operational spikes.
+
+
+## 6. Perform an Online Migration using Azure CLI
+These are the overall steps of an online migration using DMS from Azure CLI.
+
+1. Take a full backup.
+2. Take a differential backup.
+2. Upload it to the migration Blob container at the *root*.
+3. Continue taking transaction-log backups.
+4. Upload each log backup in sequence.
+5. Do not break the transaction-log chain.
+6. During cutover, stop writes and take a final tail-log backup.
+
+#### Backups
+
+Unlike backing up the database files into a folder in an Azure Storage Account BLOB container  when running DMS from the portal, running DMS from the CLI requires that the backup files reside in the root of the container.  Copy the existing backups from the earlier exercise to the root of the BLOB container. Optionally, create new full, differential and transaction log backups and place them at the root of the container.  Either will work.
+
+![cli_backups](./images/cli_backups.png)
+ 
+## 9. Start an Online Migration
+
+Get the environment information.  Fill in all information for the variables according to your environment. Start the migration.
+
+```powershell
+$StorageAccount = "<storage account name>"
+$StorageResourceGroup = "<storage account resource group>"
+$MiResourceGroup = "<Azure SQL Managed Instance resource group>"
+$ManagedInstance = "<Azure SQL Managed Instance name>" 
+$MigrationResourceGroup = "<Database Migration Service Resource Group>"
+$MigrationService = "<Database Migration Service Name>"
+
+$StorageAccountId = az storage account show `
+    --resource-group $StorageResourceGroup `
+    --name $StorageAccount `
+    --query id `
+    --output tsv
+
+$ContainerName = az storage container list `
+    --account-name  $StorageAccount `
+    --auth-mode login `
+    --query "[].name" `
+    --output tsv
+
+$ManagedInstanceId = az sql mi show `
+    --resource-group $MiResourceGroup `
+    --name $ManagedInstance `
+    --query id `
+    --output tsv
+
+$ManagedInstanceLocation = az sql mi show `
+    --resource-group $MiResourceGroup `
+    --name $ManagedInstance `
+    --query location `
+    --output tsv
+
+$MigrationServiceId = az datamigration sql-service show `
+    --resource-group $MigrationResourceGroup `
+    --sql-migration-service-name $MigrationService `
+    --query id `
+    --output tsv
+
+$StorageAccountKey = az storage account keys list `
+    --resource-group $StorageResourceGroup `
+    --account-name $StorageAccount `
+    --query "[0].value" -o tsv
+
+$SourceLoc = @{
+    AzureBlob = @{
+        storageAccountResourceId = $StorageAccountId
+        accountKey = $StorageAccountKey
+        blobContainerName = $ContainerName
+    }
+} | ConvertTo-Json -Depth 10 -Compress
+
+
+$SourceLocation = $SourceLoc.Replace('"', '\"')
+
+$SourceDatabase = "eShop"
+$TargetDatabase = "eShopCLI"
+
+az datamigration sql-managed-instance create `
+    --managed-instance-name $ManagedInstance `
+    --resource-group $MiResourceGroup `
+    --target-db-name $TargetDatabase `
+    --scope $ManagedInstanceId `
+    --migration-service $MigrationServiceId `
+    --source-database-name $SourceDatabase `
+    --source-location $SourceLocation
+```
+### 10. Monitor the Migration
+
+The same information retrieved from the CLI can also be viewed in the portal.
+
+```powershell
+az datamigration sql-managed-instance show `
+    --managed-instance-name $ManagedInstance `
+    --resource-group $MigrationResourceGroup`
+    --target-db-name $TargetDatabase `
+    --expand MigrationStatusDetails
+```
+### 11. Cutover
+
+During the controlled change window, these are the typical steps:
+
+1. Stop application writes.
+2. Disable jobs and integrations that write to the source.
+3. Drain application connections.
+4. Take a tail-log backup.
+5. Upload the tail-log backup.
+6. Wait for DMS to restore it.
+7. Record final validation values.
+8. Initiate cutover.
+
+Once all 3 backups have been restored, perform the cutover.
+
+Get the migration operation ID:
+
+```powershell
+$MigrationOperationId = az datamigration sql-managed-instance show `
+    --managed-instance-name $ManagedInstance `
+    --resource-group $MigrationResourceGroup `
+    --target-db-name $TargetDatabase `
+    --expand MigrationStatusDetails `
+    --query "properties.migrationOperationId" `
+    --output tsv
+```
+
+Perform the cutover:
+
+```powershell
+az datamigration sql-managed-instance cutover `
+    --managed-instance-name $ManagedInstance `
+    --resource-group $ResourceGroup `
+    --target-db-name $TargetDatabase `
+    --migration-operation-id $MigrationOperationId
+```
+
+
+## 12. Post-Migration Validation
+
+Use SSMS 22 to connect to the eShopCLI database.  Explore the migrated objects.
