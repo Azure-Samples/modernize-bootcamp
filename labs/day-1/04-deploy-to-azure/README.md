@@ -31,38 +31,36 @@ This lab takes approximately **90-120 minutes**.
 By the end of this lab, you will be able to:
 
 - map the Azure settings the app reads to the Azure resources that must exist to support them
-- turn a detailed workload brief into a reviewed infrastructure plan
-- compare container compute options and justify Azure Container Apps for this workload
-- separate application, migration, and database network boundaries
-- design bounded autoscaling and multi-region application resilience
-- guide GitHub Copilot from an approved plan to a Bicep implementation
-- identify where lab constraints require deeper production architecture review
+- turn a list of requirements into an infrastructure plan you have reviewed
+- compare the ways to run containers in Azure and explain why Azure Container Apps fits this app
+- keep the app, migration, and database networks separate
+- plan how the app adds and removes copies of itself within set limits, and stays available if one datacenter has a problem
+- guide GitHub Copilot from an approved plan to working Bicep files
+- spot where a real production design would need more review than this lab
 
 ## 🧭 Where This Fits
 
 The earlier labs assessed and modernized the application. This lab designs the Azure platform that application now expects.
 
-You design the foundation **for the storefront**, but you do not deploy the storefront in this module. The preprovisioned Container App runs a placeholder image so the platform can be checked on its own first. On Day 2, you will deploy the storefront onto the foundation you are about to design.
+You design the foundation **for the storefront**, but you do not deploy the storefront in this module. The Container App your instructor already deployed runs a simple sample app (a placeholder) so the foundation can be checked on its own first. On Day 2, you will deploy the storefront onto the foundation you are about to design.
 
 ## 🏗️ Required Final Architecture
 
 ![Target Azure architecture: Front Door routes HTTPS traffic over Private Link to the Container App in the application VNet; the peered database VNets hold Azure Bastion, the Windows and Ubuntu VMs, the Azure SQL private endpoint, and the optional SQL MI; GitHub Actions deploys Bicep through a scoped managed identity](./images/azure-architecture.png)
 
 > [!IMPORTANT]
-> **This is a workshop architecture, not a universal production reference
-> architecture.** Some topology, region, SKU, service-boundary, and access
-> decisions were selected to fit lab time, cost, subscription limits, and the
-> learning sequence. For a production implementation, evaluate an
+> **This architecture is designed for a workshop, not for production.** Some
+> choices, such as regions, sizes, and network layout, were made to fit the lab's
+> time, cost, and subscription limits. For a real customer, start from an
 > [Azure landing zone](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/)
-> as the platform baseline for governance, identity, security, connectivity,
-> management, and workload subscriptions. Then review the workload against the
+> (Microsoft's recommended starting setup for an Azure environment), then review
+> the design against the
 > [Azure Well-Architected Framework](https://learn.microsoft.com/azure/well-architected/)
-> and your organization's requirements. Networking and architecture decisions
-> must be thoroughly reviewed for reliability, resiliency, security, cost,
-> operational excellence, performance, failure modes, and recovery objectives
-> before deployment.
+> and the customer's own requirements before deploying anything.
 
 ### Network baseline
+
+A **virtual network (VNet)** is a private network in Azure. Each one gets a range of private addresses (its **address space**, written like `10.0.0.0/20`), which is divided into smaller sections called **subnets**.
 
 | VNet | Region | Address space | Purpose |
 | --- | --- | --- | --- |
@@ -70,7 +68,7 @@ You design the foundation **for the storefront**, but you do not deploy the stor
 | Secondary database | Central US | `10.1.0.0/20` | SQL Managed Instance delegated subnet |
 | Application | Central US by default | `10.20.0.0/20` | Internal, zone-redundant Container Apps environment |
 
-The application location remains a parameter. Select a region that supports Availability Zones before deployment; Central US is the known-good default because North Central US does not support the required zonal configuration. Do not add a subnet named `default`. Give each subnet one clear purpose, verify current service delegation and minimum-size requirements, and leave growth space.
+The application region is a setting you can change. It must be a region that supports **Availability Zones** (separate datacenters within the same region). Central US is the default because North Central US doesn't support them for this setup. Don't name any subnet `default`, give each subnet one job, check that each subnet is big enough for the service that uses it, and leave room to grow.
 
 ## 🤔 Why Azure Container Apps?
 
@@ -78,13 +76,15 @@ You should still compare the options rather than accepting a service name withou
 
 | Option | Strength | Why it is not the baseline here |
 | --- | --- | --- |
-| Azure Container Apps | Managed revisions, internal ingress, KEDA-based scaling, managed platform operations | **Selected baseline** |
-| App Service for Containers | Familiar web hosting and deployment slots | Multi-service internal networking and revision-based container operations are less natural for this target |
-| AKS | Full Kubernetes APIs, extensibility, and scheduling control | The workload has no demonstrated need for Kubernetes control-plane access, CRDs, or custom operators |
+| Azure Container Apps | Azure runs the containers for you, can keep the app private, adds and removes copies automatically, and makes it easy to release and roll back versions | **Selected baseline** |
+| App Service for Containers | Familiar web hosting, with staging slots for testing a release | Keeping several services private and managing container versions is less natural here |
+| Azure Kubernetes Service (AKS) | Full control over Kubernetes, the most flexible way to run containers | This app doesn't need that level of control, and Kubernetes takes much more work to operate |
 
-Azure Container Apps is the best fit for this exercise because it meets the container, private ingress, scaling, and revision requirements without asking a small team to operate Kubernetes. Resilience comes from a zone-redundant environment, at least two application replicas, bounded autoscaling, and Azure Front Door Premium as the private global entry point. This gives the workshop a meaningful availability design without doubling every application resource.
+Azure Container Apps is the best fit because it runs the app privately and scales it automatically, without asking a small team to run Kubernetes. The app stays available because it runs as at least two copies (replicas) spread across separate datacenters (zone-redundant), adds more copies under load up to a set limit, and is reached only through **Azure Front Door**, a secure global entry point.
 
 ## 🔒 Non-Negotiable Requirements
+
+These are the rules your plan and Bicep must follow. You don't need to understand every term in depth: Copilot uses this list when it designs, and you use it to check Copilot's work.
 
 Your plan and implementation must:
 
@@ -122,10 +122,9 @@ For each conclusion, cite the repository file that supports it. Separate observe
 facts from recommendations. Do not create an implementation plan yet.
 ```
 
-Review the inventory. Ask follow-up questions when a conclusion is unsupported
-or a repository requirement has been missed. This step keeps
-the plan grounded in evidence instead of accepting a plausible but generic Azure
-design.
+Read Copilot's list. If something isn't backed up by a file in the repository, or
+a requirement is missing, ask a follow-up question. This keeps the plan based on
+your actual repository instead of a generic Azure design.
 
 ## 🧪 Challenge 2: Produce and Review the Plan
 
@@ -155,25 +154,25 @@ resource boundaries, parameterize environment-specific values, and keep secrets 
 of source and parameter files. Do not create or modify files. Stop for review.
 ```
 
-Do not approve the first response automatically. Reject a plan that:
+Don't accept the first answer automatically. Reject a plan that:
 
 - puts public IPs on the VMs
 - enables Azure SQL public access
 - uses one Container Apps environment for two regions
 - calls two replicas “multi-region”
-- grants Contributor at subscription scope
-- uses an Azure client secret
+- gives broad Contributor access to the whole subscription
+- uses an Azure client secret (a stored password for an app)
 - deploys SQL MI automatically with the base environment
-- embeds credentials in parameters, outputs, logs, or repository files
+- puts passwords or other credentials in parameters, outputs, logs, or repository files
 
-The architecture is constrained, but these design decisions still require an
-explicit rationale:
+Even with these rules, some choices are still up to you. Make sure the plan
+explains why it chose:
 
-- module boundaries
-- exact safe subnet sizes
-- development VM and database SKUs
-- maximum replica count and HTTP concurrency threshold
-- naming convention and unique suffix strategy
+- how the Bicep is split into files (modules)
+- the size of each subnet
+- the VM and database sizes (SKUs)
+- the maximum number of app copies, and how much traffic triggers adding one
+- how resources are named, including the unique suffix that keeps names from clashing
 
 Use focused follow-up prompts instead of asking Copilot to "make it better":
 
@@ -191,8 +190,8 @@ failure domains, recovery objectives, least privilege, secret handling, and boun
 scaling. Do not revise the plan until I approve the findings.
 ```
 
-Resolve the findings and capture the approved plan before switching modes. Human
-approval is the gate between planning and generation.
+Fix the issues Copilot finds and save the approved plan before you switch modes.
+Nothing gets generated until you approve the plan.
 
 ## 🧪 Challenge 3: Generate the Bicep
 
@@ -221,9 +220,9 @@ Get-ChildItem .\infra\lab04\student -Filter *.bicep -Recurse |
   ForEach-Object { az bicep build --file $_.FullName --stdout | Out-Null }
 ```
 
-Building checks Bicep syntax, types, and compile-time rules. It does **not** prove
-that resource names are available, quotas are sufficient, policies allow the
-configuration, or deployment and runtime behavior will succeed.
+Building checks that the Bicep is written correctly. It does **not** prove that it
+would deploy: a name might already be taken, the subscription might not have
+enough capacity, or company policies might block a setting.
 
 Use the [Lab 04 requirements](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/requirements.md)
 (`infra/lab04/requirements.md` in your fork) as the implementation checklist.
@@ -243,14 +242,13 @@ network and private DNS paths, least-privilege RBAC, secret exposure, availabili
 bounded scaling, parameterization, and deterministic naming. Do not edit files.
 ```
 
-Investigate each finding, approve the corrections you agree with, and ask Copilot
-to implement only those corrections. Rebuild all generated Bicep after each
-approved review batch and inspect the diff again.
+Read each finding, decide which fixes you agree with, and ask Copilot to make only
+those. After each round of fixes, rebuild the Bicep and look at what changed.
 
 Finally, compare your approach with
 [the complete implementation](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/complete/README.md)
 (`infra/lab04/complete/` in your fork). Differences
-are discussion points, not automatic defects. Be prepared to explain:
+are things to discuss, not automatically mistakes. Be ready to explain:
 
 - which requirements both implementations satisfy
 - where module boundaries or parameter choices differ
@@ -259,34 +257,17 @@ are discussion points, not automatic defects. Be prepared to explain:
 
 ## 🏫 About the Preprovisioned Environment
 
-Before the workshop, the instructor uses the tested Bicep implementation to
-provision the shared Lab 04 foundation, including resource groups, Key Vault,
-generated VM credentials, deployment identities, and scoped role assignments.
+Before the workshop, your instructor used the finished version of this Bicep to set up the shared Azure environment for the later labs. It includes the resource groups, the Key Vault, the VM passwords, and the identities and permissions everything uses.
 
-GitHub OIDC federation is repository-specific because each federated credential
-includes the GitHub repository and environment in its subject. The instructor
-or repository administrator completes that final binding for `lab06` and
-`lab06-deploy` at the beginning of Lab 06. It authorizes application delivery
-to the existing platform; it is not used to deploy your Lab 04 Bicep.
+You do **not** deploy the Bicep you write, run the setup scripts, or delete anything from the shared environment. Your Bicep stays as files in your repository, separate from what the later labs use.
 
-Participants do not run the full Lab 04 infrastructure bootstrap, deploy their
-generated Bicep, trigger the Lab 04 infrastructure workflow, or clean up the
-shared environment. Your local implementation is intentionally kept separate
-from the environment used in later labs.
-
-OIDC allows GitHub to exchange a short-lived job token for an Azure token, so no
-Azure client secret is stored. The preprovisioned Lab 06 identity receives only
-`AcrPush` on the registry, `Container Apps Contributor` on the retail app, and
-Reader on the Front Door profile for endpoint discovery and smoke testing.
+At the start of Lab 06, GitHub is given permission to deploy the app to this environment. It uses **OIDC**, which lets GitHub prove who it is to Azure each time it runs, so no password ever has to be stored in GitHub. That permission only covers releasing the app; it is not used to deploy your Lab 04 Bicep. The identity GitHub uses can only do three things: push app images to the container registry, update the storefront's Container App, and read the Front Door settings to test the result.
 
 ## 🐢 Predeployed SQL Managed Instance
 
-The instructor deployment uses SQL MI by default and requests the Freemium
-General Purpose v2 offer first. If the subscription or region cannot use the
-free offer, the instructor can select the paid `Regular` pricing model without
-an additional confirmation prompt.
+Your instructor also set up an **Azure SQL Managed Instance** (SQL MI), a managed version of SQL Server in Azure. It uses the free offer when the subscription allows it, and a paid tier otherwise.
 
-Participants do not deploy Bicep. To allow only your current public IPv4:
+To connect to it from the VM, you need to allow your VM's public IP address through its firewall. Run:
 
 ```powershell
 az login
@@ -294,31 +275,27 @@ az login
   -SubscriptionId '<subscription-id>'
 ```
 
-The script asks before detecting your address, then creates or updates one
-inbound NSG rule with a deterministic, privacy-safe name derived from your
-signed-in Azure account and subscription. The rule is scoped to your `/32` on
-TCP 3342, and multiple participants do not overwrite each other. Rerun it if
-your public IP changes. Your instructor must grant Network Contributor on only
-the SQL MI NSG. Connect to the endpoint reported by the script using Microsoft
-Entra authentication. SQL authentication is disabled.
+The script asks before it looks up your IP address. It then adds one firewall rule (an NSG rule) that allows only your address to reach the database on port 3342. Each participant gets their own rule, so you won't overwrite anyone else's. If your IP address changes, run the script again. Your instructor must give you **Network Contributor** access to the SQL MI firewall for this to work.
+
+Connect to the address the script shows you, and sign in with your Microsoft Entra (Azure) account. Signing in with a SQL username and password is turned off.
 
 ## ✅ Review Checklist
 
-- [ ] Every generated Bicep file builds locally without errors.
-- [ ] The implementation matches the approved plan or records an approved deviation.
+- [ ] Every generated Bicep file builds without errors.
+- [ ] The Bicep matches the approved plan, or any difference is written down and approved.
 - [ ] Every Azure setting the app reads (for example Key Vault, Application Insights, or Redis) is backed by a planned resource, or the gap is recorded with a reason.
-- [ ] Front Door uses Private Link to reach one internal Container Apps origin.
-- [ ] The placeholder has a minimum of two replicas and a bounded maximum.
-- [ ] The Container Apps environment is internal and zone-redundant.
-- [ ] Both VMs have no public IP and use Bastion for management.
-- [ ] Azure SQL public network access is disabled and private DNS is linked correctly.
-- [ ] SQL MI access is isolated from the base deployment and uses Microsoft Entra authentication.
-- [ ] Database and application network paths are explicit, nonoverlapping, and justified.
-- [ ] GitHub Actions uses OIDC and no Azure client secret exists.
-- [ ] Role assignments use deterministic IDs and the narrowest practical scopes.
-- [ ] No credential appears in source, workflows, parameters, logs, or outputs.
-- [ ] Reliability, resiliency, security, operations, cost, and performance assumptions are documented for further review.
-- [ ] Static validation is not presented as proof of deployment or production readiness.
+- [ ] Front Door reaches the app over a private connection (Private Link), not the public internet.
+- [ ] The placeholder app always runs at least two copies (replicas), with a set maximum.
+- [ ] The Container Apps environment is private and spread across separate datacenters (zone-redundant).
+- [ ] Neither VM has a public IP address; you reach both through Azure Bastion.
+- [ ] Azure SQL can't be reached from the public internet, and its private network name (private DNS) is set up correctly.
+- [ ] SQL MI is deployed separately from everything else and uses Microsoft Entra sign-in.
+- [ ] Network address ranges don't overlap, and every connection between networks is deliberate and explained.
+- [ ] GitHub Actions signs in to Azure with OIDC, and no Azure password (client secret) is stored anywhere.
+- [ ] Each identity gets only the permissions it needs, on only the resources it needs (least privilege).
+- [ ] No password or other credential appears in code, workflows, parameters, logs, or outputs.
+- [ ] Assumptions about reliability, security, cost, and performance are written down for a later review.
+- [ ] A successful Bicep build is not treated as proof that it would deploy or is ready for production.
 
 ## 📖 References
 

@@ -1,10 +1,10 @@
 # ☁️ Lab 03: Get the App Ready for Azure
 
-Module 2 got the storefront onto .NET 10. Because ASP.NET MVC 5 does not run there, that upgrade also had to move the app to dependency injection, `appsettings.json`, and the modern hosting model — whether you wanted it to or not. What it did not do is make the app ready to run **in Azure**.
+Module 2 moved the storefront onto .NET 10. To do that, the upgrade also had to rewrite how the app starts up and where it keeps its settings (now in `appsettings.json`). What it did not do is make the app ready to run **in Azure**.
 
-> 🎯 **This module: make the app ready for the cloud.** You work on the **application code**: modernize the UI to Blazor, then close the gaps that would stop the app running well in Azure. Everything stays on your machine, and nothing is created in Azure. Module 4 then designs the Azure environment the app will run in.
+> 🎯 **This module: make the app ready for the cloud.** You work on the **application code**: rebuild the pages with Blazor, then close the gaps that would stop the app running well in Azure. Nothing is created in Azure. Module 4 then designs the Azure environment the app will run in.
 
-In this chapter you will work in **GitHub Copilot Chat** throughout — mostly regular chat, where the job is ordinary refactoring, with the `@upgrade` agent available for the optional question that opens the module. Convert the MVC pages to Blazor components, then ask directly whether the app is ready for Azure and close the gaps that come back.
+You work in **GitHub Copilot Chat** for the whole module: first with the **Upgrade** agent to convert the pages to Blazor, then in **Plan** mode to ask whether the app is ready for Azure and fix what it finds.
 
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
@@ -27,12 +27,14 @@ In this chapter you will work in **GitHub Copilot Chat** throughout — mostly r
 
 ## 📋 What you'll do
 
-- 🚀 Convert the MVC pages to Blazor components
+- 🚀 Rebuild the storefront's pages with Blazor components
 - ☁️ Ask whether the app is Azure ready, and fix what comes back
 
 ## 1️⃣ Convert to Blazor pages
 
-The storefront still renders through MVC views and controllers. They work fine on .NET 10, but they keep the front end on an older rendering model than the rest of the stack. You will convert those pages to Blazor components, and ask for a more modern look while you are at it.
+Right now, the storefront's pages are built with **ASP.NET MVC**. Each page is a *view* (an HTML template with blanks), and a separate *controller* handles each request, gets the data, and fills in the template. In this step you move the pages to **Blazor**, Microsoft's newer way to build web pages in .NET. With Blazor, each page is a *component*: a single file that holds both the page's layout and its code, built from reusable pieces such as a product card or the cart. The app still runs on .NET 10; only the way its pages are built changes.
+
+Unlike Module 2, this step does change the pages themselves. Copilot will rebuild each page as a Blazor component. Because the pages are being rebuilt anyway, this is also a good moment to give the store a more modern look, so the prompt below asks for that too.
 
 With the Upgrade agent selected in the chat, use the following prompt to guide Copilot:
 
@@ -121,7 +123,13 @@ For example, if the app has the database password hard-coded in a config file to
 
    Copilot may ask a few questions before it writes the plan, such as which optional Azure integrations to include. Keep the options it selects by default and continue.
 
-2. **Read the plan.** The plan file should come back in the chat. Select **Open in Editor** to view it as a markdown file. It is reading your actual codebase, so what comes back is grounded rather than generic — expect concrete gaps like no HTTPS redirection, no forwarded headers, no health endpoint, and `"AllowedHosts": "*"`.
+2. **Read the plan.** The plan comes back in the chat. Select **Open in Editor** to read it as a file.
+
+   If any item in your plan doesn't make sense, ask Copilot to explain it:
+
+   ```plaintext
+   For each item in the plan, explain in plain language what would go wrong in Azure without it.
+   ```
 
 3. **Run the plan**. When the plan looks right, send:
 
@@ -131,13 +139,13 @@ For example, if the app has the database password hard-coded in a config file to
 
 4. **Approve as it goes.** It will re-run the build and ask for approval to run commands. Grant them, and read the per-phase summaries as they appear instead of waiting until the end.
 
-5. **Ask for a summary you can understand.** Once the upgrade completes, prompt Copilot for a high-level summary:
+5. **Ask for a summary you can understand.** Once the changes are done, ask Copilot for a high-level summary:
 
    ```plaintext
    Summarize the changes you made at a high level, not file level.
    ```
 
-6. **Build and run it one more time.** The app should still look and behave exactly as it did before the run. If there are any build or unexpected errors, tell Copilot to check that it created fallbacks for local development. It may be hitting errors on Azure resources that do not exist yet. If sign-in, the cart, or anything else looks off, tell it in the chat and let it fix it before you move on. You can also ask Copilot to do this check:
+6. **Build and run it one more time.** The app should still look and behave exactly as it did before the run. If there are any build or unexpected errors, tell Copilot to check that it created fallbacks so the app still runs without Azure resources. It may be hitting errors on Azure resources that do not exist yet. If sign-in, the cart, or anything else looks off, tell it in the chat and let it fix it before you move on. You can also ask Copilot to do this check:
 
    ```plaintext
    Verify the changes you made actually work. Run the app and check the behavior, don't just re-read the code. For anything you can't verify without Azure resources, say so explicitly rather than assuming it works.
@@ -153,19 +161,19 @@ For example, if the app has the database password hard-coded in a config file to
 
 ### YARP errors
 
-If you encounter YARP (Yet Another Reverse Proxy) errors during an incremental ASP.NET Framework-to-ASP.NET Core migration and this workshop application no longer needs a side-by-side proxy:
+YARP is a tool that routes traffic when an old and a new version of an app run side by side. You chose the all-at-once upgrade in Module 2, so this app doesn't need it. If you see YARP errors:
 
-- Ask Copilot to identify where YARP is referenced.
-- Ask Copilot to remove unnecessary YARP packages, configuration, and proxy startup code.
-- Rebuild the solution after removal.
+- Ask Copilot to find where YARP is used in the app.
+- Ask Copilot to remove the YARP packages, settings, and startup code.
+- Rebuild the app after it is removed.
 
 ### Missing images or static files
 
 If product images don't appear after modernization:
 
-- Ask Copilot to verify that static files are under `wwwroot`.
-- Confirm that `app.UseStaticFiles()` is configured.
-- Check that image paths in Razor views or Blazor components match the files under `wwwroot`.
+- Ask Copilot to check that images, styles, and other static files are in the `wwwroot` folder, which is where .NET 10 web apps serve them from.
+- Ask Copilot to confirm that the app is set up to serve static files.
+- Ask Copilot to check that the image paths in the pages match the files in `wwwroot`.
 
 ![Image Organization](./images/image-organization.png)
 
@@ -178,4 +186,4 @@ By the end of this section, you should have:
 - 🔹 Closed the cloud readiness gaps it found
 - 🔹 Kept the application buildable and its behavior unchanged throughout
 
-> **Next module preview:** Module 4 designs the Azure foundation this app now expects — networking, managed identity, and the container platform it will run on. You plan it and generate the Bicep for it; the live environment is already provisioned for you, so your implementation stays a local artifact to review rather than something you deploy. The app itself is deployed in Module 6.
+> **Next module preview:** Module 4 designs the Azure resources this app now expects, such as the private networks, the identities it signs in with, and the service that runs it. You plan them and have Copilot write them as Bicep files. Your instructor has already set up the real Azure environment, so your Bicep stays as files in your repository to review, not something you deploy. The app itself is deployed in Module 6.
