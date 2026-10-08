@@ -247,9 +247,9 @@ The rest of this module is the upgrade itself, in five steps.
 
 > ‼️ **IMPORTANT**
 >
-> The agent runs many commands and actions (called tool calls). If VS Code prompts you to approve each one, be ready to stand by and approve. Optionally, you can choose the option to allow them for the rest of the session (select **Default Permissions** at the bottom underneath the chat and change it to **Allow All**) — otherwise the upgrade stalls waiting on you. With customers, it is best to review each of these calls to make sure they feel comfortable with them.
+> The agent runs many commands and actions (called tool calls). When VS Code asks you to approve one, read what it is about to do, then approve it. Watching these approvals during the assessment and planning stages is a good way to see how the agent works. With customers, it is best to review each of these calls so they feel comfortable with them.
 >
-> If VS Code asks **Allow MCP tools from "Upgrade" to make LLM requests?**, select **Allow in this Session**. The Upgrade agent needs this to run its analysis.
+> If VS Code asks **Allow MCP tools from "Upgrade" to make LLM requests?**, select **Allow in this Session**. The Upgrade agent needs this to run its analysis. (MCP, the Model Context Protocol, is how extensions give Copilot extra tools and reference files. The **Upgrade MCP server** comes with the GitHub Copilot upgrade extension and gives the Upgrade agent its upgrade tools and instructions.)
 >
 > ![Allow MCP tools from Upgrade to make LLM requests](./images/allow-mcp-llm-requests.png)
 
@@ -269,7 +269,7 @@ You can see the dashboard is on the "Assess" phase. Observe the other aspects of
 
 > 💡 **NOTE**
 >
-> During the upgrade, Copilot may ask permission to read files outside your project folder. This is safe to approve: the agent is reading instruction files from the **Upgrade MCP server**, which comes with the GitHub Copilot upgrade extension, so it can follow a structured process.
+> During the upgrade, Copilot may ask permission to read files outside your project folder. This is safe to approve: the agent is reading instruction files from the **Upgrade MCP server** so it can follow a structured process.
 
 ![Approving outside files modal](./images/approve-outside-files.png)
 
@@ -337,7 +337,7 @@ Once you confirm, the agent writes the plan.
 
 > 💡 **NOTE**
 >
-> If prompted, keep approving requests to read files outside your project. These are instruction files from the **Upgrade MCP server**, which help the agent build the plan step by step. (MCP, the Model Context Protocol, is how extensions give Copilot extra tools and reference files. The Upgrade MCP server comes with the GitHub Copilot upgrade extension.)
+> If prompted, keep approving requests to read files outside your project. These are instruction files from the **Upgrade MCP server**, which help the agent build the plan step by step.
 
 ![Approving outside files modal - upgrade options](./images/upgrade-options-external.png)
 
@@ -382,6 +382,8 @@ Once you approve the plan, the tool begins the upgrade. In Guided mode nothing i
 - Files will be modified incrementally
 - Git commits will be created for each major change
 - Progress will be displayed in the chat interface and on the modernization dashboard
+
+> 💡 **Optional: let the agent run without asking.** During this phase the agent runs many more commands, such as a build after every change. Now that you've seen what it does, you can optionally let it run them without asking for the rest of the session: select **Default Permissions** at the bottom of the chat and change it to **Allow All**. If you do, keep an eye on the dashboard and `tasks.md` to follow along as each task completes. With customers, keep approving each call unless they are comfortable letting the agent run freely.
 
 > 💡 When the agent finishes a task and tries to commit, it may report that no Git identity is set up. Reply in the chat with `Commit with <your lab email>`, using the **Username** listed under **Azure portal** on the **Resources** tab.
 
@@ -431,6 +433,8 @@ The agent decides each next step based on what it just saw, so it does not alway
 ## 5️⃣ Finalize the Migration
 
 ![Upgrade complete!](./images/net-upgrade-finished.png)
+
+> 💡 **Check the database password.** After the upgrade, the app reads its database connection from `src\eShopLite.StoreFx\appsettings.json` instead of `connectionStrings.config`. Open `appsettings.json` and check the `StoreDbContext` connection string. If the password is still a placeholder, either ask Copilot to carry over the connection string from `connectionStrings.config`, or replace the placeholder yourself with the **W11-Workstation** password from the **Resources** tab. Without the right password, the app can't reach the database and the products won't load.
 
 When the final validation task completes, ask the agent to start the app and check it for you:
 
