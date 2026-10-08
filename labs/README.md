@@ -6,7 +6,7 @@ This lab is the hands-on learning environment for **Modernize with Confidence**,
 
 The bootcamp goes beyond moving existing servers to the cloud. Attendees learn how AI-assisted tools, architectural judgment, and Azure services can work together to assess an application estate, identify practical modernization opportunities, and shape a phased path from legacy infrastructure toward secure, resilient, and manageable cloud platforms.
 
-The repository contains deliberately legacy .NET Framework applications and a SQL Server data tier that represent a realistic modernization starting point.
+The repository deliberately contains legacy .NET Framework applications and a SQL Server data tier. This legacy architecture is the starting point for a realistic modernization opportunity.
 
 ## ![The application](../assets/icons/repository.svg) The Application
 

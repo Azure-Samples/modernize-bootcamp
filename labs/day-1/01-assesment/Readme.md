@@ -1,8 +1,8 @@
 # 🔎 Lab 01: Assess Caldova Retail with Azure Migrate
 
-Caldova Retail wants to move its online storefront out of an aging datacenter, but "move it to Azure" is not yet a plan. The team needs to understand what it owns, how the components depend on one another, which Azure targets are realistic, what must be remediated, and whether the change supports the business.
+Caldova Retail wants to move its online store out of an aging datacenter, but "move it to Azure" is not a plan yet. First, the team needs to know what it has, how the pieces depend on each other, where each piece could run in Azure, what has to be fixed before it moves, and whether the move makes business sense.
 
-This informational module shows how **Azure Migrate** supports that conversation. You will follow a fictional assessment of the Caldova Retail estate and learn how to turn discovery data into migration and modernization decisions.
+This is a reading module. It shows how **Azure Migrate**, Microsoft's tool for planning a move to Azure, helps answer those questions. You will walk through a sample assessment of Caldova's servers and learn how to turn what it finds into migration decisions.
 
 > [!NOTE]
 > This is a discussion and interpretation lab. You will not deploy an Azure Migrate appliance or migrate a server. The sample report is a teaching aid modeled on Azure Migrate concepts; it is not an export from a live environment.
@@ -42,7 +42,22 @@ Caldova's leaders agree on five outcomes:
 4. Modernize the application and data platform where the benefit justifies the change.
 5. Build a repeatable approach for the next group of retail workloads.
 
-These outcomes matter more than naming an Azure service. The assessment must help Caldova choose a sequence that balances business continuity, modernization value, delivery risk, and the team's capacity for change.
+These outcomes matter more than picking an Azure service. The assessment has to help Caldova decide what to move and in what order, without disrupting the business or taking on more change than the team can handle.
+
+### 📖 Key terms
+
+| Term | What it means |
+| --- | --- |
+| **Estate** | Everything the customer runs today: servers, apps, databases, and the connections between them |
+| **Workload** | A set of servers and apps that together deliver one business service, such as the online store |
+| **Assessment** | Azure Migrate's report on whether, where, and at what cost a workload could run in Azure |
+| **Rehost** ("lift and shift") | Move servers to Azure VMs with as little change as possible |
+| **Replatform / refactor** | Change the app so it can use managed Azure services instead of servers you run yourself |
+| **IaaS vs. PaaS** | *Infrastructure as a service*: you rent VMs and still manage them. *Platform as a service*: Azure runs the platform and you just run your app or database on it |
+| **Right-sizing** | Choosing an Azure size based on what the server actually uses, not what it was originally given |
+| **TCO** | *Total cost of ownership*: the full cost of running something, including hardware, licenses, and staff time |
+| **Migration wave** | A group of workloads moved together, with its own plan, tests, and rollback plan |
+| **Domain controller (AD DS)** | The server that handles sign-in and network names (DNS) for the other servers |
 
 ## 🏢 Current estate
 
@@ -55,11 +70,11 @@ These outcomes matter more than naming an Azure service. The assessment must hel
 
 ![Caldova on-premises architecture: customers reach a load balancer that fronts CR-WEB-01 and CR-WEB-02 (IIS), both backed by CR-SQL-01 (SQL Server), with CR-AD-01 providing domain, DNS, policy, and service identity](./images/on-prem-architecture.png)
 
-The diagram exposes an immediate concern: `CR-AD-01` is Caldova's only documented domain controller. A server assessment might find that its CPU, memory, disks, and operating system are compatible with an Azure VM, but that does **not** make migrating the only domain controller as an ordinary VM a safe identity plan.
+The diagram shows an immediate concern: `CR-AD-01` is Caldova's only domain controller, the server every other server depends on for sign-in and network names. An assessment might say it would run fine on an Azure VM, but that does **not** mean it's safe to move Caldova's only domain controller like any other server.
 
 ## 🧭 Where Azure Migrate fits
 
-Azure Migrate is a central hub for discovering, assessing, and tracking the migration of on-premises infrastructure, applications, and data. In a customer initiative it supports a progression rather than a one-time scan.
+Azure Migrate is one place to find, assess, and track the move of on-premises servers, apps, and databases to Azure. In a customer project, it is used across several stages, not as a one-time scan.
 
 ### 1. Establish scope
 
@@ -79,7 +94,7 @@ Discovery can identify:
 - network connections used for dependency analysis
 - support status and potential migration blockers
 
-Discovery data should be reconciled with configuration management records, monitoring tools, application-owner knowledge, and network evidence. "Discovered" does not always mean "in scope," and "not discovered" does not mean "does not exist."
+Always double-check what Azure Migrate finds against the customer's own records, monitoring tools, and the people who run each app. Azure Migrate can miss things, and not everything it finds needs to move.
 
 ### 3. Group workloads and dependencies
 
@@ -105,7 +120,7 @@ Azure Migrate combines several assessment views:
 | Azure SQL assessment | Which Azure SQL target is compatible, appropriately sized, and cost effective? | Compare Azure SQL Managed Instance, Azure SQL Database, and SQL Server on Azure VM |
 | Business case | How do current costs compare with modeled Azure costs and migration strategies? | Present a directional TCO, cash-flow, savings, and modernization view to sponsors |
 
-The business case can aggregate recommendations from these heterogeneous assessments. A PaaS-preferred strategy can recommend managed targets for suitable web and SQL workloads while using Azure VMs as a fallback for general servers.
+The business case combines the results of these assessments. If you tell it to prefer managed services (PaaS), it recommends them where they fit and falls back to Azure VMs for everything else.
 
 ### 5. Compare migration strategies
 
@@ -120,7 +135,7 @@ Assessment findings help the team evaluate the common migration motions:
 | Retire | Remove unused servers, applications, databases, or interfaces confirmed by owners |
 | Retain | Keep a workload on-premises temporarily because of dependencies, risk, economics, or timing |
 
-The lowest-change option is not always the lowest-risk option over the lifetime of the workload. Conversely, a PaaS recommendation does not prove that Caldova can absorb every application and operating-model change in the first migration wave.
+Moving servers as-is is the smallest change, but not always the safest choice in the long run. And just because a managed service is recommended doesn't mean Caldova's team can take on every change it requires in the first wave.
 
 #### Choose a modernization direction
 
@@ -174,7 +189,7 @@ Readiness is target-specific. A server might be ready for an Azure VM while its 
 
 An **as-is** assessment recommends a target from allocated source capacity. A **performance-based** assessment uses observed CPU, memory, disk IOPS, disk throughput, and network activity. Performance-based sizing can reduce overprovisioning, but only when the collection period represents normal and peak business cycles.
 
-The selected percentile and comfort factor matter. A 95th-percentile recommendation intentionally ignores brief outliers; that may be sensible for a horizontally scalable web tier but unsafe for a database with an unobserved month-end peak.
+Two settings shape the result. The **percentile** decides which usage to size for: the 95th percentile ignores the busiest 5% of the time. The **comfort factor** adds a safety margin; 1.3 means 30% extra. Ignoring short spikes is usually fine for web servers that can add more copies, but risky for a database whose busiest day (such as month-end) wasn't in the data.
 
 ### Performance coverage
 
@@ -239,15 +254,15 @@ Thirty days of data and 96 percent performance coverage support an initial size 
 
 ### The web tier has a modernization opportunity
 
-The two lightly utilized IIS servers suggest that duplicating their allocated VM sizes would preserve unused capacity. Azure Container Apps may remove operating-system management and make revision-based deployment and scale-out easier, but only after Caldova validates and containerizes the application. The later application labs address the code and configuration work that infrastructure telemetry cannot see.
+The two web servers are barely used, so copying their current sizes into Azure would mean paying for capacity nobody uses. Azure Container Apps could remove the need to manage servers and make it easier to release new versions and add capacity, but only after the app is tested and packaged as a container. The later labs cover that code work, which a server assessment can't see.
 
 ### The SQL target needs a specialist review
 
-Observed utilization supports a smaller managed target hypothesis, not an immediate purchase. Database compatibility, latency, feature usage, recovery objectives, transaction-log behavior, and peak I/O testing can change the service tier and cost significantly.
+The usage data suggests a smaller managed database could work, but it's a starting point, not a decision. A database specialist still needs to check feature compatibility, speed, recovery needs, and the busiest periods, and any of those can change the right size and cost a lot.
 
-### Identity is a prerequisite, not a passenger
+### Sort out sign-in (identity) before anything else moves
 
-The domain controller's green server readiness does not approve an identity design. Caldova should establish private connectivity and a redundant AD DS topology in Azure, validate replication and recovery, and only then change or retire the source domain controller.
+A "ready" result for the domain controller only means the server would run in Azure. It doesn't mean the sign-in setup is safe to move. Caldova should first connect its network privately to Azure, set up at least two domain controllers there, test that they stay in sync and can be recovered, and only then change or retire the original one.
 
 Microsoft Entra ID is the cloud identity and access service used for Azure resources and modern applications. It is not a drop-in replacement for every AD DS protocol, domain join, Group Policy, DNS, or legacy authentication dependency. Identity modernization is a separate decision stream.
 
@@ -260,7 +275,7 @@ Microsoft Entra ID is the cloud identity and access service used for Azure resou
 | 2 - Production storefront | Managed SQL migration and synchronized web-tier cutover during an approved window | Business transactions reconcile; service levels hold; rollback window closes with owner approval |
 | 3 - Optimize and retire | Cost tuning, reservations or savings plans, operational handoff, legacy shutdown, and evidence retention | Azure costs reviewed; old servers and licenses retired safely; lessons captured for the next workload |
 
-Do not split components into waves merely because they are separate rows in an assessment. A wave is a coordinated business change with an owner, entry criteria, test plan, rollback plan, communications plan, and measurable exit criteria.
+Don't put servers in different waves just because they are separate rows in the assessment. A wave is a planned business change with an owner, a test plan, a rollback plan, a communication plan, and clear conditions for when it is done.
 
 ## 🗣️ Questions to ask the customer
 
@@ -316,7 +331,7 @@ An assessment engagement should leave the customer with more than a portal scree
 
 ## 🔗 How this connects to the bootcamp
 
-Azure Migrate assesses the infrastructure, discovered applications, and data platform. It does not rewrite Caldova's source code or prove that the storefront behaves correctly on a new runtime.
+Azure Migrate assesses the servers, the apps it finds on them, and the databases. It does not change Caldova's code, and it can't prove the store still works after moving to a newer version of .NET.
 
 The next labs continue the same initiative:
 
