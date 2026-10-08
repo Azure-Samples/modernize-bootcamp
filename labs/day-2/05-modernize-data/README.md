@@ -398,7 +398,7 @@ Use online migration when the source database must remain available while data i
 Before starting:
 
 1. Locate the Azure SQL Managed Instance already provisioned in your lab environnment's subscription.
-3. Establish connectivity by using SSMS 22 installed on the lab VM's desktop, use the sa account.
+3. Establish connectivity by using SSMS 22 installed on the lab VM's desktop, use the Entra with Password account.
 
 ![SSMS22](./images/ssms_22.png).
 
