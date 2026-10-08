@@ -619,7 +619,7 @@ Get the migration operation ID:
 ```powershell
 $MigrationOperationId = az datamigration sql-managed-instance show `
     --managed-instance-name $ManagedInstance `
-    --resource-group $MigrationResourceGroup `
+    --resource-group  $MiResourceGroup `
     --target-db-name $TargetDatabase `
     --expand MigrationStatusDetails `
     --query "properties.migrationOperationId" `
@@ -631,7 +631,7 @@ Perform the cutover:
 ```powershell
 az datamigration sql-managed-instance cutover `
     --managed-instance-name $ManagedInstance `
-    --resource-group $ResourceGroup `
+    --resource-group  $MiResourceGroup `
     --target-db-name $TargetDatabase `
     --migration-operation-id $MigrationOperationId
 ```
