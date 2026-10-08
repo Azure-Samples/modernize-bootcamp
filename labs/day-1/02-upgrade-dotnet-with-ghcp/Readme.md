@@ -51,6 +51,8 @@ Walk around the storefront for a minute and notice how it behaves:
 
 ## 🛠️ Setup
 
+Now that you've seen the on-premises app, it's time to modernize it. You'll do this work in **VS Code** on the VM, starting with your own copy of the app's code.
+
 > The upgrade agent saves its changes in Git as it works, so run this module against **your own fork**: your own copy of the repository on GitHub. That way your changes don't affect the workshop repository or anyone else.
 
 **1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser +++https://github.com/Skillable-Events/caldova-retail+++
