@@ -637,6 +637,6 @@ az datamigration sql-managed-instance cutover `
 ```
 
 
-## 12. Post-Migration Validation
+### 12. Post-Migration Validation
 
 Use SSMS 22 to connect to the eShopCLI database.  Explore the migrated objects.
