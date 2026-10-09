@@ -120,6 +120,10 @@ Open Copilot Chat by selecting the chat icon in the top menu bar, to the right o
 
 > 💡 If Copilot prompts you to sign in, select **Continue with GitHub**. An authorization page opens in the browser; select **Continue**, then **Authorize Visual-Studio-Code**. Return to VS Code once you are signed in.
 
+> 💡 **Chat or a model not available?** If the chat says a model or chat feature isn't available, select the **GitHub Copilot** icon in the bottom status bar, then select **Use AI Features**. This should prompt you to sign in.
+>
+> ![Use AI Features in the status bar](./images/use-ai-features.png)
+
 Then, type in the chatbox and submit this prompt:
 
 ```plaintext
@@ -219,6 +223,8 @@ The rest of this module is the upgrade itself, in five steps.
 
    ![Selecting the .NET version upgrade scenario](./images/pick-new-dotnet-version.png)
 
+   Behind the scenes, the Upgrade agent scans the repository for keywords to match it to the right upgrade scenario, for example detecting this is a dotnet version upgrade scenario. If it has trouble matching a scenario or gets stuck here, tell it to try again.
+
 3. Copilot Chat should open with the **Upgrade** agent already selected. If it is not, open the **agent picker** at the bottom of the chat box and select **Upgrade**. If **Upgrade** is not listed, check that the **GitHub Copilot upgrade** extension is installed: select **Extensions** in the Activity Bar and search for `GitHub Copilot upgrade` (install it if it is not installed).
 
    The Upgrade agent is built for this job. A general Copilot agent works from what the AI model already knows. The Upgrade agent instead follows tested, step-by-step upgrade instructions, uses real build tools to find code that will break, and rebuilds the app after each task to check that nothing broke.
@@ -227,7 +233,7 @@ The rest of this module is the upgrade itself, in five steps.
 
    > 💡 **PICKING A MODEL**
    >
-   > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus.
+   > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
 4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the `.sln` file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat. Select the following options:
 
@@ -270,8 +276,8 @@ You can see the dashboard is on the "Assess" phase. Observe the other aspects of
 > 💡 **NOTE**
 >
 > During the upgrade, Copilot may ask permission to read files outside your project folder. This is safe to approve: the agent is reading instruction files from the **Upgrade MCP server** so it can follow a structured process.
-
-![Approving outside files modal](./images/approve-outside-files.png)
+>
+> ![Approving outside files modal](./images/approve-outside-files.png)
 
 ### What the agent examines
 
@@ -434,7 +440,14 @@ The agent decides each next step based on what it just saw, so it does not alway
 
 ![Upgrade complete!](./images/net-upgrade-finished.png)
 
-> 💡 **Check the database password.** After the upgrade, the app reads its database connection from `src\eShopLite.StoreFx\appsettings.json` instead of `connectionStrings.config`. Open `appsettings.json` and check the `StoreDbContext` connection string. If the password is still a placeholder, either ask Copilot to carry over the connection string from `connectionStrings.config`, or replace the placeholder yourself with the **W11-Workstation** password from the **Resources** tab. Without the right password, the app can't reach the database and the products won't load.
+> 💡 **Check the database password.** After the upgrade, the app reads its database connection from `src\eShopLite.StoreFx\appsettings.json` instead of `connectionStrings.config`. Open `appsettings.json` and check the `StoreDbContext` connection string. If the password is still a placeholder, either ask Copilot to carry over the connection string from `connectionStrings.config`, or fill it in yourself. If any part is missing, these are the correct values:
+>
+> - **Data Source:** `192.168.1.100,1433`
+> - **Initial Catalog:** `eshop`
+> - **User ID:** `sa`
+> - **Password:** the **W11-Workstation** password from the **Resources** tab
+>
+> Without the right password, the app can't reach the database and the products won't load.
 
 When the final validation task completes, ask the agent to start the app and check it for you:
 
