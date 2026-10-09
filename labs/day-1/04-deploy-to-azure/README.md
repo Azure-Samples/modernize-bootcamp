@@ -24,7 +24,7 @@ You will work through four steps with GitHub Copilot, and you approve each one b
 3. **Generate:** Copilot writes the Bicep files for the approved plan, and you check that they build.
 4. **Review:** Copilot reviews the Bicep against the plan and requirements. You decide which findings to fix, then compare your design with a known-good implementation.
 
-This lab takes approximately **90-120 minutes**.
+This lab takes approximately **60 minutes**.
 
 ## 🎯 Objectives
 
@@ -108,6 +108,8 @@ Your plan and implementation must:
 Continue in the same VSCode chat you were using. Use **Ask** mode to learn
 what is already in the repository and to identify the evidence behind the
 requirements.
+
+![Switching the chat mode to Ask](../03-modernize-with-ghcp/images/ask-mode-dropdown.png)
 
 ```text
 Explore this repository for Lab 04 without changing any files.

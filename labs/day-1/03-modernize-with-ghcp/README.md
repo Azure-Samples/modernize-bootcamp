@@ -140,7 +140,7 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 5. **Narrow the scope, then move to planning.** Not everything the agent suggests belongs in this module. The database is migrated in Lab 05, the infrastructure (Bicep) is designed in Module 4, and the Dockerfile comes in Module 6. Tell the agent explicitly, so it doesn't make those changes:
 
    ```plaintext
-   Proceed to planning, but do not create a Dockerfile, infrastructure (Bicep/Terraform) files, or touch the database. Create a new branch for the changes.
+   Proceed to planning, but do not create a Dockerfile or infrastructure (Bicep/Terraform) files. Don't migrate or change the database. The app must keep connecting to the same existing SQL Server with the same connection details. Create a new branch for the changes.
    ```
 
    The modernize agent hands the work to the **planning-coordinator** agent, which writes the migration plan.
@@ -158,7 +158,7 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    Read through the tasks. Your plan may have a different number of tasks, or different ones, from the person next to you; that's expected. If anything doesn't belong, such as a task that touches the database or creates infrastructure files, edit `plan.md` directly or tell the agent in the chat.
 
-   **Add one rule to the plan.** None of the Azure services exist yet, so the app has to keep working without them. Open `plan.md` and add this line to it, then save the file:
+   **Add one rule to the plan.** None of the Azure services exist yet, so the app has to keep working without them. Add this rule either by typing it in the chat and asking the agent to add it to the plan, or by navigating to the `.github/modernize` folder and editing `plan.md` directly:
 
    ```plaintext
    Every Azure service added by this plan must be optional and switched on only by a configuration setting; when the setting is empty, the app must run exactly as it did before without contacting Azure, and if the settings for a service are only partly filled in, the app must stop at startup with a clear error instead of silently falling back.
@@ -190,9 +190,13 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
 9. **Approve as it goes.** It will re-run the build and ask for approval to run commands. Grant them, and read the per-phase summaries as they appear instead of waiting until the end.
 
+   ![The permissions menu with Default Permissions, Sandboxing for terminal, Allow All, and Autopilot](./images/autopilot-permissions.png)
+
+   > 💡 **A note on Autopilot.** The permissions menu at the bottom of the chat also offers **Autopilot (Preview)**, which goes a step further than **Allow All**: instead of asking before every command, the agent works through the whole task on its own, staying within its permissions. It's good to know this exists, and it can speed things up here, where you control the environment and can review every commit afterward. In a customer environment, treat it carefully: the customer cannot see or stop each individual action while it runs, so letting the agent work completely unsupervised trades visibility and control for speed. Prefer **Default Permissions** or **Allow All** when a customer needs to stay in control of what the agent does.
+
 10. **Read the summary.** When every task is done, the agent posts a summary in the chat. It tells you:
 
-    - which **branch** the changes are on. The agent creates a new local branch for this work (`azure-migration` in our run) from your Module 2 branch, and doesn't push anything to GitHub.
+    - which **branch** the changes are on. The agent creates a new local branch for this work from your Module 2 branch, and doesn't push anything to GitHub.
     - whether the app **builds**, and whether any **tests** ran. This app has no test projects, so expect no tests to run.
     - a table of each **task**, its **result**, and the **commit** it made, so you can review each change on its own.
 
@@ -206,19 +210,13 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
     Summarize the changes you made at a high level, not file level.
     ```
 
-11. **Build and run the app on the VM.** Your code is now on the new `azure-migration` branch. Because none of the Azure settings are filled in, the app should skip Azure entirely and work exactly as before: for example, it reads its database connection from local settings instead of Key Vault, and keeps shopping carts in memory instead of Redis.
+11. **Build and run the app on the VM.** Your code is now on the new branch the agent created. Because none of the Azure settings are filled in, the app should skip Azure entirely and work exactly as before: for example, it reads its database connection from local settings instead of Key Vault, and keeps shopping carts in memory instead of Redis.
 
-    **First, check the database password.** The migration may have moved or removed the database connection string, for example while wiring the app to read secrets from Key Vault. Before you run the app:
+    **First, check where the database connection lives now.** We still need it to run the app, since Key Vault isn't wired up to a real Key Vault yet. Ask Copilot:
 
-    1. Open `src\eShopLite.StoreFx\appsettings.json`.
-    2. Find the `StoreDbContext` connection string under `ConnectionStrings`.
-    3. If it's missing, empty, or the password is a placeholder, ask Copilot to restore it for running on the VM:
-
-       ```plaintext
-       The app no longer has a working StoreDbContext connection string for running on this VM. Restore it in appsettings.json using the same server, database, and user as before, without requiring Key Vault.
-       ```
-
-       Then replace the password with the **W11-Workstation** password from the **Resources** tab.
+    ```plaintext
+    Where is the database connection string now? We still need it to run the app since Key Vault isn't wired up yet. Put it in user secrets and run this if needed.
+    ```
 
     **Then build and run it.** Ask Copilot to build and run the app, and open the URL it gives you. The app should look and behave exactly as it did before this step: the products load, sign-in works for both demo accounts, and the cart keeps its contents.
 
