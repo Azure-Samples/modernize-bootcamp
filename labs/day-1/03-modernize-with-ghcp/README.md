@@ -196,7 +196,7 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
 10. **Read the summary.** When every task is done, the agent posts a summary in the chat. It tells you:
 
-    - which **branch** the changes are on. The agent creates a new local branch for this work (`azure-migration` in our run) from your Module 2 branch, and doesn't push anything to GitHub.
+    - which **branch** the changes are on. The agent creates a new local branch for this work from your Module 2 branch, and doesn't push anything to GitHub.
     - whether the app **builds**, and whether any **tests** ran. This app has no test projects, so expect no tests to run.
     - a table of each **task**, its **result**, and the **commit** it made, so you can review each change on its own.
 
@@ -210,7 +210,7 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
     Summarize the changes you made at a high level, not file level.
     ```
 
-11. **Build and run the app on the VM.** Your code is now on the new `azure-migration` branch. Because none of the Azure settings are filled in, the app should skip Azure entirely and work exactly as before: for example, it reads its database connection from local settings instead of Key Vault, and keeps shopping carts in memory instead of Redis.
+11. **Build and run the app on the VM.** Your code is now on the new branch the agent created. Because none of the Azure settings are filled in, the app should skip Azure entirely and work exactly as before: for example, it reads its database connection from local settings instead of Key Vault, and keeps shopping carts in memory instead of Redis.
 
     **First, check where the database connection lives now.** We still need it to run the app, since Key Vault isn't wired up to a real Key Vault yet. Ask Copilot:
 
