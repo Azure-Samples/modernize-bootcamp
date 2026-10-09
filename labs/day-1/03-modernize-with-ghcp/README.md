@@ -212,21 +212,11 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
 11. **Build and run the app on the VM.** Your code is now on the new `azure-migration` branch. Because none of the Azure settings are filled in, the app should skip Azure entirely and work exactly as before: for example, it reads its database connection from local settings instead of Key Vault, and keeps shopping carts in memory instead of Redis.
 
-    **First, check where the database connection lives now.** Switch the chat mode to **Ask**, so Copilot only investigates and doesn't change anything yet:
-
-    ![Switching the chat mode to Ask](./images/ask-mode-dropdown.png)
+    **First, check where the database connection lives now.** We still need it to run the app, since Key Vault isn't wired up to a real Key Vault yet. Ask Copilot:
 
     ```plaintext
-    Where does StoreDbContext get its connection string from now? It probably isn't a plain value in appsettings.json anymore because of the Key Vault change. Is it set in user secrets? If not, what would I need to set there to run the app on this VM?
+    Where is the database connection string now? We still need it to run the app since Key Vault isn't wired up yet. Put it in user secrets and run this if needed.
     ```
-
-    Read what Copilot finds, then switch back to **Agent** mode. If the connection isn't already available in user secrets, ask Copilot to set it up:
-
-    ```plaintext
-    Set up user secrets for this project if it isn't already, and set StoreDbContext there using the same server, database, and user as before, so the app can run here on the VM without Key Vault.
-    ```
-
-    Then give Copilot the **W11-Workstation** password from the **Resources** tab to use as the password.
 
     **Then build and run it.** Ask Copilot to build and run the app, and open the URL it gives you. The app should look and behave exactly as it did before this step: the products load, sign-in works for both demo accounts, and the cart keeps its contents.
 

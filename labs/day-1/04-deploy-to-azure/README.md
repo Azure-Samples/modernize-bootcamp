@@ -109,6 +109,8 @@ Continue in the same VSCode chat you were using. Use **Ask** mode to learn
 what is already in the repository and to identify the evidence behind the
 requirements.
 
+![Switching the chat mode to Ask](../03-modernize-with-ghcp/images/ask-mode-dropdown.png)
+
 ```text
 Explore this repository for Lab 04 without changing any files.
 
