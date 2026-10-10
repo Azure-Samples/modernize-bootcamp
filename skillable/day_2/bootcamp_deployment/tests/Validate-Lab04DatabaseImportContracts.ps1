@@ -125,6 +125,10 @@ $postprovision = Get-Content -LiteralPath $postprovisionPath -Raw
 $deployScript = Get-Content -LiteralPath $deployScriptPath -Raw
 $helperScript = Get-Content -LiteralPath $helperPath -Raw
 $importScript = Get-Content -LiteralPath $importScriptPath -Raw
+$postprovisionApprovalCall = $postprovision.LastIndexOf(
+    'Approve-FrontDoorPrivateLink `'
+)
+$postprovisionImportCall = $postprovision.LastIndexOf('& $importScriptPath')
 $deployTokens = $null
 $deployParseErrors = $null
 $deployAst = [System.Management.Automation.Language.Parser]::ParseInput(
@@ -173,6 +177,16 @@ Assert-Contract (
     $postprovision -match '-AzdEnvironment'
 ) 'The postprovision hook must invoke the shared importer with AZD outputs.'
 Assert-Contract (
+    $postprovision -match 'LAB04_CONTAINER_APPS_ENVIRONMENT_ID' -and
+    $postprovision -match 'FRONT_DOOR_ORIGIN_ID' -and
+    $postprovision -match 'FRONT_DOOR_PRIVATE_LINK_REQUEST_MESSAGE' -and
+    $postprovision -match 'FRONT_DOOR_ENDPOINT' -and
+    $postprovision -match 'Unknown pending private endpoint connection' -and
+    $postprovision -match 'Multiple private endpoint connections' -and
+    $postprovisionApprovalCall -ge 0 -and
+    $postprovisionImportCall -gt $postprovisionApprovalCall
+) 'The AZD hook must approve only the expected Front Door connection before database import.'
+Assert-Contract (
     $deployScript -match 'Import-Lab04Database\.ps1' -and
     $deployScript -match '-DeploymentName\s+\$armDeploymentName'
 ) 'The direct Deploy action must invoke the shared importer with ARM outputs.'
@@ -189,6 +203,12 @@ Assert-Contract (
     $deployScript -match 'Last probe: \$lastProbeFailure' -and
     $deployScript -notmatch 'if \(\$attempt -eq \d+\) \{\s*throw'
 ) 'Front Door verification must support Windows PowerShell and PowerShell 7 HTTP responses and report the final failure.'
+Assert-Contract (
+    $deployScript -match 'az account set[\s\S]*?\$LASTEXITCODE' -and
+    $deployScript -match '\$sqlAdminJson\s*=\s*az ad user show[\s\S]*?\$LASTEXITCODE[\s\S]*?ConvertFrom-Json' -and
+    $deployScript -match '\$sqlAdminJson\s*=\s*az ad signed-in-user show[\s\S]*?\$LASTEXITCODE[\s\S]*?ConvertFrom-Json' -and
+    $deployScript -match 'az login --tenant \$tenantId'
+) 'Direct deployment must surface Azure CLI authentication failures before reading Microsoft Entra user properties.'
 Assert-Contract (
     $helperScript -match 'dotnet tool install Microsoft\.SqlPackage' -and
     $helperScript -match '--tool-path\s+\$temporaryPath' -and

@@ -14,7 +14,9 @@ param keyVaultAdministratorObjectId string
 param vmAdminUsername string
 
 @secure()
-param vmAdminPassword string
+param vmAdminPassword string = ''
+
+param deployVirtualMachines bool = false
 
 param tags object = {}
 
@@ -48,7 +50,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' = {
   }
 }
 
-resource vmUsernameSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = {
+resource vmUsernameSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = if (deployVirtualMachines) {
   parent: keyVault
   name: 'vm-admin-username'
   properties: {
@@ -56,7 +58,7 @@ resource vmUsernameSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = {
   }
 }
 
-resource vmPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = {
+resource vmPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = if (deployVirtualMachines) {
   parent: keyVault
   name: 'vm-admin-password'
   properties: {

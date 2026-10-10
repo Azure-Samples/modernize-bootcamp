@@ -31,7 +31,9 @@ param sqlEntraAdminPrincipalType string = 'User'
 param vmAdminUsername string
 
 @secure()
-param vmAdminPassword string
+param vmAdminPassword string = ''
+
+param deployVirtualMachines bool = false
 
 param tags object = {
   Application: 'Caldova'
@@ -53,6 +55,7 @@ module network './modules/regional-network.bicep' = {
     databaseAddressPrefix: '10.0.0.0/20'
     applicationAddressPrefix: '10.20.0.0/20'
     enablePrimaryServices: true
+    enableVirtualMachines: deployVirtualMachines
     enableApplicationVnet: false
     tags: tags
   }
@@ -75,7 +78,7 @@ module codeBuildRegistryPush './modules/acr-push-role.bicep' = {
   }
 }
 
-module machines './modules/virtual-machines.bicep' = {
+module machines './modules/virtual-machines.bicep' = if (deployVirtualMachines) {
   name: 'private-virtual-machines'
   params: {
     prefix: prefix
@@ -88,7 +91,7 @@ module machines './modules/virtual-machines.bicep' = {
   }
 }
 
-module bastion './modules/bastion.bicep' = {
+module bastion './modules/bastion.bicep' = if (deployVirtualMachines) {
   name: 'bastion'
   params: {
     name: '${prefix}-${suffix}-bas'
@@ -137,6 +140,6 @@ output databaseFqdn string = databaseMode == 'azureSql'
   : ''
 output databaseVnetId string = network.outputs.databaseVnetId
 output databaseVnetName string = network.outputs.databaseVnetName
-output virtualMachineNames array = machines.outputs.virtualMachineNames
-output virtualMachineIds array = machines.outputs.virtualMachineIds
-output virtualMachinePrincipalIds array = machines.outputs.virtualMachinePrincipalIds
+output virtualMachineNames array = deployVirtualMachines ? machines!.outputs.virtualMachineNames : []
+output virtualMachineIds array = deployVirtualMachines ? machines!.outputs.virtualMachineIds : []
+output virtualMachinePrincipalIds array = deployVirtualMachines ? machines!.outputs.virtualMachinePrincipalIds : []

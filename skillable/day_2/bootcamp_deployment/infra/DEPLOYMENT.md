@@ -20,10 +20,11 @@ Run every command from the repository root.
 
 ## Use the deployment script
 
-The script prompts securely for the VM administrator password, resolves the
-selected Microsoft Entra user for SQL administration, validates the object ID,
-and never writes the password to a parameter file. Supply only the user's
-principal name; the object ID remains an internal Bicep parameter.
+The VMs and Bastion are disabled by default. When `-DeployVirtualMachines` is
+specified, the script prompts securely for the VM administrator password,
+resolves the selected Microsoft Entra user for SQL administration, validates
+the object ID, and never writes the password to a parameter file. Supply only
+the user's principal name; the object ID remains an internal Bicep parameter.
 
 The password must be 12-72 characters, must not contain the VM administrator
 username, and must contain lowercase, uppercase, numeric, and at least one of
@@ -69,7 +70,8 @@ required by Azure SQL.
 When invoking `main.bicep` without the deployment script, the
 `sqlEntraAdminLogin` and `sqlEntraAdminObjectId` parameters are optional. They
 default to the user principal name and object ID returned by Bicep's
-`deployer()` function:
+`deployer()` function. The VM password can be omitted while
+`deployVirtualMachines` is false:
 
 ```powershell
 az deployment sub what-if `
@@ -81,7 +83,20 @@ az deployment sub what-if `
     primaryLocation='centralus' `
     secondaryLocation='eastus2' `
     applicationLocation='centralus' `
+    vmAdminUsername='labadmin'
+```
+
+To include the VMs and Bastion, pass both the opt-in flag and a password:
+
+```powershell
+az deployment sub what-if `
+  --name 'lab04-direct-preview' `
+  --location 'centralus' `
+  --template-file .\infra\main.bicep `
+  --parameters `
+    environmentName='lab04-direct' `
     vmAdminUsername='labadmin' `
+    deployVirtualMachines=true `
     vmAdminPassword='<strong-password>'
 ```
 
@@ -118,6 +133,30 @@ Deploy after reviewing the interactive what-if result:
   -EnvironmentName 'lab04-direct' `
   -Action Deploy
 ```
+
+To deploy the optional VMs and Bastion, add `-DeployVirtualMachines`. The
+script requires or prompts for a compliant `-VmAdminPassword` only in that
+mode:
+
+```powershell
+.\infra\Deploy-Lab04.ps1 `
+  -SubscriptionId $subscriptionId `
+  -EnvironmentName 'lab04-direct' `
+  -DeployVirtualMachines `
+  -Action Deploy
+```
+
+The default incremental deployment does not delete compute resources from an
+environment where they were previously deployed. Disabling the flag only
+omits them from the current template; delete the existing VMs, Bastion,
+compute-only subnets/NSG, and credential secrets explicitly if they are no
+longer needed.
+
+For AZD deployments, the post-provision hook explicitly approves the expected
+Front Door managed private endpoint connection to the Container Apps
+environment and waits for the Front Door endpoint to become healthy. It fails
+closed if an unknown pending request or multiple matching requests are found.
+This approval is independent of the optional VM and Bastion deployment.
 
 `Deploy` runs `az deployment sub create --confirm-with-what-if`, so Azure CLI
 asks for confirmation before changing resources. After a successful deployment,
@@ -250,10 +289,10 @@ cannot package the repository-local `data\eshop.bacpac`. Use
 `Deploy-Lab04.ps1 -Action Deploy` when the `eshop_ai` database must be
 initialized.
 
-Confirm SQL, VM, DMS, SQL MI, and zone-redundant Container Apps availability
-before deploying to different regions. Locations cannot be changed in place for
-existing regional resources. Use a new environment name or remove the old
-deployment first.
+Confirm SQL, DMS, SQL MI, zone-redundant Container Apps, and optional VM
+availability before deploying to different regions. Locations cannot be changed
+in place for existing regional resources. Use a new environment name or remove
+the old deployment first.
 
 ## Select the database target
 

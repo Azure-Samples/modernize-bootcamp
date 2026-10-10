@@ -33,6 +33,8 @@ param(
     [ValidateSet('Freemium', 'Regular')]
     [string]$SqlMiPricingModel = 'Freemium',
 
+    [switch]$DeployVirtualMachines,
+
     [ValidateSet('Validate', 'WhatIf', 'Deploy')]
     [string]$Action = 'WhatIf',
 
@@ -216,31 +218,53 @@ if (-not (Get-Command az -ErrorAction SilentlyContinue)) {
 }
 
 az account set --subscription $SubscriptionId
+if ($LASTEXITCODE -ne 0) {
+    throw "Unable to select Azure subscription '$SubscriptionId'. Reauthenticate with 'az login' and verify that the subscription is accessible."
+}
 
 $tenantId = az account show --query tenantId --output tsv
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($tenantId)) {
+    throw "Unable to determine the tenant for Azure subscription '$SubscriptionId'. Reauthenticate with 'az login' and rerun the deployment."
+}
+
+$reauthenticationMessage = "Run 'az login --tenant $tenantId', select subscription '$SubscriptionId', and rerun the deployment. If browser authentication is unavailable, add '--use-device-code'."
 if ($SqlEntraAdminLogin) {
     try {
-        $sqlAdmin = az ad user show `
+        $sqlAdminJson = az ad user show `
             --id $SqlEntraAdminLogin `
             --query '{id:id,login:userPrincipalName}' `
-            --output json | ConvertFrom-Json
+            --output json
+        if ($LASTEXITCODE -ne 0) {
+            throw "Azure CLI exited with code $LASTEXITCODE."
+        }
+        $sqlAdmin = $sqlAdminJson | ConvertFrom-Json
     }
     catch {
-        throw "Unable to resolve SQL administrator '$SqlEntraAdminLogin' as a Microsoft Entra user. Verify the user principal name and reauthenticate interactively with 'az login --tenant $tenantId'."
+        throw "Unable to resolve SQL administrator '$SqlEntraAdminLogin' as a Microsoft Entra user. Verify the user principal name. $reauthenticationMessage"
     }
 }
 else {
     try {
-        $sqlAdmin = az ad signed-in-user show `
+        $sqlAdminJson = az ad signed-in-user show `
             --query '{id:id,login:userPrincipalName}' `
-            --output json | ConvertFrom-Json
+            --output json
+        if ($LASTEXITCODE -ne 0) {
+            throw "Azure CLI exited with code $LASTEXITCODE."
+        }
+        $sqlAdmin = $sqlAdminJson | ConvertFrom-Json
     }
     catch {
-        throw "Unable to resolve the signed-in Microsoft Entra user. Reauthenticate interactively with 'az login --tenant $tenantId', or supply -SqlEntraAdminLogin with a user principal name."
+        throw "Unable to resolve the signed-in Microsoft Entra user. $reauthenticationMessage Alternatively, supply -SqlEntraAdminLogin with a user principal name."
     }
 }
 
-if (-not $sqlAdmin.id -or -not $sqlAdmin.login) {
+if (
+    $null -eq $sqlAdmin -or
+    $null -eq $sqlAdmin.PSObject.Properties['id'] -or
+    $null -eq $sqlAdmin.PSObject.Properties['login'] -or
+    [string]::IsNullOrWhiteSpace("$($sqlAdmin.id)") -or
+    [string]::IsNullOrWhiteSpace("$($sqlAdmin.login)")
+) {
     throw 'The selected Microsoft Entra SQL administrator did not return both an object ID and user principal name.'
 }
 
@@ -251,26 +275,32 @@ if (-not [guid]::TryParse($SqlEntraAdminObjectId, [ref]$parsedObjectId)) {
     throw "The resolved SQL administrator object ID must be a GUID. Received '$SqlEntraAdminObjectId'."
 }
 
-if (-not $VmAdminPassword) {
+$plainTextPassword = ''
+if ($DeployVirtualMachines -and -not $VmAdminPassword) {
     $VmAdminPassword = Read-Host 'Enter a strong VM administrator password' -AsSecureString
 }
 
-$plainTextPassword = [Net.NetworkCredential]::new('', $VmAdminPassword).Password
-if (
-    $plainTextPassword.Length -lt 12 -or
-    $plainTextPassword.Length -gt 72 -or
-    $plainTextPassword -notmatch '[a-z]' -or
-    $plainTextPassword -notmatch '[A-Z]' -or
-    $plainTextPassword -notmatch '[0-9]' -or
-    $plainTextPassword -notmatch '[!@$%*_\-+=]' -or
-    $plainTextPassword -notmatch '^[a-zA-Z0-9!@$%*_\-+=]+$' -or
-    $plainTextPassword.IndexOf(
-        $VmAdminUsername,
-        [StringComparison]::OrdinalIgnoreCase
-    ) -ge 0
-) {
-    $plainTextPassword = $null
-    throw 'The VM password must be 12-72 characters, exclude the username, and contain lowercase, uppercase, numeric, and ! @ $ % * _ - + = characters only.'
+if ($VmAdminPassword) {
+    $plainTextPassword = [Net.NetworkCredential]::new('', $VmAdminPassword).Password
+}
+
+if ($DeployVirtualMachines) {
+    if (
+        $plainTextPassword.Length -lt 12 -or
+        $plainTextPassword.Length -gt 72 -or
+        $plainTextPassword -notmatch '[a-z]' -or
+        $plainTextPassword -notmatch '[A-Z]' -or
+        $plainTextPassword -notmatch '[0-9]' -or
+        $plainTextPassword -notmatch '[!@$%*_\-+=]' -or
+        $plainTextPassword -notmatch '^[a-zA-Z0-9!@$%*_\-+=]+$' -or
+        $plainTextPassword.IndexOf(
+            $VmAdminUsername,
+            [StringComparison]::OrdinalIgnoreCase
+        ) -ge 0
+    ) {
+        $plainTextPassword = $null
+        throw 'The VM password must be 12-72 characters, exclude the username, and contain lowercase, uppercase, numeric, and ! @ $ % * _ - + = characters only.'
+    }
 }
 
 $templateFile = Join-Path $PSScriptRoot 'main.bicep'
@@ -288,10 +318,13 @@ $deploymentParameters = @(
     "prefix=$Prefix"
     "databaseMode=$DatabaseMode"
     "sqlMiPricingModel=$SqlMiPricingModel"
+    "deployVirtualMachines=$($DeployVirtualMachines.IsPresent.ToString().ToLowerInvariant())"
     "sqlEntraAdminObjectId=$SqlEntraAdminObjectId"
     "sqlEntraAdminLogin=$SqlEntraAdminLogin"
     "vmAdminUsername=$VmAdminUsername"
-    "vmAdminPassword=$plainTextPassword"
+    if ($VmAdminPassword) {
+        "vmAdminPassword=$plainTextPassword"
+    }
 )
 
 try {

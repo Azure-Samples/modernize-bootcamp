@@ -15,8 +15,8 @@ are separate concerns.
 
 | Boundary | Components |
 | --- | --- |
-| Bootstrap | Resource group, RBAC-enabled Key Vault, VM secrets, separate code build/deploy managed identities |
-| Primary | Database VNet, Windows and Ubuntu VMs without public IPs, Bastion, Azure Container Registry, Database Migration Service, optional Azure SQL Database |
+| Bootstrap | Resource group, RBAC-enabled Key Vault, optional VM secrets, separate code build/deploy managed identities |
+| Primary | Database VNet, Azure Container Registry, Database Migration Service, optional Azure SQL Database, and opt-in private Windows/Ubuntu VMs with Bastion |
 | Secondary | Database and application VNets, peering, Log Analytics, internal zone-redundant Container Apps environment, placeholder Container App, and default SQL Managed Instance |
 | Global | Front Door Premium, endpoint, route, and Private Link origin |
 | Automation | AZD hook, direct-deployment script, optional GitHub OIDC identities/environments/workflow, cleanup script |
@@ -31,9 +31,9 @@ flowchart TB
     APP -->|Managed identity / AcrPull| ACR[Azure Container Registry]
 
     subgraph Primary["Primary resource group"]
-        BASTION[Azure Bastion]
-        WIN[Windows VM]
-        LINUX[Ubuntu VM]
+        BASTION[Optional Azure Bastion]
+        WIN[Optional Windows VM]
+        LINUX[Optional Ubuntu VM]
         DMS[Database Migration Service]
         SQLDB[(Azure SQL Database)]
         ACR
@@ -129,8 +129,8 @@ updates.
   resource groups, role assignments, and a custom role
 - Microsoft Graph access to resolve the signed-in Entra user or an explicitly
   supplied Entra administrator user principal name
-- regional capacity and quota for VMs, DMS, zone-redundant Container Apps, and
-  the selected database service
+- regional capacity and quota for DMS, zone-redundant Container Apps, the
+  selected database service, and VMs when optional compute is enabled
 
 Authenticate:
 
@@ -152,18 +152,26 @@ The pre-provision hook:
 
 1. selects the Azure subscription and regions
 2. uses the signed-in Entra user as the SQL administrator
-3. creates or recovers a compliant VM password in the local AZD environment
-4. defaults to SQL Managed Instance with the Freemium pricing model
-5. accepts `LAB04_SQL_MI_PRICING_MODEL=Regular` when the instructor determines
+3. leaves the optional VMs and Bastion disabled by default
+4. creates or recovers a compliant VM password only when optional compute is enabled
+5. defaults to SQL Managed Instance with the Freemium pricing model
+6. accepts `LAB04_SQL_MI_PRICING_MODEL=Regular` when the instructor determines
    that the subscription or region cannot use Freemium
 
-After Bicep succeeds, the post-provision hook imports the repository-level
-`data\eshop.bacpac` as `eshop_ai`. It uses the signed-in Entra administrator,
-automatically obtains the deployer's public IPv4 address from
-`api.ipify.org`, and grants only that `/32` temporary access. For Azure SQL it
-temporarily enables the public endpoint and adds a server firewall rule. For
-SQL MI it adds a temporary TCP 3342 NSG rule. The hook removes its rule and
-restores Azure SQL's original public-network setting even when import fails.
+After Bicep succeeds, the post-provision hook finds the Front Door managed
+private endpoint request on the Container Apps environment. It approves only
+the request whose description exactly matches the Bicep output, rejects
+unknown or duplicate pending requests, verifies the connection and origin,
+and waits for the Front Door endpoint to become healthy. This connection is
+required whether or not the optional VMs and Bastion are deployed.
+
+The hook then imports the repository-level `data\eshop.bacpac` as `eshop_ai`.
+It uses the signed-in Entra administrator, automatically obtains the deployer's
+public IPv4 address from `api.ipify.org`, and grants only that `/32` temporary
+access. For Azure SQL it temporarily enables the public endpoint and adds a
+server firewall rule. For SQL MI it adds a temporary TCP 3342 NSG rule. The
+hook removes its rule and restores Azure SQL's original public-network setting
+even when import fails.
 
 The hook automatically installs pinned Microsoft.SqlPackage `170.5.96` into
 the ignored project-local
@@ -176,6 +184,24 @@ PowerShell 7 and the .NET SDK.
 Rerunning `azd up` preserves an existing `eshop_ai` database and skips the
 import before making any network change. The deployment never drops or
 replaces an existing database.
+
+### Optional VMs and Bastion
+
+The Windows VM, Ubuntu VM, their NSG and subnets, Azure Bastion, and VM
+credential secrets are not deployed by default. Enable them before
+provisioning:
+
+```powershell
+azd env set LAB04_DEPLOY_VIRTUAL_MACHINES true
+azd up
+```
+
+The pre-provision hook generates or recovers `LAB04_VM_ADMIN_PASSWORD` only
+when this setting is `true`. Supplying an existing password remains supported.
+Set the value back to `false` to omit compute from subsequent incremental
+deployments. ARM incremental mode does not delete VMs, Bastion, subnets, or
+secrets that were already deployed; remove those existing resources explicitly
+or recreate the environment when they are no longer required.
 
 ### Container App configuration
 
@@ -224,10 +250,10 @@ The values map to the Bicep `primaryLocation`, `secondaryLocation`, and
 `applicationLocation` parameters, respectively. AZD environment values persist
 for subsequent deployments of that environment.
 
-Confirm VM, DMS, SQL MI or Azure SQL, and zone-redundant Container Apps
-availability and quota before selecting different regions. Do not change
-locations in place for an environment that already contains regional
-resources. Use a new AZD environment or remove the existing deployment first.
+Confirm DMS, SQL MI or Azure SQL, zone-redundant Container Apps, and optional
+VM availability and quota before selecting different regions. Do not change
+locations in place for an environment that already contains regional resources.
+Use a new AZD environment or remove the existing deployment first.
 
 The signed-in deployment user is the default and requires no SQL administrator
 input. To select a different Entra user, set the optional override before
@@ -261,8 +287,8 @@ Freemium provides 4 vCores, 64 GB of storage, and 720 vCore-hours per month for
 12 months on one eligible instance per subscription. The paid `Regular` model
 uses the same General Purpose v2 lab shape but incurs normal Azure charges.
 
-AZD local state under `.azure/<environment>` can contain generated VM
-credentials and must not be committed or shared.
+When optional compute is enabled, AZD local state under `.azure/<environment>`
+can contain generated VM credentials and must not be committed or shared.
 
 ## Enable participant SQL MI access
 
@@ -506,7 +532,7 @@ This is a training deployment, not a complete production landing zone.
 
 ### Intentionally private
 
-- VMs have no public IP addresses and are accessed through Bastion.
+- When enabled, VMs have no public IP addresses and are accessed through Bastion.
 - Azure SQL disables public database access. SQL MI retains private VNet
   connectivity and enables its public data endpoint for the migration lab.
 - The Container Apps environment is internal.
@@ -517,7 +543,7 @@ This is a training deployment, not a complete production landing zone.
 ### Intentionally public or simplified
 
 - Front Door is the public application entry point.
-- Bastion exposes its managed public endpoint.
+- When enabled, Bastion exposes its managed public endpoint.
 - ACR Basic retains public network access for GitHub-hosted runners, but its
   admin account is disabled and access uses scoped RBAC.
 - SQL MI public TCP 3342 remains blocked until a participant script adds one

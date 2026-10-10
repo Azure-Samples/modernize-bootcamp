@@ -52,7 +52,7 @@ Lab 04 modules in dependency order:
 
 1. Bootstrap Key Vault plus separate build, deployment, and retail runtime
    managed identities.
-2. Primary network, VMs, Bastion, ACR, DMS, and Azure SQL when selected.
+2. Primary network, ACR, DMS, optional VMs and Bastion, and Azure SQL when selected.
 3. Secondary database network, application network, Container Apps, monitoring,
    and SQL MI when selected.
 4. Front Door Premium with a Private Link origin.
@@ -93,8 +93,8 @@ hyphens are rejected.
 
 The application environment is internal and zone redundant. Front Door Premium
 reaches it through Private Link. Database and application VNets are
-bidirectionally peered. The primary VMs have no public IP addresses and are
-reached through Azure Bastion.
+bidirectionally peered. When enabled, the primary VMs have no public IP
+addresses and are reached through Azure Bastion.
 
 ACR intentionally retains public network access on the Basic SKU so
 GitHub-hosted runners can push images. Its administrator account is disabled.
@@ -223,5 +223,5 @@ Remove the active environment only after completing dependent labs:
 azd down --purge
 ```
 
-AZD environment files can contain generated VM credentials. They are local
-state and must never be committed or printed.
+When optional compute is enabled, AZD environment files can contain generated
+VM credentials. They are local state and must never be committed or printed.
