@@ -2,6 +2,17 @@
 
 Now that the database is migrated to Azure, let us use the power of AI for some easy applications out of the database. In this exercise, you will connect Azure AI to the SQL Managed Instance and create an advertisement for one of the product using AI.
 
+> [!NOTE] This lab requires additional Azure resources to be deployed.   
+> - Azure Foundry resource
+> - Foundry project
+> - Model deployment
+> 
+> They must follow a certain naming convention.  Failing to do so, will block you from creating those Azure resources.
+> 
+> - Azure Foundry resource: caldova-lab08-ai-@lab.LabInstance.Id
+> - Foundry project: caldova-lab08-proj-@lab.LabInstance.Id
+> - Model deployment: gpt-5-mini-@lab.LabInstance.Id
+
 ## Connect Azure SQL Managed Instance to Microsoft Foundry
 
 This guide discovers an existing Azure SQL Managed Instance and connects it to a model deployed in Microsoft Foundry (formerly Azure AI Foundry). The SQL managed instance uses its existing system-assigned managed identity, so no API key is stored in SQL.
@@ -204,7 +215,7 @@ If no matching model is available, don't run the deployment command. Set `$locat
 All Foundry and OpenAI resources in the remaining steps use `$resourceGroup`. Set the deployment name:
 
 ```powershell
-$modelDeployment = $modelName
+$modelDeployment = caldova-lab08-ai-@lab.LabInstance.Id
 ```
 
 If the model isn't offered in that region, set `$location` to another Foundry-supported Azure region. The Foundry resources will still be created in the SQL managed instance resource group stored in `$resourceGroup`.
