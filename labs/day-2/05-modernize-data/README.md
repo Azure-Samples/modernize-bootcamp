@@ -1,5 +1,22 @@
 # Lab 05: Database Modernization Bootcamp
 
+> [!NOTE] This lab requires additional Azure resources to be deployed.   
+> - Azure Storage account
+> - Azure Database Migration Service
+> - Blob container
+> - Blob folder
+> - Azure Database Migration Service (DMS) 
+> - DMS SQL Instance
+> 
+> They must follow a certain naming convention.  Failing to do so, will block you from creating those Azure resources.
+> - Storage account: caldovalab05st@lab.LabInstance.Id
+> - Blob container: sqlmi-backups-@lab.LabInstance.Id
+> - Blob folder: eshop-@lab.LabInstance.Id
+> - DMS: caldova-lab05-sqlmig-@lab.LabInstance.Id
+
+
+An Azure policy in place enforces a certain naming convetion for these resources.
+
 ## SQL Server to Azure SQL Database — Student Migration Challenges
 
 **Scenario:** Migrate the eShop database from SQL Server on VM to Azure SQL Database by using Azure Database Migration Service (DMS).
@@ -158,7 +175,7 @@ Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go 
 
 #### 3. Storage Account
 
-Provision an Azure Storage Account <b>in the same region as your SQL MI </b>and create a Blob container in it to store source database backup. 
+Provision an Azure Storage Account caldovalab05st@lab.LabInstance.Id <b>in the same region as the Azure SQL Managed Instance </b>and create a Blob container sqlmi-backups-@lab.LabInstance.Id in it to store source database backup. 
 
 ![Storage1](./images/Storage_1.png)
 ![Storage3](./images/Storage_3.png)
@@ -174,14 +191,14 @@ Similarly, you will need to grant permission so that the Managed Identity of the
 
 ![Storage10](./images/Storage_10.png)
 
-Create a Blob container in the storage account and a folder within the container.
+Create a Blob container sqlmi-backups-@lab.LabInstance.Id in the storage account and a folder eshop-@lab.LabInstance.Id within the container.
 
 ![Storage11](./images/Storage_11.png)
 ![Storage12](./images/Storage_12.png)
 
 #### 4. Database Migration Service (DMS)
 
-<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS).
+<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS) caldova-lab05-sqlmig-@lab.LabInstance.Id.
 
 ![DMS1](./images/DMS_1.png)
 
@@ -255,7 +272,7 @@ On the next page, configure details as shown.
 
 <b>Note: </b>
 
- DMS needs to configure a SQL datanase to track progress of migration for restartability. 
+ DMS needs to configure a SQL Instance sqlinst-@lab.LabInstance.Id to track progress of migration for restartability. 
  
  What you are entering here is information for that tracking database - not your source or target database. You need not manage this instance for this lab. 
 
