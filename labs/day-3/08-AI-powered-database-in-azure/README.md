@@ -215,7 +215,7 @@ If no matching model is available, don't run the deployment command. Set `$locat
 All Foundry and OpenAI resources in the remaining steps use `$resourceGroup`. Set the deployment name:
 
 ```powershell
-$modelDeployment = caldova-lab08-ai-@lab.LabInstance.Id
+$modelDeployment = "gpt-5-mini-@lab.LabInstance.Id"
 ```
 
 If the model isn't offered in that region, set `$location` to another Foundry-supported Azure region. The Foundry resources will still be created in the SQL managed instance resource group stored in `$resourceGroup`.
@@ -223,7 +223,7 @@ Create a Foundry resource of kind `AIServices`. The custom domain supplies the `
 
 ```powershell
 # Must be globally unique. Use lowercase letters, numbers, and hyphens.
-$foundryResource = Read-Host "Enter a globally unique Foundry resource name"
+$foundryResource = "caldova-lab08-ai-@lab.LabInstance.Id"
 
 az cognitiveservices account create `
     -n $foundryResource `
@@ -255,7 +255,7 @@ Create a Foundry project under the same Foundry resource:
 
 ```powershell
 # The project name doesn't need to be globally unique; it must only be unique within this Foundry resource.
-$foundryProject = Read-Host "Enter a foundry project name - anything unique inside this foundry resource" 
+$foundryProject = "caldova-lab08-proj-@lab.LabInstance.Id" 
 
 az cognitiveservices account project create `
     -n $foundryResource `
