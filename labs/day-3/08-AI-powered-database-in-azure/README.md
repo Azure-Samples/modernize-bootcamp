@@ -360,7 +360,7 @@ instance selected in `$managedInstance` as a login with `ALTER SETTINGS`, such a
 ```sql
 USE [master];
 
-EXEC sys.sp_configure 'external rest endpoint enabled', 
+EXEC sys.sp_configure 'external rest endpoint enabled', 1;
 RECONFIGURE WITH OVERRIDE;
 
 EXEC sys.sp_configure 'external rest endpoint enabled';
@@ -373,7 +373,7 @@ The final result should show `run_value` equal to `1`.
 Connect to the database containing `dbo.Product`. Replace `<target-database>` and `<foundry-resource>`.
 
 Don't put the real database master key password in this Markdown file or source control. Store it in your approved password manager or secret store.
-Replace your `database master` password <u>(minimum 16 characters)</u> and `foundry-resource` with yours.
+Replace the `database master` password with a unique 16-128 character secret (this lab requires at least 16 characters; SQL Server's default minimum is 8) containing characters from at least three of these four categories: uppercase letters, lowercase letters, base-10 digits, and nonalphanumeric symbols. Replace `foundry-resource` with yours.
 
 ```sql
 USE [eshop];
