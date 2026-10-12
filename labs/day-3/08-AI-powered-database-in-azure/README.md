@@ -85,7 +85,7 @@ $location
 - All Foundry and OpenAI resources created by this guide use the same resource group as the SQL managed instance.
 - `sp_invoke_external_rest_endpoint` requires the SQL Managed Instance **SQL Server 2025** or **Always-up-to-date** update policy. Changing from SQL Server 2022 permanently upgrades the internal database format.
 - The documented Azure CLI value is `SqlServer2025`. `AlwaysUpToDate` also supports this feature but can't later be changed back to a version-aligned policy.
-- The OpenAI-compatible v1 endpoint is `https://<foundry-resource>.openai.azure.com/openai/v1/responses`. It doesn't use an `api-version` query parameter.
+- The OpenAI-compatible v1 endpoint is `https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com/openai/v1/responses`. It doesn't use an `api-version` query parameter.
 - The `model` property in the request must contain the **deployment name**, not merely the underlying model name.
 - The v1 API uses the `https://ai.azure.com` token audience. In a database scoped credential, use `{"resourceid":"https://ai.azure.com"}`. The `/.default` suffix used by SDK token scopes isn't included in this credential value.
 - The SQL managed identity needs the **Cognitive Services OpenAI User** role on the Foundry resource.
@@ -219,7 +219,7 @@ $modelDeployment = "gpt-5-mini-@lab.LabInstance.Id"
 ```
 
 If the model isn't offered in that region, set `$location` to another Foundry-supported Azure region. The Foundry resources will still be created in the SQL managed instance resource group stored in `$resourceGroup`.
-Create a Foundry resource of kind `AIServices`. The custom domain supplies the `<foundry-resource>.openai.azure.com` endpoint used later.
+Create a Foundry resource of kind `AIServices`. The custom domain supplies the `caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com` endpoint used later.
 
 ```powershell
 # Must be globally unique. Use lowercase letters, numbers, and hyphens.
@@ -381,7 +381,7 @@ The final result should show `run_value` equal to `1`.
 
 ## 9. Create the database master key and scoped credential
 
-Connect to the database containing `dbo.Product`. Replace `<target-database>` and `<foundry-resource>`.
+Connect to the database containing `dbo.Product`.
 
 Don't put the real database master key password in this Markdown file or source control. Store it in your approved password manager or secret store.
 Replace your `database master` password <u>(minimum 16 characters)</u> and `foundry-resource` with yours.
@@ -404,11 +404,11 @@ IF EXISTS
 (
     SELECT 1
     FROM sys.database_scoped_credentials
-    WHERE [name] = N'https://<foundry-resource>.openai.azure.com'
+    WHERE [name] = N'https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com'
 )
 BEGIN
     ALTER DATABASE SCOPED CREDENTIAL
-        [https://<foundry-resource>.openai.azure.com]
+        [https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com]
     WITH
         IDENTITY = 'Managed Identity',
         SECRET = '{"resourceid":"https://ai.azure.com"}';
@@ -416,7 +416,7 @@ END
 ELSE
 BEGIN
     CREATE DATABASE SCOPED CREDENTIAL
-        [https://<foundry-resource>.openai.azure.com]
+        [https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com]
     WITH
         IDENTITY = 'Managed Identity',
         SECRET = '{"resourceid":"https://ai.azure.com"}';
@@ -430,8 +430,6 @@ The `SECRET` value above isn't an API key. It tells SQL MI which audience to req
 ### Run the following query in SSMS. 
 
 
-Replace `<foundry-resource>` with <b>$foundryResource</b> and `<model-deployment-name>` with <b>$modelDeployment</b> from the Azure CLI steps.
-
 ```sql
 USE [eshop];
 
@@ -441,7 +439,7 @@ DECLARE @response nvarchar(max);
 DECLARE @returnCode int;
 DECLARE @adCopySource nvarchar(max);
 DECLARE @modelDeployment nvarchar(128) =
-    N'<model-deployment-name>';
+    N'gpt-5-mini-@lab.LabInstance.Id';
 
 SELECT @adCopySource =
     CONCAT([Name], N': ', [Description])
@@ -467,10 +465,10 @@ DECLARE @payload nvarchar(max) =
 
 EXEC @returnCode = sys.sp_invoke_external_rest_endpoint
     @url =
-        N'https://<foundry-resource>.openai.azure.com/openai/v1/responses',
+        N'https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com/openai/v1/responses',
     @method = N'POST',
     @credential =
-        [https://<foundry-resource>.openai.azure.com],
+        [https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com],
     @payload = @payload,
     @timeout = 120,
     @retry_count = 2,
@@ -539,7 +537,7 @@ Imagine your next weekend escape: the smell of pine, the sound of a crackling fi
 | `401 Unauthorized` | Confirm the credential uses `{"resourceid":"https://ai.azure.com"}` exactly and allow time for RBAC propagation. |
 | `403 Forbidden` | Confirm the SQL MI principal ID has **Cognitive Services OpenAI User** on the Foundry resource itself. |
 | `404` or model not found | Use the deployment name, not the model name, in the payload's `model` property. |
-| Credential URL mismatch | Confirm the credential is named exactly `https://<foundry-resource>.openai.azure.com` and the request uses the same host. |
+| Credential URL mismatch | Confirm the credential is named exactly `https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com` and the request uses the same host. |
 | Connection or DNS failure | Confirm outbound HTTPS 443 from the MI subnet to `*.openai.azure.com`, including NSG, route table, firewall, and DNS configuration. |
 | `Product ID 9 was not found` | Use an existing product ID or load the expected sample data. |
 | Empty `ModelResponse` with a successful call | Inspect `FullResponse`; the response shape might differ for the selected model or API behavior. |
