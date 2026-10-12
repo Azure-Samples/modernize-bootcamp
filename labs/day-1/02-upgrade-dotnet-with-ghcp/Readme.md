@@ -34,9 +34,7 @@ Caldova Retail is already running on-premises, on a Windows Server behind IIS. C
 
    ![Open Edge](./images/open-edge.png)
 
-2. Open the bookmarked application, running on-premises:
-
-   ![Open Application](./images/open-eshop-on-prem.png)
+2. In the browser type this link: +++https://app01+++. It may take a few seconds to load.
 
 Walk around the storefront for a minute and notice how it behaves:
 
@@ -59,7 +57,7 @@ Walk around the storefront for a minute and notice how it behaves:
 
    ![Skillable Events single sign-on](./images/sso-skillable.png)
 
-   > 💡 If the sign-in keeps returning to the same page or shows an error, wait a few minutes and try again; this is a transient error. If it takes you to the Skillable GH Enterprise main page [Skillable-Events GH](https://github.com/enterprises/Skillable-Events) search for "caldova-retail" in the search bar and access the repository that way.
+   > 💡 If the sign-in keeps reloading and returning to the same page or shows an error, wait a few minutes and try again; this is a transient error.
 
 2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
 3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead. If it prompts you to stay signed in, hit **Yes**.
@@ -106,7 +104,7 @@ If VS Code opens the folder in **Restricted Mode**, select **Manage** in the ban
 
 You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
 
-**4. Give the app its database password.** The app reads its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions. Leave the server, database, and user exactly as they are.
+**4. Give the app its database password.** The app reads its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user exactly as they are.
 
 ## ▶️ Run the App
 
