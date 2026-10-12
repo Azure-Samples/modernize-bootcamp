@@ -9,7 +9,14 @@ This guide discovers an existing Azure SQL Managed Instance and connects it to a
 All Azure control-plane commands use Azure CLI. Run them from PowerShell. The database configuration and model call are T-SQL because Azure CLI doesn't execute queries inside Azure SQL Managed Instance.
 
 
-## 1. Connect to the SQL Managed Instance and find the product 
+## 1. Add an NSG rule to connect to SQL MI. Connect to the SQL Managed Instance and find the product 
+
+ Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbount access to port 3342.  If not, add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
+
+ ![NSG1](../../day-2/05-modernize-data/images/NSG1.png)
+
+
+
 Launch SSMS and connect to the SQL Managed instance.  You can browse for Azure SQL MI as shown here.
 Remember to use the public endpoint on port 3342 and use Entra with password option.
 
@@ -370,10 +377,10 @@ The final result should show `run_value` equal to `1`.
 
 ## 9. Create the database master key and scoped credential
 
-Connect to the database containing `dbo.Product`. Replace `<target-database>` and `<foundry-resource>`.
+Connect to the database containing `dbo.Product`. 
 
 Don't put the real database master key password in this Markdown file or source control. Store it in your approved password manager or secret store.
-Replace the `database master` password with a unique 16-128 character secret (this lab requires at least 16 characters; SQL Server's default minimum is 8) containing characters from at least three of these four categories: uppercase letters, lowercase letters, base-10 digits, and nonalphanumeric symbols. Replace `foundry-resource` with yours.
+Replace the  `database master` password with a unique 16-128 character secret (this lab requires at least 16 characters; SQL Server's default minimum is 8) containing characters from at least three of these four categories: uppercase letters, lowercase letters, base-10 digits, and nonalphanumeric symbols. Replace `foundry-resource` with yours.
 
 ```sql
 USE [eshop];
