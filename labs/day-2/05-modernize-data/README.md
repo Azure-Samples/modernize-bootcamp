@@ -8,11 +8,13 @@
 > - Azure Database Migration Service (DMS) 
 > - DMS SQL Instance
 > 
-> They must follow a certain naming convention.  Failing to do so, will block you from creating those Azure resources.
+> They must follow a certain naming convention.  All resources you create must end with i.e. have a suffix @lab.LabInstance.Id.  Failing to do so, will block you from creating those Azure resources.
+>
 > - Storage account: caldovalab05st@lab.LabInstance.Id
 > - Blob container: sqlmi-backups-@lab.LabInstance.Id
 > - Blob folder: eshop-@lab.LabInstance.Id
 > - DMS: caldova-lab05-sqlmig-@lab.LabInstance.Id
+> - DMS SQL Instance: caldova-lab05-sqlinst-@lab.LabInstance.Id
 
 
 An Azure policy in place enforces a certain naming convetion for these resources.
