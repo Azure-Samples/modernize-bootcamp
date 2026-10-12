@@ -31,6 +31,14 @@ Save your results in a location provided by your instructor or in a local workin
 6. bounded draft plans for the first modernization wave
 7. assumptions, unknowns, and decisions that require human owners
 
+> [!NOTE]
+> **You are not expected to be a developer, and you do not have to fill in these
+> tables by hand.** Throughout this lab, each register and matrix is shown as a
+> completed **worked sample** so you can see what the assessment produces and how
+> that information is used to plan a migration. Your goal is to understand the
+> workflow — running the assessments, comparing the two tools, and recognizing a
+> good finding — not to author a full professional analysis.
+
 Generated reports can contain source details and architectural information. Review and redact them before publishing or sharing them outside the workshop.
 
 ## 🏦 Application estate
@@ -65,11 +73,15 @@ Neither output is automatically authoritative. Repository code, build results, t
 
 This lab assumes a Skillable Windows workstation. Git, GitHub CLI, VS Code, GitHub Copilot, Visual Studio build tools, and the modernization tools should already be installed.
 
+> 📂 **Where to run commands:** This lab mixes two kinds of code blocks. Blocks marked **💻 Run this in the terminal** are commands you run yourself in a PowerShell terminal — after you clone the hub in step 2️⃣, run them from the hub root (`modernize_sample_demo`) unless a step says otherwise. Blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to GitHub Copilot in VS Code, not terminal commands.
+
 ### 1. Open PowerShell
 
 Use a regular PowerShell terminal. Do not run these commands from inside another application repository.
 
 ### 2. Verify the command-line tools
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 git --version
@@ -82,11 +94,15 @@ Each command should print version or help information.
 
 If `modernize` is not recognized, install the current Windows package:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 winget install GitHub.Copilot.modernization.agent
 ```
 
 After installation, close PowerShell, open a new PowerShell terminal, and run:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 modernize --help
@@ -99,11 +115,15 @@ modernize --help
 
 Check whether GitHub CLI is already authenticated:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 gh auth status
 ```
 
 If it is not authenticated, run:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 gh auth login
@@ -116,6 +136,8 @@ Choose:
 3. **Login with a web browser**
 
 Complete the browser sign-in, then verify again:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 gh auth status
@@ -141,6 +163,8 @@ If an extension is missing, search for its exact name and install the verified p
 
 In PowerShell, choose a working folder and run:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 git clone --recurse-submodules https://github.com/Skillable-Events/modernize_sample_demo.git
 Set-Location .\modernize_sample_demo
@@ -148,11 +172,15 @@ Set-Location .\modernize_sample_demo
 
 If you already cloned the hub without its submodules, run this instead from the hub root:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 git submodule update --init --recursive
 ```
 
 ### 2. Initialize the demo
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 .\scripts\Initialize-Demo.ps1
@@ -161,6 +189,8 @@ git submodule update --init --recursive
 The script prepares the local integration folders and data used by the application estate.
 
 ### 3. Check prerequisites
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 .\scripts\Test-Prerequisites.ps1
@@ -179,6 +209,8 @@ Do not treat missing build prerequisites as modernization findings. Fix the work
 
 ### 4. Establish a build baseline
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 .\scripts\Build-All.ps1
 ```
@@ -186,6 +218,8 @@ Do not treat missing build prerequisites as modernization findings. Fix the work
 An assessment from a broken or incomplete baseline can confuse environmental failures with application modernization work. Record the build result, including any known pre-existing failure.
 
 Running the complete application is not required for this assessment lab. If your instructor asks you to demonstrate it, use the hub scripts:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 .\scripts\Start-Demo.ps1
@@ -197,11 +231,15 @@ Running the complete application is not required for this assessment lab. If you
 
 Record the hub SHA:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 git rev-parse HEAD
 ```
 
 Record each pinned component SHA:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 git submodule status
@@ -214,6 +252,8 @@ Keep this output with your final handoff. A branch name such as `main` can move;
 ## 3️⃣ Open the multi-repository workspace
 
 From the hub root, run:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 code .\contoso-legacy-bank-multi-repo.code-workspace
@@ -259,6 +299,8 @@ The extension UI can evolve. Labels might vary slightly, but the assessment choi
 
 If the extension cannot distinguish projects in the multi-root workspace, open the relevant component in a separate VS Code window:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 code .\apps\contoso-legacy-bank-accounts
 ```
@@ -281,14 +323,29 @@ Do not select **Create Plan** yet. First complete all five assessments and the a
 
 ### 3. Build the finding register
 
-Capture findings in this format:
+A **finding register** is simply a running list of the issues the assessment
+discovered, with enough detail that someone could act on each one later. In a
+real project your team fills this in as you review each repository.
+
+> [!NOTE]
+> **For non-developers:** You do **not** need to complete this table yourself in
+> the lab. The rows below are a **worked sample** so you can see what a good
+> finding looks like. Each column answers a question an owner will ask before
+> funding the work: *What is wrong? Where is the proof? How risky is it? What
+> would we do about it?* Read the sample, then focus on recognizing these same
+> ingredients in the real assessment output.
+
+Findings are captured in this format (sample rows shown):
 
 | ID | Repository | Finding | Priority | File or symbol evidence | Consumer or dependency impact | Proposed direction | Confidence / unknowns |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| VS-01 | Accounts |  |  |  |  |  |  |
-| VS-02 | Statements |  |  |  |  |  |  |
+| VS-01 | Accounts | Data access uses Entity Framework 6 against a local-only SQL LocalDB database, which cannot run in Azure as-is | High | `AccountsService` data layer and `App.config` connection string | Portal and Statements both read account data through this service, so any change must keep their calls working | Move to EF Core and Azure SQL, keeping the existing service operations unchanged at first | High confidence it must change; unknown how much data must be migrated |
+| VS-02 | Statements | Statement API (ASP.NET Web API 2) calls the Accounts service with no timeout or retry, so a slow account service can hang statement requests | Medium | `StatementsController` and its WCF client configuration | Portal depends on statement requests completing, so failures surface directly to customers | Add resilient client behavior (timeouts/retries) when moving to ASP.NET Core | Medium confidence; need runtime data on how often this fails today |
 
-At minimum, investigate these areas:
+At minimum, the assessment investigates these areas. (The jargon in the right
+column is the kind of detail a developer would examine — you do not need to
+recognize every term; the point is that each repository is examined for both
+its own code and how it connects to the others.)
 
 | Repository | Assessment focus |
 | --- | --- |
@@ -302,6 +359,8 @@ At minimum, investigate these areas:
 ### 4. Check that assessment did not change source
 
 From the hub root:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 git status --short
@@ -321,6 +380,8 @@ Repository assessments do not automatically prove how a contract is consumed els
 Return to `contoso-legacy-bank-multi-repo.code-workspace`, open **Copilot Chat**, and use **Ask** or **Agent** mode in a read-only manner. Start with `#codebase` so VS Code searches the indexed workspace.
 
 ### 2. Submit the application-wide assessment prompt
+
+> 🤖 **Paste this into Copilot Chat.**
 
 ```plaintext
 #codebase Analyze all five Contoso Legacy Bank application repositories as one
@@ -347,16 +408,22 @@ implementable repository work packages and human decision gates.
 
 Ask focused follow-ups instead of accepting the first response:
 
+> 🤖 **Paste this into Copilot Chat.**
+
 ```plaintext
 Show the code evidence for every producer and consumer in the WCF dependency
 chain. Which consumers would break if the account service changed first?
 ```
+
+> 🤖 **Paste this into Copilot Chat.**
 
 ```plaintext
 Trace statement generation from the portal request through the account service,
 statement API, file queue, document worker, and PDF result. Mark every contract
 that needs a compatibility or coexistence strategy.
 ```
+
+> 🤖 **Paste this into Copilot Chat.**
 
 ```plaintext
 Which recommendations are directly supported by code, which are inferred, and
@@ -365,13 +432,27 @@ which require a product owner, security owner, data owner, or operations owner?
 
 ### 4. Capture the contract matrix
 
+A **contract** is the agreement about how one application talks to another — the
+messages they exchange and what each side expects. If you change one app, you
+must not break the "contract" the other apps rely on.
+
+> [!NOTE]
+> **For non-developers:** The table below is a **worked sample**, not an exercise
+> to complete. Think of each row as "App A hands something to App B." This matrix
+> matters because it shows the **hidden connections** between repositories — the
+> things most likely to break during a migration. The migration order and the
+> "coexistence" plans (keeping old and new versions working together) come
+> directly from this picture.
+
+Sample contract matrix:
+
 | Producer | Consumer | Contract or data | Evidence | Current failure behavior | Modernization/coexistence concern |
 | --- | --- | --- | --- | --- | --- |
-| Accounts | Portal | WCF operations and faults |  |  |  |
-| Accounts | Statements | WCF operations and DTOs |  |  |  |
-| Statements | Portal | HTTP routes and payloads |  |  |  |
-| Statements | Documents | File-queue message |  |  |  |
-| Batch | Accounts/data store | CSV and import semantics |  |  |  |
+| Accounts | Portal | WCF operations and faults | `IAccountService` operations called by the Portal client | Portal shows an error dialog and the action stops | Portal must keep working while Accounts moves to a new API, so the old operations need a compatibility path |
+| Accounts | Statements | WCF operations and DTOs | Statements' account client and shared data objects | Statement request fails if the account call fails | Statements and Accounts cannot both change in the same release without coordination |
+| Statements | Portal | HTTP routes and payloads | Web API 2 routes the Portal calls for statement status | Portal cannot show statement status | Keep the same routes/responses when moving Statements to ASP.NET Core |
+| Statements | Documents | File-queue message | Message dropped on the shared file queue | Document job is never produced; no error shown to the user | Replace the file queue with managed messaging without losing in-flight jobs |
+| Batch | Accounts/data store | CSV and import semantics | Nightly CSV import into the accounts data | Duplicate or partial import corrupts balances | Import must stay idempotent (safe to re-run) after the data store moves to Azure SQL |
 
 The output should make dependencies visible, not merely list technologies.
 
@@ -385,12 +466,16 @@ The hub contains `.github\modernize\repos.json`. It lists the five application r
 
 From the hub root:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 gh auth status
 modernize --help
 ```
 
 ### 2. Inspect the repository configuration
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 Get-Content .\.github\modernize\repos.json
@@ -405,6 +490,8 @@ Confirm that it lists:
 - `contoso-legacy-bank-batch`
 
 ### 3. Run the supplied assessment-only wrapper
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 .\scripts\Invoke-ModernizeAssessment.ps1
@@ -435,12 +522,16 @@ The repository config allows the CLI to produce per-repository findings and an a
 
 List the output:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 Get-ChildItem .\artifacts\modernize-assessment -Recurse -File |
   Select-Object FullName, Length, LastWriteTime
 ```
 
 Open the generated Markdown reports in VS Code:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 code .\artifacts\modernize-assessment
@@ -460,6 +551,8 @@ Do not publish raw reports until they have been reviewed for source details, int
 ### 5. Optional: run the interactive CLI
 
 The same CLI also provides a text user interface:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 modernize
@@ -483,24 +576,44 @@ Do not continue into plan execution or upgrade.
 
 ## 7️⃣ Compare and reconcile the results
 
-The goal is not to decide which tool "won." Determine which findings are supported by evidence and which gaps require more investigation.
+You ran two assessments: the interactive one in VS Code and the Modernization
+CLI. This step compares them. The goal is **not** to decide which tool "won" —
+it is to see where they agree (higher confidence), where they disagree (needs a
+closer look), and what neither tool could know (gaps for a human to decide).
 
 ### 1. Compare coverage
 
+> [!NOTE]
+> **For non-developers:** The table below is a **worked sample** showing how a
+> reviewer records whether each assessment answered an important question. You do
+> not need to fill it in. The value here is the habit: when two tools agree you
+> can trust the finding more; when they disagree, you go look at the actual code
+> before believing either one.
+
+Sample coverage comparison:
+
 | Question | VS Code result | CLI result | Evidence checked | Reconciled conclusion |
 | --- | --- | --- | --- | --- |
-| Were all five repositories analyzed? |  |  |  |  |
-| Were frameworks and packages detected correctly? |  |  |  |  |
-| Were WCF producers and consumers connected? |  |  |  |  |
-| Were HTTP, CSV, file-queue, and PDF contracts identified? |  |  |  |  |
-| Were data and LocalDB assumptions identified? |  |  |  |  |
-| Were test and observability gaps identified? |  |  |  |  |
-| Were findings supported by files and symbols? |  |  |  |  |
-| Did the result separate facts, assumptions, and unknowns? |  |  |  |  |
-| Did it propose safe coexistence and rollback? |  |  |  |  |
-| Did it aggregate risks at application level? |  |  |  |  |
+| Were all five repositories analyzed? | Yes, one at a time | Yes, all five from one config file | Output files for Portal, Accounts, Statements, Documents, Batch | Agree — full coverage |
+| Were frameworks and packages detected correctly? | Yes | Yes | Project files and build output | Agree |
+| Were WCF producers and consumers connected? | Partly — strong per-repo detail | Yes — shown in the aggregate report | Account service callers in Portal and Statements | CLI aggregate was clearer on cross-repo links |
+| Were HTTP, CSV, file-queue, and PDF contracts identified? | Yes | Yes | Contract matrix from §5 | Agree |
+| Were data and LocalDB assumptions identified? | Yes | Yes | Accounts connection string | Agree — a known blocker |
+| Were test and observability gaps identified? | Yes | Partly | Missing tests around statement failures | Needs follow-up |
+| Were findings supported by files and symbols? | Yes | Mostly | Spot-checked a few findings | Agree, with spot checks |
+| Did the result separate facts, assumptions, and unknowns? | Yes | Partly | Prompt required it in VS Code | VS Code was clearer here |
+| Did it propose safe coexistence and rollback? | Yes | Partly | Coexistence notes in §5 | Needs a human-owned plan |
+| Did it aggregate risks at application level? | Limited | Yes | CLI aggregate report | CLI stronger at the whole-app view |
 
 ### 2. Reconcile disagreements
+
+"Reconcile" just means: when the two tools disagree, go find the real answer in
+the code or build output, then write down the decision and who owns it.
+
+> [!NOTE]
+> **For non-developers:** The row below is a **sample** of how a disagreement is
+> resolved. Notice the last column: the final call belongs to a **human owner**,
+> not to either tool. AI assessments suggest; people decide.
 
 For every important disagreement:
 
@@ -510,15 +623,17 @@ For every important disagreement:
 4. record the evidence and confidence
 5. assign unresolved decisions to a human owner
 
-Use this register:
+Sample reconciliation register:
 
 | ID | Topic | VS Code conclusion | CLI conclusion | Verified evidence | Decision | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| RC-01 |  |  |  |  |  |  |
+| RC-01 | Does the Statements service call Accounts with a timeout? | No timeout found (risk) | Not flagged | Checked the Statements client config — no timeout is set | Confirmed as a real risk; add resilient client during migration | Statements repo owner |
 
 ### 3. Identify assessment gaps
 
-A complete report can still be based on incomplete evidence. Look for:
+A complete-looking report can still be based on incomplete evidence. These are
+the kinds of things an assessment often **cannot** see on its own — they usually
+need a person who knows the business or operations:
 
 - untested runtime failure paths
 - missing performance and volume data
@@ -537,15 +652,24 @@ Score work by dependency and risk, not only by how old a framework is.
 
 ### 1. Build the prioritization matrix
 
-Use **High**, **Medium**, or **Low** consistently:
+> [!NOTE]
+> **For non-developers:** This is a **worked sample**, not a task to complete.
+> Prioritization is how a team decides **what to modernize first**. A dependency
+> that many apps rely on (like the account service) usually goes early, because
+> everything else waits on it. The ratings below (High/Medium/Low) are a sample
+> judgment — in a real project owners agree on them together. The far-right
+> "Recommended wave" column is the payoff: it turns all the earlier analysis into
+> an order of work.
+
+Rate each item **High**, **Medium**, or **Low**. Sample matrix:
 
 | Repository/capability | Business impact | Technical risk | Dependency criticality | Test readiness | Estimated effort | Coexistence need | Recommended wave |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Account contracts and data |  |  |  |  |  |  |  |
-| Statement orchestration |  |  |  |  |  |  |  |
-| Document generation |  |  |  |  |  |  |  |
-| Batch reconciliation |  |  |  |  |  |  |  |
-| Customer portal |  |  |  |  |  |  |  |
+| Account contracts and data | High | High | High | Low | High | High | Wave 2 (foundation) |
+| Statement orchestration | High | Medium | Medium | Low | Medium | High | Wave 3 |
+| Document generation | Medium | Medium | Low | Low | Medium | Medium | Wave 4 |
+| Batch reconciliation | Medium | Medium | Low | Low | Medium | Medium | Wave 4 |
+| Customer portal | High | Low | Low | Medium | Medium | Low | Wave 5 (after services are stable) |
 
 ### 2. Propose modernization waves
 
@@ -583,6 +707,8 @@ Create plans only after the assessment findings have been reconciled. Keep each 
 
 ### 1. Locate assessment JSON files
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 $assessmentFiles = @(
   Get-ChildItem .\artifacts\modernize-assessment `
@@ -599,6 +725,8 @@ Identify the assessment file that contains the findings for the repository you a
 ### 2. Create a plan from reviewed evidence
 
 The following example creates a plan for the Accounts repository. Replace the placeholder with the verified assessment JSON path:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 $accountsAssessment = Read-Host 'Enter the verified Accounts assessment JSON path'
@@ -645,33 +773,49 @@ You may edit a draft plan for review. **Do not run it in this lab.**
 
 ## 🔟 Final handoff
 
-Your final handoff should be understandable to an architect or repository owner who did not attend the lab.
+The final handoff is the short report you would give to an architect or
+repository owner who did not attend the lab. It gathers everything above into a
+few summary tables they can act on.
+
+> [!NOTE]
+> **For non-developers:** The three tables below are **worked samples** of that
+> report — you do not need to produce them yourself in the lab. Together they
+> answer an owner's three questions: *What did we learn?* (assessment summary),
+> *In what order will we modernize?* (roadmap summary), and *What is the first
+> concrete piece of work?* (work-package summary). The commit SHAs are simply the
+> exact snapshot of code that was assessed, so the report can be trusted later.
 
 ### Assessment summary
 
+Sample (values are illustrative):
+
 | Item | Result |
 | --- | --- |
-| Hub commit SHA |  |
-| Component commit SHAs |  |
-| Baseline build |  |
-| VS Code assessments completed |  |
-| CLI repositories completed |  |
-| Confirmed high-priority findings |  |
-| Rejected or unsupported findings |  |
-| Open unknowns |  |
+| Hub commit SHA | `a1b2c3d` (recorded earlier in the lab) |
+| Component commit SHAs | Portal `1111111`, Accounts `2222222`, Statements `3333333`, Documents `4444444`, Batch `5555555` |
+| Baseline build | All five repositories built successfully before assessment |
+| VS Code assessments completed | 5 of 5 |
+| CLI repositories completed | 5 of 5, plus one application-level aggregate |
+| Confirmed high-priority findings | Accounts EF6/LocalDB blocker; Statements missing resilient client |
+| Rejected or unsupported findings | None rejected; a few CLI items needed code spot-checks |
+| Open unknowns | Data volume/migration size; current real-world failure rates |
 
 ### Roadmap summary
 
+Sample roadmap (ordered by dependency):
+
 | Wave | Outcome | Repositories | Prerequisites | Exit evidence | Human approver |
 | --- | --- | --- | --- | --- | --- |
-| 0 |  |  |  |  |  |
-| 1 |  |  |  |  |  |
+| 0 | Baseline recorded and contracts frozen | All | Build baseline, SHAs recorded | Characterization tests in place | Architecture owner |
+| 1 | Account service and data boundary modernized | Accounts | Wave 0 complete | Portal and Statements still work against new API | Accounts + data owners |
 
 ### Work-package summary
 
+Sample first work package:
+
 | Work package | Owning repository | Assessment evidence | Dependencies | Success criteria | Rollback/coexistence |
 | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |
+| Move account data to EF Core + Azure SQL | Accounts | Finding VS-01 | Baseline tests from Wave 0 | Existing account operations behave identically; Portal and Statements unaffected | Keep the old service operational until consumers are verified |
 
 ### Completion checklist
 
@@ -695,6 +839,8 @@ Your final handoff should be understandable to an architect or repository owner 
 ### A component folder is empty or missing
 
 From the hub root:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 git submodule update --init --recursive
@@ -720,17 +866,23 @@ Use the Skillable-provided installation. If a required component is unavailable,
 
 Install it:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 winget install GitHub.Copilot.modernization.agent
 ```
 
 Close all PowerShell terminals, open a new one, and run:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 modernize --help
 ```
 
 ### GitHub authentication or entitlement fails
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 gh auth status
@@ -751,6 +903,8 @@ Confirm the browser and VS Code use the same intended GitHub account and that th
 ### The modernization extension does not offer the expected project
 
 Open that component repository in its own VS Code window:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 $componentFolder = Read-Host 'Enter the component folder name'
@@ -775,11 +929,15 @@ Do not describe partial output as a complete portfolio assessment.
 
 Confirm its URL and branch in:
 
+> 💻 **Run this in the terminal.**
+
 ```powershell
 Get-Content .\.github\modernize\repos.json
 ```
 
 Verify access:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 $repositoryName = Read-Host 'Enter the repository name'
@@ -791,6 +949,8 @@ Record the repository as incomplete until a successful result exists. Do not inf
 ### Assessment created unexpected changes
 
 Inspect the hub and each component:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
 git status --short

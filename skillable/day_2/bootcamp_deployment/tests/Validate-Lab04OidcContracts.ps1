@@ -114,6 +114,7 @@ foreach ($name in @(
     'Prefix',
     'DatabaseMode',
     'SqlMiPricingModel',
+    'DeployVirtualMachines',
     'Action',
     'VmAdminUsername',
     'VmAdminPassword',

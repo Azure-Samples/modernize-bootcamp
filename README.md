@@ -6,7 +6,7 @@ This repository is the hands-on learning environment for **Modernize with Confid
 
 The bootcamp goes beyond moving existing servers to the cloud. Attendees learn how AI-assisted tools, architectural judgment, and Azure services can work together to assess an application estate, identify practical modernization opportunities, and shape a phased path from legacy infrastructure toward secure, resilient, and manageable cloud platforms.
 
-The repository contains deliberately legacy .NET Framework applications and a SQL Server data tier that represent a realistic modernization starting point. The Caldova business scenario provides context for the exercises, while the **Caldova Retail** applications in this repository provide the working code and data assets used in the labs.
+The repository deliberately contains legacy .NET Framework applications and a SQL Server data tier. This legacy architecture is the starting point for a realistic modernization opportunity. The Caldova business scenario provides context for the exercises, while the **Caldova Retail** applications in this repository provide the working code and data assets used in the labs.
 
 ## ![Audience](assets/icons/audience.svg) Who This Is For
 

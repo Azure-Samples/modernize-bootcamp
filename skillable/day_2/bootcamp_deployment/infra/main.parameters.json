@@ -33,7 +33,10 @@
       "value": "${LAB04_VM_ADMIN_USERNAME}"
     },
     "vmAdminPassword": {
-      "value": "${LAB04_VM_ADMIN_PASSWORD}"
+      "value": "${LAB04_VM_ADMIN_PASSWORD=}"
+    },
+    "deployVirtualMachines": {
+      "value": "${LAB04_DEPLOY_VIRTUAL_MACHINES=false}"
     }
   }
 }

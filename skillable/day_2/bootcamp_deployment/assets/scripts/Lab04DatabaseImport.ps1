@@ -53,12 +53,10 @@ function Get-Lab04SqlPackageExecutableName {
 function Get-Lab04SqlPackageCachePath {
     param([Parameter(Mandatory)][string]$ProjectRoot)
 
-    $toolsRoot = Join-Path `
-        $ProjectRoot `
-        '.azure' `
-        'tools' `
-        'sqlpackage'
-    return Join-Path $toolsRoot $script:Lab04SqlPackageVersion
+    $azureRoot = Join-Path $ProjectRoot '.azure'
+    $toolsRoot = Join-Path $azureRoot 'tools'
+    $sqlPackageRoot = Join-Path $toolsRoot 'sqlpackage'
+    return Join-Path $sqlPackageRoot $script:Lab04SqlPackageVersion
 }
 
 function Assert-Lab04SqlPackageVersion {

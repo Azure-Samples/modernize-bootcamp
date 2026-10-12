@@ -6,6 +6,7 @@ param databaseAddressPrefix string
 param applicationAddressPrefix string
 param applicationLocation string = location
 param enablePrimaryServices bool = false
+param enableVirtualMachines bool = false
 param enableManagedInstanceSubnet bool = false
 param enableApplicationVnet bool = true
 param tags object = {}
@@ -17,7 +18,7 @@ var applicationSecondOctet = split(applicationAddressPrefix, '.')[1]
 var managedInstanceAddressPrefix = '10.${databaseSecondOctet}.5.0/24'
 var managedInstanceAddressToken = replace(replace(managedInstanceAddressPrefix, '.', '-'), '/', '-')
 
-resource vmNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = if (enablePrimaryServices) {
+resource vmNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = if (enablePrimaryServices && enableVirtualMachines) {
   name: '${prefix}-vm-${suffix}-nsg'
   location: location
   tags: tags
@@ -66,7 +67,7 @@ resource databaseVnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   }
 }
 
-resource bastionSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = if (enablePrimaryServices) {
+resource bastionSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = if (enablePrimaryServices && enableVirtualMachines) {
   parent: databaseVnet
   name: 'AzureBastionSubnet'
   properties: {
@@ -74,7 +75,7 @@ resource bastionSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = 
   }
 }
 
-resource vmSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = if (enablePrimaryServices) {
+resource vmSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = if (enablePrimaryServices && enableVirtualMachines) {
   parent: databaseVnet
   name: 'snet-vms'
   dependsOn: [
@@ -91,9 +92,9 @@ resource vmSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = if (e
 resource privateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = if (enablePrimaryServices) {
   parent: databaseVnet
   name: 'snet-private-endpoints'
-  dependsOn: [
+  dependsOn: enableVirtualMachines ? [
     vmSubnet
-  ]
+  ] : []
   properties: {
     addressPrefix: '10.${databaseSecondOctet}.3.0/24'
     privateEndpointNetworkPolicies: 'Disabled'
@@ -309,8 +310,8 @@ output databaseVnetName string = databaseVnet.name
 output applicationVnetId string = enableApplicationVnet ? applicationVnet.id : ''
 output applicationVnetName string = enableApplicationVnet ? applicationVnet.name : ''
 output containerAppsSubnetId string = enableApplicationVnet ? containerAppsSubnet.id : ''
-output bastionSubnetId string = enablePrimaryServices ? bastionSubnet.id : ''
-output vmSubnetId string = enablePrimaryServices ? vmSubnet.id : ''
+output bastionSubnetId string = enablePrimaryServices && enableVirtualMachines ? bastionSubnet.id : ''
+output vmSubnetId string = enablePrimaryServices && enableVirtualMachines ? vmSubnet.id : ''
 output privateEndpointSubnetId string = enablePrimaryServices ? privateEndpointSubnet.id : ''
 output dmsSubnetId string = enablePrimaryServices ? dmsSubnet.id : ''
 output managedInstanceSubnetId string = enableManagedInstanceSubnet ? managedInstanceSubnet.id : ''

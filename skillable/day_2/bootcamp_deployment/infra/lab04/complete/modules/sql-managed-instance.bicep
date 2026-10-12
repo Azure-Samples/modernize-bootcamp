@@ -17,9 +17,16 @@ param pricingModel string = 'Freemium'
 ])
 param entraAdminPrincipalType string = 'User'
 
+@allowed([
+  'AlwaysUpToDate'
+  'SQLServer2022'
+  'SQLServer2025'
+])
+param databaseFormat string = 'SQLServer2025'
+
 param tags object = {}
 
-resource managedInstance 'Microsoft.Sql/managedInstances@2023-08-01' = {
+resource managedInstance 'Microsoft.Sql/managedInstances@2025-01-01' = {
   name: name
   location: location
   tags: tags
@@ -42,6 +49,7 @@ resource managedInstance 'Microsoft.Sql/managedInstances@2023-08-01' = {
       tenantId: subscription().tenantId
     }
     collation: 'SQL_Latin1_General_CP1_CI_AS'
+    databaseFormat: databaseFormat
     licenseType: 'LicenseIncluded'
     pricingModel: pricingModel
     isGeneralPurposeV2: true

@@ -49,6 +49,7 @@ Set-AzdDefault -Name LAB04_SECONDARY_LOCATION -Value 'centralus'
 Set-AzdDefault -Name LAB04_APPLICATION_LOCATION -Value 'centralus'
 Set-AzdDefault -Name LAB04_VM_ADMIN_USERNAME -Value 'labadmin'
 Set-AzdDefault -Name LAB04_SQL_MI_PRICING_MODEL -Value 'Freemium'
+Set-AzdDefault -Name LAB04_DEPLOY_VIRTUAL_MACHINES -Value 'false'
 azd env set AZURE_LOCATION (Get-AzdValue -Name LAB04_PRIMARY_LOCATION)
 
 $prefix = Get-AzdValue -Name LAB04_PREFIX
@@ -107,6 +108,12 @@ if ($sqlMiPricingModel -notin @('Freemium', 'Regular')) {
     throw "LAB04_SQL_MI_PRICING_MODEL must be 'Freemium' or 'Regular'. Received '$sqlMiPricingModel'."
 }
 
+$deployVirtualMachinesValue = (Get-AzdValue -Name LAB04_DEPLOY_VIRTUAL_MACHINES).ToLowerInvariant()
+if ($deployVirtualMachinesValue -notin @('true', 'false')) {
+    throw "LAB04_DEPLOY_VIRTUAL_MACHINES must be 'true' or 'false'. Received '$deployVirtualMachinesValue'."
+}
+$deployVirtualMachines = $deployVirtualMachinesValue -eq 'true'
+
 $sqlAdminLoginOverride = Get-AzdValue -Name LAB04_SQL_ADMIN_LOGIN_OVERRIDE
 $tenantId = az account show --query tenantId --output tsv
 if ($sqlAdminLoginOverride) {
@@ -137,8 +144,9 @@ if (-not $sqlAdmin.id -or -not $sqlAdmin.login) {
 azd env set LAB04_SQL_ADMIN_OBJECT_ID ([string]$sqlAdmin.id)
 azd env set LAB04_SQL_ADMIN_LOGIN ([string]$sqlAdmin.login)
 
-if (-not (Get-AzdValue -Name LAB04_VM_ADMIN_PASSWORD)) {
+if ($deployVirtualMachines -and -not (Get-AzdValue -Name LAB04_VM_ADMIN_PASSWORD)) {
     $vaultName = $null
+    $password = $null
     if ($environmentName) {
         $vaults = az keyvault list --output json | ConvertFrom-Json
         if ($LASTEXITCODE -ne 0) {
@@ -150,16 +158,26 @@ if (-not (Get-AzdValue -Name LAB04_VM_ADMIN_PASSWORD)) {
     }
 
     if ($vaultName) {
-        $password = az keyvault secret show `
+        $passwordSecretName = az keyvault secret list `
             --vault-name $vaultName `
-            --name vm-admin-password `
-            --query value `
+            --query "[?name=='vm-admin-password'].name | [0]" `
             --output tsv
-        if ($LASTEXITCODE -ne 0 -or -not $password) {
-            throw "Unable to recover the existing VM password from Key Vault '$vaultName'."
+        if ($LASTEXITCODE -ne 0) {
+            throw "Unable to inspect VM credentials in Key Vault '$vaultName'."
+        }
+        if ($passwordSecretName) {
+            $password = az keyvault secret show `
+                --vault-name $vaultName `
+                --name $passwordSecretName `
+                --query value `
+                --output tsv
+            if ($LASTEXITCODE -ne 0 -or -not $password) {
+                throw "Unable to recover the existing VM password from Key Vault '$vaultName'."
+            }
         }
     }
-    else {
+
+    if (-not $password) {
         $alphabet = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@$%*-_=+'
         $randomBytes = [byte[]]::new(32)
         [Security.Cryptography.RandomNumberGenerator]::Fill($randomBytes)
@@ -171,4 +189,5 @@ if (-not (Get-AzdValue -Name LAB04_VM_ADMIN_PASSWORD)) {
     $password = $null
 }
 
-Write-Host "Lab 04 AZD configuration is ready. Database mode: $databaseMode"
+$computeStatus = $deployVirtualMachines ? 'enabled' : 'disabled'
+Write-Host "Lab 04 AZD configuration is ready. Database mode: $databaseMode. VMs and Bastion: $computeStatus."

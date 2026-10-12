@@ -8,15 +8,17 @@ directory remain resource-group scoped and can still be built independently.
 
 ### `bootstrap.bicep`
 
-Creates the RBAC-enabled Key Vault, VM credential secrets, separate code build
-and deployment identities, and a dedicated retail runtime identity. It grants
-the selected Microsoft Entra administrator Key Vault Secrets Officer and the
-runtime identity Key Vault Secrets User.
+Creates the RBAC-enabled Key Vault, optional VM credential secrets, separate
+code build and deployment identities, and a dedicated retail runtime identity.
+It grants the selected Microsoft Entra administrator Key Vault Secrets Officer
+and the runtime identity Key Vault Secrets User.
 
 ### `primary.bicep`
 
-Creates the primary database VNet, two private VMs, Bastion, ACR, DMS, and
-workload role assignments. Its `databaseMode` parameter controls Azure SQL:
+Creates the primary database VNet, ACR, DMS, and workload role assignments.
+Its `deployVirtualMachines` parameter optionally creates two private VMs,
+Bastion, and their network resources; the default is `false`. Its
+`databaseMode` parameter controls Azure SQL:
 
 - `azureSql`: create the Entra-only logical server, private endpoint, private
   DNS zone, and VNet link. Deployment automation imports `eshop_ai` afterward.

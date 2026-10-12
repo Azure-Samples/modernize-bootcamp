@@ -33,10 +33,17 @@ param sqlEntraAdminLogin string = deployer().userPrincipalName
 param vmAdminUsername string
 
 @secure()
-param vmAdminPassword string
+param vmAdminPassword string = ''
+
+@allowed([
+  'false'
+  'true'
+])
+param deployVirtualMachines string = 'false'
 
 var suffix = take(uniqueString(subscription().id, environmentName, prefix), 8)
 var databaseName = 'eshop_ai'
+var deployVirtualMachinesEnabled = deployVirtualMachines == 'true'
 var resourceGroups = {
   bootstrap: 'rg-${prefix}-bootstrap-${suffix}'
   primary: 'rg-${prefix}-primary-${suffix}'
@@ -84,6 +91,7 @@ module bootstrap './lab04/complete/bootstrap.bicep' = {
     keyVaultAdministratorObjectId: sqlEntraAdminObjectId
     vmAdminUsername: vmAdminUsername
     vmAdminPassword: vmAdminPassword
+    deployVirtualMachines: deployVirtualMachinesEnabled
     tags: tags
   }
 }
@@ -101,6 +109,7 @@ module primary './lab04/complete/primary.bicep' = {
     sqlEntraAdminLogin: sqlEntraAdminLogin
     vmAdminUsername: vmAdminUsername
     vmAdminPassword: vmAdminPassword
+    deployVirtualMachines: deployVirtualMachinesEnabled
     tags: tags
   }
 }
@@ -162,6 +171,7 @@ output LAB04_SQL_ADMIN_OBJECT_ID string = sqlEntraAdminObjectId
 output LAB04_SQL_ADMIN_LOGIN string = sqlEntraAdminLogin
 output LAB04_DATABASE_MODE string = databaseMode
 output LAB04_SQL_MI_PRICING_MODEL string = sqlMiPricingModel
+output LAB04_DEPLOY_VIRTUAL_MACHINES bool = deployVirtualMachinesEnabled
 output LAB04_DATABASE_FQDN string = databaseMode == 'azureSql'
   ? primary.outputs.databaseFqdn
   : secondary.outputs.databaseFqdn

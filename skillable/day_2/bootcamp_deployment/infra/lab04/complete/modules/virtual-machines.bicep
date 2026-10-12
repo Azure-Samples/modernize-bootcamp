@@ -7,6 +7,8 @@ param subnetId string
 param adminUsername string
 
 @secure()
+@minLength(12)
+@maxLength(72)
 param adminPassword string
 
 param tags object = {}
