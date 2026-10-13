@@ -27,7 +27,7 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 
 5. If VS Code opens the folder in **Restricted Mode**, select **Manage**, then **Trust**.
 6. Open `src\eShopLite.StoreFx\appsettings.json` and replace the placeholder password in the `StoreDbContext` connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user as they are.
-7. Confirm the app runs: open the VS Code terminal (`Ctrl+` `), run `dotnet run --project src\eShopLite.StoreFx`, and verify the product catalog loads in your browser before continuing.
+7. Confirm the app runs: open the VS Code terminal (`Ctrl+` `) and run `dotnet run --project src\eShopLite.StoreFx` (or ask Copilot Chat: `Run the app`), and verify the product catalog loads in your browser before continuing.
 
 ## 📋 What you'll do
 
