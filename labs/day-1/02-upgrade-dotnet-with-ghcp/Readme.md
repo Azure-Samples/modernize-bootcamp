@@ -16,9 +16,9 @@ Caldova Retail runs on .NET Framework 4.8, the last version of a platform that i
 
 - 👀 See the storefront as it runs on-premises today, then get your own copy running on the VM
 - 🔎 Assess a legacy codebase with the GitHub Copilot upgrade agent
-- 🔄 Migrate the storefront from .NET Framework 4.8 to .NET 10
-- 📋 Review the generated upgrade plan and hold it to scope
-- ✅ Verify the application still behaves exactly as it did before
+- 📋 Review and shape the generated upgrade plan
+- 🔄 Start the agentic .NET 10 upgrade, observe its behavior, and learn how to steer it
+- 🏁 Understand the end state of a modernized .NET 10 app before moving to Module 3
 
 > 💡 **SCOPE**
 >
@@ -57,7 +57,7 @@ Walk around the storefront for a minute and notice how it behaves:
 
    ![Skillable Events single sign-on](./images/sso-skillable.png)
 
-   > 💡 If the sign-in keeps reloading and returning to the same page or shows an error, wait a few minutes and try again; this is a transient error.
+   > ⚠️ **Sign-in may take a few tries.** If it keeps reloading or shows an error, wait a few minutes, then try again.
 
 2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
 3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead. If it prompts you to stay signed in, hit **Yes**.
@@ -240,8 +240,14 @@ The rest of this module is the upgrade itself, in five steps.
    - **Create working branch:** Check the box. A branch is a separate line of work in Git. The upgraded code goes on the new branch, and your original code stays untouched so you can always go back to it.
    - **Branch name:** upgrade-net10 (or whatever you prefer)
    - **Commit strategy:** Commit after each task. A commit is a saved checkpoint of the code, so you get one checkpoint per finished task.
+   - **Branch Sync:** Auto (Merge). This keeps the upgrade workflow in sync with the source branch. We won't have any changes to the source branch in this case, but this is a great option to maintain git history while doing the upgrade.
+   - **Pending changes:** Commit. This saves any changes you have before starting the upgrade.
 
-   Don't worry if some of these options are missing or extra ones appear; the agent doesn't show exactly the same options every time. For any extra options, keep the default, which is what Copilot recommends. Select **Confirm** to start the upgrade with these settings.
+   > 💡 **NOTE: UPGRADE OPTIONS MAY VARY**
+   >
+   > Don't worry if some of these options are missing or extra ones appear; the agent doesn't show exactly the same options every time. For any extra options, keep the default, which is what Copilot recommends.
+
+   Select **Confirm** to start the upgrade with these settings.
 
    ![Copilot Chat displays a modal for selecting the upgrade parameters](./images/net-upgrade-selection-modal.png)
 
@@ -379,21 +385,40 @@ Like the dashboard, this file checks off each task as it finishes. The agent dec
 
 What should hold steady is the **shape**: establish prerequisites, convert the project system, port the application code, then validate. If your run produces six tasks instead of four, that is the agent splitting the same work differently — not a sign anything is wrong.
 
-## 4️⃣ Monitor the Upgrade Process
+## 4️⃣ Monitor and Steer the Upgrade Process
 
-Once you approve the plan, the tool begins the upgrade. In Guided mode nothing is executed until you do, so take the time to read `plan.md` first. During this phase:
+Once you approve the plan, the agent begins upgrading the application.
 
-- Files will be modified incrementally
-- Git commits will be created for each major change
-- Progress will be displayed in the chat interface and on the modernization dashboard
+> ⏱️ **WORKSHOP NOTE: AGENTIC PACING**
+>
+> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In a real-world scenario, this can take **45 to 60+ minutes** and the exact duration varies based on the codebase.
+>
+> In this workshop, **you only need to let the agent run for 5–10 minutes:**
+>
+> 1. Switch the agent to Autopilot so it can run continuously.
+> 2. **Read through this section and try things out** while the agent works—check the dashboard, inspect a background subagent, ask Copilot questions in the chat, or test out a steering message.
+> 3. **Don't stop the agent yet**—once you've explored the features in this section, Step 5️⃣ will show you how to stop the run and move on to the next module.
 
-> 💡 **Optional: let the agent run without asking.** During this phase the agent runs many more commands, such as a build after every change. Now that you've seen what it does, you can optionally let it run them without asking for the rest of the session: select **Default Permissions** at the bottom of the chat and change it to **Allow All**. If you do, keep an eye on the dashboard and `tasks.md` to follow along as each task completes. With customers, keep approving each call unless they are comfortable letting the agent run freely.
+During this phase:
+
+- Files are modified incrementally
+- Git commits are created for each major milestone
+- Progress is displayed in the chat interface, in `tasks.md`, and on the modernization dashboard
+
+**Switch to Autopilot mode.** During execution the agent runs many commands, tool calls, and test builds. Rather than manually approving each action, switch the agent to run autonomously:
+
+1. Select **Default permissions** at the bottom right of the Copilot Chat window.
+2. Select **Autopilot (Preview)** (or **Allow all**).
+
+   ![Switching to Autopilot permissions](./images/autopilot-mode.png)
+
+This auto-approves tool calls so the agent can work through the migration tasks continuously. (In real-world customer engagements, teams often stay on default permissions until stakeholders are comfortable with the agent's actions).
 
 > 💡 When the agent finishes a task and tries to commit, it may report that no Git identity is set up. Reply in the chat with `Commit with <your lab email>`, using the **Username** listed under **Azure portal** on the **Resources** tab.
 
-Keep the dashboard or tasks.md file open.
+**Observe and test while it runs:**
 
-As the tool works through each task, monitor the chat box to observe the agent's behavior. You can see how it is going about changes and what files it is altering. The Copilot Chat is also available to help you understand the changes being made and to provide context on any issues that arise.
+Keep the dashboard and/or `tasks.md` open. As the agent works in Autopilot, monitor the chat box to observe its behavior. You can see how it approaches changes and which files it modifies. Copilot Chat is also available to answer your questions in real time:
 
 ![Chat execution dialogue](./images/chat-execution-dialogue.png)
 
@@ -411,133 +436,68 @@ What was the .NET Framework way of doing this, and what replaces it in .NET 10?
 Why is this task taking a while?
 ```
 
-Check the activity tab of the dashboard. It records the timeline, log, and commits of the upgrade. You can see it shows the steps the agent is taking, such as rebuilding the app after changing a file.
+Check the **Activity** tab of the dashboard. It records the timeline, log, and commits of the upgrade, showing the exact steps the agent takes (such as rebuilding the app after modifying a file).
 
 ![Activity log](./images/activity-log.png)
 
 ### 🧭 Steering the agent
 
-The agent decides each next step based on what it just saw, so it does not always move in a straight line. It can occasionally stall, drift, or stop early. You stay in control the whole time:
+The agent decides each next step based on what it just observed, so it does not always move in a straight line. It can occasionally stall, drift, or pause on errors. You stay in control the whole time:
 
 - **It seems slow or stalled.** If the chat is not producing output as quickly as you expect, stop the run and type `continue`.
-- **You want to see what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to open the background work the agent is running, such as a subagent reviewing or validating a task, for more detail.
+- **Inspect what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to view the background subagents reviewing or validating a task.
 
   ![Arrow on a background step in the chat](./images/background-process-arrow.png)
 
-- **You want to redirect it mid-task.** Type your message while the agent is still working and send it as a **steering** message (hover over the message and select steering). Copilot reads it before carrying on, instead of queuing it until the current step finishes.
-- **It is badly stuck or off track.** You can always start a fresh chat with the Upgrade agent and ask it to pick the upgrade back up from where it left off, or restart entirely.
-- **It stops with an error.** Ask it to keep going, or ask why it stopped, for example `Try to continue` or `Why did you get this error?`. In the example below, the agent stopped during initialization; a follow-up message is enough to get it moving again.
+- **Redirect mid-task.** Type your message while the agent is working and send it as a **steering** message (hover over your message and select **Steering**). Copilot reads it immediately before carrying on, rather than queuing it for after the step finishes.
+- **Handling stops or errors.** If the agent stops with an error, ask it to continue or diagnose the issue (for example, `Try to continue` or `Why did you get this error?`). In the example below, the agent paused during initialization; a follow-up prompt gets it moving again.
 
   ![Agent stopped with an error during upgrade initialization](./images/agent-stopped-error.png)
 
-- **The dashboard is not updating.** The dashboard can get stuck, and you may see an error in the chat saying the agent failed to save state. This is a known issue. The upgrade still continues in order, so keep an eye on the chat and the Source Control view instead. If commits are still landing, the upgrade is fine and only the dashboard is behind.
+- **The dashboard is not updating.** The dashboard can occasionally lag behind while the agent continues running in Git and chat. If you see commits landing in Source Control or files updating in the chat response (e.g., changes indicator), the upgrade is progressing normally even if the dashboard state is behind.
 
-> 🛟 **Still really stuck, or has the upgrade been running for a very long time (>1 hour)?** Don't let it block the rest of the day. We have a copy of the app already upgraded to .NET 10. You can stop here and start the following module; its first note shows how to fork and clone it.
+  ![Files updated indicator](./images/files-updated.png)
 
-## 5️⃣ Finalize the Migration
+---
+
+## 5️⃣ Wrap Up & Transition
+
+Once you've tried everything in this section and let the agent run for about 5–10 minutes, you're ready to wrap up:
+
+**1. Stop the agent.** Select the **Stop** button in Copilot Chat to halt execution.
+
+![Stop button in Copilot Chat](./images/stop-agent.png)
+
+You do not need to let the agent finish the entire task list or troubleshoot any errors that arise during this run.
+
+**2. See what a completed upgrade looks like.** In a full, completed run, the agent finishes all planned tasks and validates the application end-to-end:
 
 ![Upgrade complete!](./images/net-upgrade-finished.png)
 
-> 💡 **Check the database password.** After the upgrade, the app reads its database connection from `src\eShopLite.StoreFx\appsettings.json` instead of `connectionStrings.config`. Open `appsettings.json` and check the `StoreDbContext` connection string. If the password is still a placeholder, either ask Copilot to carry over the connection string from `connectionStrings.config`, or fill it in yourself. If any part is missing, these are the correct values:
->
-> - **Data Source:** `192.168.1.100,1433`
-> - **Initial Catalog:** `eshop`
-> - **User ID:** `sa`
-> - **Password:** the **W11-Workstation** password from the **Resources** tab
->
-> Without the right password, the app can't reach the database and the products won't load.
+When the full upgrade finishes, the application has undergone significant modernization under the hood:
 
-When the final validation task completes, ask the agent to start the app and check it for you:
+- **Modern SDK-style projects:** Classic `.csproj` files and `packages.config` are converted to SDK-style projects targeting `net10.0` with `<PackageReference>`.
+- **Modern ASP.NET Core architecture:** `Global.asax` is replaced by `Program.cs`, Autofac is replaced by built-in ASP.NET Core dependency injection, and Forms Authentication moves to modern cookie authentication.
+- **Unified configuration:** Connection strings and application settings move from `Web.config` and `connectionStrings.config` into `appsettings.json`.
+- **CLI-first run experience:** The application runs cross-platform using standard `dotnet run`, completely removing dependencies on IIS Express and Windows Server.
+- **Identical behavior:** The application connects to the same SQL Server database, serves the same catalog and images, authenticates users, and processes carts and orders identically to the legacy version.
 
-```plaintext
-Run the application and confirm it works end to end. Check that the product catalog loads with images, sign-in works for both accounts, the cart persists across page loads, and placing an order writes back to SQL Server. Tell me about anything that behaves differently than it did before the upgrade.
-```
+**3. Move to the next module.** Because letting the agent finish the entire upgrade takes up to an hour, the bootcamp provides a pre-upgraded repository so you can proceed without waiting.
 
-The agent will build the project, start it, and report what it finds. Open the URL yourself as well and walk the same paths you used before the upgrade:
+Do not attempt to fix or manually finish the in-progress codebase from this module. Instead, proceed directly to the next lab.
 
-- The product catalog loads, with images
-- Sign-in works for both accounts — use these demo logins:
-
-  | Username | Password | Role | Notes |
-  | --- | --- | --- | --- |
-  | `alice` | `Password1!` | Admin, Manager | Has existing order history |
-  | `bob` | `Password1!` | Employee | Has existing order history |
-
-- Adding to the cart persists across page loads
-- Placing an order writes back to SQL Server
-
-Notice what you are checking for: **nothing has changed**. The storefront should look and behave exactly as it did on .NET Framework. That's why this module keeps the database and the app's look the same: if anything looks or behaves differently, it's a bug caused by the upgrade, and you know exactly where to look.
-
-If something is off, the [troubleshooting steps](#-handling-common-issues) below cover the common cases.
-
-### ✅ Final check
-
-- ✅ Running on .NET 10
-- ✅ Using the modern project file format and library references
-- ✅ Reading its settings from `appsettings.json` instead of `Web.config`
-- ✅ Starting with `dotnet run`, without IIS Express
-- ✅ Showing the **same pages** and using the **same SQL Server database** as before
-
-🎉 **Congratulations — your storefront is running on .NET 10.**
-
-An app that only ran on Windows with .NET Framework 4.8 and IIS Express is now a modern .NET 10 app that starts with `dotnet run`. It runs on a supported version of .NET, it can run on Linux and in a container, and it can now use the Azure hosting options covered later in this bootcamp. None of that was possible an hour ago.
+---
 
 ## 🎯 What You've Accomplished
 
-By using GitHub Copilot's modernization capabilities, you've:
+By using GitHub Copilot Modernization, you've:
 
-- 🔹 Moved a .NET Framework 4.8 application onto .NET 10
-- 🔹 Updated the project files to the modern format
-- 🔹 Used AI to find and fix the code that no longer worked on .NET 10
-- 🔹 Kept the database and the app's look and behavior the same, so the change is easy to check
-
-Doing this upgrade by hand usually takes days of finding and fixing code and libraries that no longer work. With GitHub Copilot, you did it in a fraction of the time, and the change is small enough to actually review.
-
-## 🔧 Handling Common Issues
-
-### Error Recovery
-
-Sometimes the tool may encounter errors during the upgrade. When this happens:
-
-1. If you see an error message, select **Resume**. This often fixes the problem on the next try.
-2. If the error persists, type in the chatbox:
-
-   ```
-   Fix the errors and continue with the update
-   ```
-
-3. For a specific error, paste the error message into the chat and ask Copilot to explain and fix it.
-
-### Static Assets and Views
-
-The upgrade moves files around, so images, scripts, and styles (CSS) sometimes stop loading even though the pages themselves are fine. If pages look unstyled or images are missing, use this prompt:
-
-```
-The pages load but the scripts and stylesheets in subfolders are not resolving. Check the static file configuration and asset paths for the new project layout, and fix them step by step. Keep the existing MVC views.
-```
-
-### Database Connectivity
-
-The database does not change in this module, but *the way the app finds it* does: the database connection settings move from `connectionStrings.config` into `appsettings.json`. If data stops loading, check that first:
-
-```
-The products are not loading. Check that the SQL Server connection string was carried over correctly into the new configuration system and that Entity Framework is reading it. Think and do this step by step.
-```
-
-### Runtime Error Resolution
-
-For runtime errors:
-
-1. Stop the running app (`Shift+F5`, or press `Ctrl+C` in the terminal running `dotnet run`)
-2. Copy the error message from the **Terminal** or **Debug Console** panel
-3. Paste it into the Copilot chat for analysis and resolution
+- 🔹 Run an automated application assessment to uncover framework dependencies and migration risks
+- 🔹 Generated and reviewed a step-by-step modernization plan with `plan.md` and `tasks.md`
+- 🔹 Observed an AI upgrade agent execute real code migrations, package upgrades, and builds
+- 🔹 Learned how to monitor, inspect, and steer autonomous agents during complex multi-step tasks
+- 🔹 Understood what changes are required to transition a legacy .NET Framework app to modern .NET 10
 
 > 💡 **Going further: custom skills**
 >
-> The agent's built-in instructions cover steps that are the same in every .NET app. If a customer has their own coding standards, you can add them as Markdown files under `.github/skills/` in the repository, and the agent will follow them too. This matters most when a customer has many apps to modernize: you work out the pattern once, and every later app gets it automatically. Custom skills are out of scope for this workshop; see [GitHub Copilot upgrade scenarios and skills](https://learn.microsoft.com/dotnet/core/porting/github-copilot-upgrade/scenarios-and-skills) to learn more.
-
-## ➡️ What's Next
-
-You've completed the framework upgrade using GitHub Copilot Modernization. The app runs on .NET 10, but running on modern .NET is not the same as being ready for Azure. The code still expects to run as a single copy on one server. In Azure, it may run as several copies at once, and it should use Azure services for things like storing secrets.
-
-In the next module you'll rebuild the storefront's pages with Blazor, which is where the app's look can finally change. Then you'll ask Copilot whether the app is ready for Azure and work through what it finds.
+> The agent's built-in instructions cover steps common to .NET migrations. Organizations can add custom migration standards as Markdown files under `.github/skills/` in their repositories, and the agent will adhere to those conventions. See [GitHub Copilot upgrade scenarios and skills](https://learn.microsoft.com/dotnet/core/porting/github-copilot-upgrade/scenarios-and-skills) to learn more.
