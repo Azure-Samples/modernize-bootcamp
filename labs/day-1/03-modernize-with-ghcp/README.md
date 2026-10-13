@@ -8,22 +8,26 @@ You work in **GitHub Copilot Chat** for the whole module: first with the **Upgra
 
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
-> 💡 **Didn't finish the .NET 10 upgrade in Module 2?** Use our copy of the app that already runs on .NET 10, and start this module from there:
->
-> 1. In Microsoft Edge, go to +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++. Sign in the same way you did in Module 2 if you are asked.
-> 2. Select **Fork**, then **Create fork** with the defaults left alone.
-> 3. In your new fork, select **Code**, then copy the **HTTPS** URL.
-> 4. Open PowerShell from your applications and run these commands from the default location (`C:\Users\Admin`), pasting the URL you copied:
->
->    ```powershell
->    git clone <your-fork-url>
->    cd caldova-retail-dotnet10
->    code .
->    ```
->
-> 5. If VS Code opens the folder in **Restricted Mode**, select **Manage**, then **Trust**.
-> 6. Open `src\eShopLite.StoreFx\appsettings.json` and replace the placeholder password in the `StoreDbContext` connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions.
-> 7. Run the app and confirm the catalog loads before you continue.
+## 🛠️ Setup: Load the Upgraded .NET 10 Repository
+
+In Module 2, you observed how GitHub Copilot Modernization assesses and begins an upgrade. Because this full agentic framework upgrade may take an hour, we pick up this module using a prepared copy of the storefront that is already upgraded to **.NET 10**.
+
+Follow these steps to fork, clone, and configure the .NET 10 repository (like you did in the previous module):
+
+1. In Microsoft Edge, open this link: +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++. (Sign in with your lab credentials if prompted).
+2. Select **Fork**, then **Create fork** with the defaults left alone.
+3. In your new fork, select **Code**, then copy the **HTTPS** URL.
+4. Open PowerShell from your applications and run these commands from the default location (`C:\Users\Admin`), replacing `<your-fork-url>` with the URL you copied:
+
+   ```powershell
+   git clone <your-fork-url>
+   cd caldova-retail-dotnet10
+   code .
+   ```
+
+5. If VS Code opens the folder in **Restricted Mode**, select **Manage**, then **Trust**.
+6. Open `src\eShopLite.StoreFx\appsettings.json` and replace the placeholder password in the `StoreDbContext` connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user as they are.
+7. Confirm the app runs: open the VS Code terminal (`Ctrl+` `), run `dotnet run --project src\eShopLite.StoreFx`, and verify the product catalog loads in your browser before continuing.
 
 ## 📋 What you'll do
 
