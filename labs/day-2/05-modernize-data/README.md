@@ -42,10 +42,10 @@ Students will learn to:
 
 ### Student tasks
 
-1. Using SQL Server Management Studio, connect to the source database using the instructor-approved method.
-2. Confirm that SQL Server services are running on the source database VM - windows service named "SQL Server (MSSQLSERVER)".
-3. Connect to the local SQL Server with SQL Server Management Studio (SSMS) using "sa" SQL login given to you.
-4. Record the SQL Server version,edition - right click on the server and type "new query". Execute the following SQL.
+1. Open SQL Server Management Studio from the task bar. It would have pre-populated login to the source database.
+2. Connect to the local SQL Server using "sa" SQL login given to you.
+3. Right click on the server and click on "New Query".
+4. Execute the following SQL.
 
 ```sql
 Use master;
@@ -55,11 +55,11 @@ select @@version ;
 
 [![this](./images/Challenge_1_db_properties.png)](./images/Challenge_1_db_properties.png)
 
-6. While there, also note down all the "page" names displayed when checking on database "properties" section.
+6. Note the "page" names displayed when checking on database "properties" section. The "page" list will be different for SQL Managed Instance that we willmigrate to, later.
 7. From the "Files" section, note down the data files and transaction log file name.
 8. You connected to the SQL server using SQL authentication. What are other ways to authenticate to a SQL server?
 9. (Research on this) What is a logical and physical backup of SQL database ?
-10. How is recovery mode and logical and/or physical backup related ?
+10. (Research on this) different type of recovery modes for SQL database.
 11. Put the database into full recovery mode in SSMS running this query.
 
 ```sql
@@ -90,6 +90,8 @@ DBCC CHECKDB (N'eShop') ;
 * SSMS connects to the source instance.
 * The student records the source version, edition, size etc.
 * You can explain at least four different authentication mechanisms and show at least two ways to connnect.
+* You understand that logical backup (.bacpac) is an export of data structure and data that can be moved across OS/versions of SQL.It is also a point-in-time backup. Under the hood, a .bacpac file is simply a compressed ZIP package containing JSON/XML metadata definition files and data
+* A physical backup (.bak) by contrast is page-by-page physical copy of files. Along with transaction log backups, a physical backup can be used to restore database with minimal data loss - as you will do in this lab later.
 * You can explain recovery model and different types of backups.
 
 ## Challenge 2 — Pre-migration assessment of the source database 
@@ -132,16 +134,19 @@ Notice that there are several ways you can authenticate to SQL server using Entr
 
 ![SQLMI_ENTRA](./images/sqlmi_entra.png)
 
-6. To retrieve the public endpoint FQDN and port number to use as part of the connection information, navigate to the Azure SQL Managed Instance in the portal.  Go to *Connection strings* an lookup the public endpoint examples.
+6. To retrieve the public endpoint FQDN and port number to use as part of the connection information, navigate to the Azure SQL Managed Instance in the portal.  Go to *Connection strings* under *settings* and lookup the public endpoint examples. You need to copy only the servername and the port, as shown here.
 
 ![AZSQLMIPE](./images/AzSQLMIPE.png)
 
-Use that Entra ID and password to login using SSMS. Under "Databases" there is no database listed now.
+Use that Entra ID and password to login using SSMS. This is same as your azure login. 
+
 
 ![SSMS_LOGIN](./images/ssms_login.png)
 
 
-7. Connect to the target SQL MI using SSMS. Notice that there are no databaes there.
+7. Connect to the target SQL MI using SSMS. Notice that there are no databaes there yet. 
+
+As part of data migration you will restore the database in this managed instance.
 
 
 ## Success criteria
