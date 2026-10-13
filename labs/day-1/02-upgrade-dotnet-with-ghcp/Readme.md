@@ -4,6 +4,12 @@ The Caldova Retail storefront is built on **.NET Framework 4.8**, an older versi
 
 In this module you'll use **GitHub Copilot Modernization** to make that move. Rather than finding and fixing every piece of code that no longer works by hand, you'll guide an AI agent that reviews the code, writes a plan you can check and edit, and then carries it out one task at a time.
 
+> ⚠️ **IMPORTANT: EXPECT AN AGENTIC WORKFLOW**
+>
+> The rest of today's labs use AI agents. The modernization tools provide a structured process where they can, but agents may still take a different path or show options that don't match the screenshots or instructions exactly. Use your best judgment: review what an agent is asking to do, and choose the option that makes sense. The choices you make here won't prevent you from continuing to the next section.
+>
+> Learning to navigate this variation is part of the workshop—and part of real-world modernization work. If you're unsure what an agent is doing, what an approval means, or whether it seems stuck, ask it to explain or ask your instructor for help.
+
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
 > 🖥️ **Where you work.** You do this whole lab on the **W11-Workstation** virtual machine in your Skillable lab environment. Its sign-in credentials are on the **Resources** tab of your lab instructions. Everything you need, including VS Code, the GitHub Copilot extensions, and the build tools, is already installed on the VM. At no point do you need to leave the VM or use your own computer.
@@ -70,19 +76,19 @@ Walk around the storefront for a minute and notice how it behaves:
 
    ![Create fork](./images/fork-creation.png)
 
-2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/caldova-retail.git`.
+2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like **https://github.com/User1-12345678_events/caldova-retail.git**.
 
    ![Code button](./images/code-button.png)
 
    ![Copy HTTPS URL](./images/copy-https.png)
 
-3. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location -- C:\Users\Admin):
+3. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location, **C:\Users\Admin**):
 
    ```powershell
    git clone <your-fork-url>
    ```
 
-   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in.
+   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **Authorize git-ecosystem**), then return to PowerShell. The clone starts once you are signed in.
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, +++https://github.com/Skillable-Events/caldova-retail+++, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
 **3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
@@ -92,41 +98,47 @@ cd caldova-retail
 code .
 ```
 
-If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the `caldova-retail` folder.
+If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the **caldova-retail** folder.
 
 > 💡 If VS Code prompts you to sign in, select **Continue with GitHub**. An authorization page opens in the browser; select **Continue**, then **Authorize Visual-Studio-Code**. Return to VS Code once you are signed in.
 
-If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
+Check for any notification near the top banner like shown below. If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
 
 ![Restricted Mode banner](./images/restricted-mode-banner.png)
 
 ![VS Code showing the folder is trusted](./images/trusted-folder.png)
 
-You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
+You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
 
-**4. Give the app its database password.** The app reads its connection string from `src\eShopLite.StoreFx\connectionStrings.config`. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user exactly as they are.
+**4. Give the app its database password.** The app reads its connection string from **src\eShopLite.StoreFx\connectionStrings.config**. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user exactly as they are.
+
+![Replace the database password in connectionStrings.config](./images/db-password.png)
 
 ## ▶️ Run the App
 
 To make sure the setup was completed correctly, ask Copilot Chat to build and launch the legacy app for you.
 
-> 💡 Running this .NET Framework app outside a server requires **MSBuild** (the tool that builds the app) and **IIS Express** (a small web server for testing), because legacy ASP.NET apps like this one can't be started with the usual `dotnet run`. Both tools are already installed on the VM, so there is nothing to set up. Keep it in mind for future customer scenarios where you need to run a legacy app yourself.
+> 💡 Running this .NET Framework app outside a server requires **MSBuild** (the tool that builds the app) and **IIS Express** (a small web server for testing), because legacy ASP.NET apps like this one can't be started with the usual **dotnet run**. Both tools are already installed on the VM, so there is nothing to set up. Keep it in mind for future customer scenarios where you need to run a legacy app yourself.
 
 Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
 ![Open chat](./images/open-chat.png)
 
-> 💡 If Copilot prompts you to sign in, select **Continue with GitHub**. An authorization page opens in the browser; select **Continue**, then **Authorize Visual-Studio-Code**. Return to VS Code once you are signed in.
+Click the Copilot icon in the bottom status bar. If it says **Sign In**, you are not signed in to Copilot. Select **Sign In**:
 
-> 💡 **Chat or a model not available?** If the chat says a model or chat feature isn't available, select the **GitHub Copilot** icon in the bottom status bar, then select **Use AI Features**. This should prompt you to sign in.
->
-> ![Use AI Features in the status bar](./images/use-ai-features.png)
+![Sign In in the Copilot status bar](./images/copilot-sign-in-status.png)
+
+In the sign-in window, select **Continue with GitHub**. When the authorization page opens in your browser, select **Continue**, then **Authorize Visual-Studio-Code**. Return to VS Code when authorization is complete.
+
+![Continue with GitHub in the Copilot sign-in window](./images/copilot-sign-in-dialog.png)
 
 Then, type in the chatbox and submit this prompt:
 
 ```plaintext
 This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express. Tell me the URL when it is running.
 ```
+
+Watch Copilot Chat while it works. VS Code may ask you to approve a tool call before Copilot can run a command. Approve any tool calls, like downloading NuGet packages (libraries the app depends on) needed to build and run the solution.
 
 A plain "run this app" prompt would also work. Copilot would inspect the project and work out the build and launch steps itself. Spelling them out up front just gets you there faster and avoids potential trial and error.
 
@@ -191,6 +203,8 @@ You can run one at any time, without committing to an upgrade.
 
 **5. Read the results.** Cloud readiness issues are grouped into **Mandatory**, **Potential**, and **Optional**. The summary estimates the effort to reach the highlighted target Azure service (Azure App Service, Azure Container Apps, or Azure Kubernetes Service) by grouping it into T-shirt sizes, and correctly identifies the app as running on .NET Framework 4.8. Try changing the Target Service dropdown from Azure App Service to Azure Container Apps. Note how issues may disappear/appear/change criticality since this is a different hosting service.
 
+![Target Service options, including Azure Container Apps](./images/target-service-options.png)
+
 ![Assessment](./images/full-assessment.png)
 
 Expand any issue to see what the extension found and the guidance it recommends — the affected code, why it matters for the target service, and what a fix would involve. This is the most useful part of the assessment: the counts tell you how big the job is, and the details are what you would walk a customer through.
@@ -211,7 +225,7 @@ The rest of this module is the upgrade itself, in five steps.
 
 ## 1️⃣ Initiate the Upgrade
 
-1. Open the GitHub Copilot modernization extension.
+1. The GitHub Copilot modernization extension should be open from the assessment run, but if not, re-open the GitHub Copilot modernization extension.
 
    > 💡 Can't find it? Select **Extensions** in the Activity Bar, search for `modernization`, and select **GitHub Copilot modernization**.
    >
@@ -233,7 +247,7 @@ The rest of this module is the upgrade itself, in five steps.
    >
    > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
-4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the `.sln` file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat. Select the following options:
+4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat. Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
 
    - **Target Framework:** .NET 10
    - **Flow Mode:** Guided. The agent pauses after the assessment and again after the plan, so you can check its work before it changes any code. This is the best choice while you are learning, and with customers who want to approve each stage. **Automatic** runs from start to finish without stopping; use it once you know the tool and the change is low-risk.
@@ -243,17 +257,21 @@ The rest of this module is the upgrade itself, in five steps.
    - **Branch Sync:** Auto (Merge). This keeps the upgrade workflow in sync with the source branch. We won't have any changes to the source branch in this case, but this is a great option to maintain git history while doing the upgrade.
    - **Pending changes:** Commit. This saves any changes you have before starting the upgrade.
 
-   > 💡 **NOTE: UPGRADE OPTIONS MAY VARY**
-   >
-   > Don't worry if some of these options are missing or extra ones appear; the agent doesn't show exactly the same options every time. For any extra options, keep the default, which is what Copilot recommends.
-
    Select **Confirm** to start the upgrade with these settings.
 
    ![Copilot Chat displays a modal for selecting the upgrade parameters](./images/net-upgrade-selection-modal.png)
 
-   The window then shows a confirmation.
+   The window should then show a confirmation. If it does not appear but Copilot Chat is still loading, that's okay—the modal sometimes gets stuck even while the agent continues. Watch the chat for progress.
 
    ![Copilot Chat displays confirmed modal](./images/confirmed-modal.png)
+
+   **Before continuing, set your Git commit identity in Copilot Chat.** Send this message (stop the chat if needed, and send), replacing the placeholders with your lab details:
+
+   ```plaintext
+   For the rest of this upgrade, use <your name> and <your lab email> as the Git commit identity.
+   ```
+
+   Use the **Username** listed under **Azure portal** on the **Resources** tab as your email. For your name, use the part before **@** in that email (for example, **user1-6614389**) or your own name. Whichever is fine. This lets the agent make commits later without stopping to ask for your identity. Tell Copilot to `continue the upgrade` after this if it stops.
 
 > ‼️ **IMPORTANT**
 >
@@ -288,7 +306,7 @@ You can see the dashboard is on the "Assess" phase. Observe the other aspects of
 - **Project structure** — How the code is organized, which project file format it uses, and which .NET version it targets
 - **NuGet packages** — The third-party code libraries the app uses, and whether each one has a version that works on .NET 10
 - **API usage patterns** — Deprecated .NET Framework APIs, categorized as binary incompatible, source incompatible, or behavioral change
-- **Old web framework** — Parts of the app built on the old ASP.NET web framework (`System.Web`), which does not exist in .NET 10 and has to be rewritten
+- **Old web framework** — Parts of the app built on the old ASP.NET web framework (**System.Web**), which does not exist in .NET 10 and has to be rewritten
 - **Binding redirects** — Old settings that tell the app which library versions to load; if they are wrong, the app crashes when it runs
 - **Effort and risk** — Roughly how many lines of code need to change, how hard each part is, and whether to add tests first that record how the app behaves today
 
@@ -300,20 +318,20 @@ The agent saves its findings into a workflow folder in your repository rather th
 .github/upgrades/scenarios/dotnet-version-upgrade/assessment.md
 ```
 
-You should also see an "Assessment complete" pop-up with a link to it:
+You may also see an "Assessment complete" pop-up with a link to it:
 
 ![Assessment complete modal](./images/assessment-complete-modal.png)
 
-You can also find the files yourself in the **Explorer** view. Expand `.github` → `upgrades\scenarios\dotnet-version-upgrade` to see `assessment.md` alongside the other files the agent created for this upgrade, such as `scenario-instructions.md`. You can open any of these files at any point to see what the agent is working from.
+You can also find the files yourself in the **Explorer** view. Expand **.github** → **upgrades\scenarios\dotnet-version-upgrade** to see **assessment.md** alongside the other files the agent created for this upgrade, such as **scenario-instructions.md** (the preferences you just select like target framework, flow mode, etc.). You can open any of these files at any point to see what the agent is working from.
 
 ![Upgrade scenario files in the VS Code Explorer](./images/assessment-files-explorer.png)
 
-Open `assessment.md` and read it. The report is long, so focus on these four sections. They are the most important ones to look at.
+Open **assessment.md** and read it. The report is long, so focus on these four sections. They are the most important ones to look at.
 
 | Section | What to look for | Why it matters |
 |---|---|---|
 | **Package Compatibility** | Anything marked ⚠️ incompatible | A library with no .NET 10 version has to be replaced or removed. This is the only kind of issue that can block the upgrade completely. |
-| **Technologies and Features** | Which technology causes the most issues | This tells you how big the change is. In our run, roughly 99% of issues came from the old web framework (`System.Web`), so the web parts of the app have to be rewritten, not just pointed at a new .NET version. |
+| **Technologies and Features** | Which technology causes the most issues | This tells you how big the change is. In our run, roughly 99% of issues came from the old web framework (**System.Web**), so the web parts of the app have to be rewritten, not just pointed at a new .NET version. |
 | **Binding Redirect Configuration** | The 🔴 Mandatory count | These problems don't show up when the app is built. They show up as errors the first time someone uses the app. |
 | **Projects Compatibility** | Difficulty, estimated lines of code (LOC), and the 🧪 test flag | Shows how big the job is, and whether to write tests that record how the app behaves today before changing anything. |
 
@@ -331,13 +349,21 @@ First, the agent shows a pop-up with upgrade options. Look through them.
 
 ![Upgrade options modal](./images/upgrade-options-ui.png)
 
-From the dropdown, change project structure for Web projects from Side-by-Side to All-at-Once. This changes the code rewrites from incremental side-by-side to a single pass.
+The options can vary between runs in this agentic flow. Hover over an option for more information, or ask Copilot Chat a clarifying question before choosing.
 
-**Side-by-side** builds a *new* version of the app next to the old one and moves pages over a few at a time, while the old app keeps serving customers. That suits a large website that can never go offline, but it means running two versions of the app, plus extra code to route each request to the right one, for the whole project.
+**Upgrade Strategy** controls how the migration is divided:
 
-**All-at-once** rewrites the web app in a single pass. The tool recommends it for small web apps (roughly ten controllers or fewer; a controller is the code that handles one area of the site) when some downtime is acceptable. The storefront has only four controllers, so this is clearer and faster for the workshop.
+- **All-at-Once:** Migrate everything together.
+- **Incremental:** Migrate smaller parts in stages.
 
-Keep the other defaults. To save time, we skip the option to generate automated tests. In a real project, those tests check that the app behaves the same before and after the upgrade.
+**Project Approach** controls where the migrated code goes:
+
+- **In-place:** Modify the existing project.
+- **Side-by-side:** Create a new project alongside the existing one.
+
+For the Web project, select **In-place rewrite** for **Project Approach** if that option is available. If the options differ or are missing, you can keep the defaults; the agent may present different choices depending on the scenario.
+
+Keep the other defaults. To save time, skip the option to generate automated tests. The agent will still record a baseline of how the app looks and behaves before the upgrade, then use it to guide validation afterward. This baseline helps compare behavior, but it is not a substitute for automated regression tests.
 
 Hit confirm.
 
@@ -347,41 +373,40 @@ Once you confirm, the agent writes the plan.
 
 > 💡 **NOTE**
 >
-> If prompted, keep approving requests to read files outside your project. These are instruction files from the **Upgrade MCP server**, which help the agent build the plan step by step.
+> While the agent prepares the plan, VS Code may ask to **Allow reading external files?** The request may name a **SKILL.md** file in the installed **.NET Upgrade Agent** extension. These skill files contain instructions that tell the agent how to carry out the upgrade; they are not files from your app. If the prompt identifies the Upgrade Agent extension and a skill file, select **Allow Once** so the agent can read that guidance. Review the file path in the prompt; if it is from an unexpected location, select **Skip** and ask your instructor.
 
-![Approving outside files modal - upgrade options](./images/upgrade-options-external.png)
+![Allow reading the Upgrade Agent's SKILL.md file](./images/approve-upgrade-skill-file.png)
 
 ### Review the Generated Plan
 
-When the "plan ready" pop-up appears, open the `plan.md` file.
+When Copilot says the plan is ready, open the **plan.md** file.
 
-![Plan ready modal](./images/plan-ready-modal.png)
-
-Both files are saved in the same folder as the assessment:
+It will be saved in the same folder as the assessment:
 
 ```text
 .github/upgrades/scenarios/dotnet-version-upgrade/plan.md
-.github/upgrades/scenarios/dotnet-version-upgrade/tasks.md
 ```
 
-**1. Open `plan.md` and review it carefully.**
+**1. Open plan.md and review it carefully.**
 
-It lists the library updates, the code that will break, and the steps the agent plans to take. The agent follows this file exactly, so **to change the approach, just edit the text in `plan.md`**.
+It describes the library updates, the code that may need to change, and the steps the agent proposes. Review it before the upgrade begins. To adjust the approach, edit **plan.md** or tell the agent what you want changed in the chat. You can also ask questions such as, “Why is this task first?” or “Why is this task necessary?” to understand the plan before proceeding.
+
+The agent may list its tasks at the end of **plan.md**, or it may create a separate **tasks.md** in the same folder. Check **plan.md** first; if it doesn't include a task list, open **tasks.md**. Once the plan is approved, a task list will be created to track progress in VS Code.
 
 > 💡 **NOTE**
 >
-> Because we chose **Guided** flow mode, the agent stops here and waits for you before it changes any code. This is the moment to edit `plan.md` — whatever you leave in it is what gets executed. In **Automatic** mode the agent would carry straight on without asking.
+> Because we chose **Guided** flow mode, the agent stops here and waits for you before it changes any code. This is the moment to edit **plan.md** — whatever you leave in it is what gets executed. In **Automatic** mode the agent would carry straight on without asking.
 
-**2. Open `tasks.md`.**
+**2. Review the task list.**
 
-Like the dashboard, this file checks off each task as it finishes. The agent decides how to split up the work, so **your task list may not match this one exactly**; names, counts, and order can change between runs. You don't need to understand every term below. In short, the agent checks prerequisites, updates the project files, rewrites the code that no longer works on .NET 10, and then tests the app. A typical breakdown looks like this:
+The task list checks off each task as it finishes. The agent decides how to split up the work, so **your task list may not match this one exactly**; names, counts, and order can change between runs. You don't need to understand every term below. In short, the agent checks prerequisites, updates the project files, rewrites the code that no longer works on .NET 10, and then tests the app. A typical breakdown looks like this:
 
 | Task | What it does |
 |---|---|
-| `01-prerequisites` | Confirms the .NET 10 SDK and records current working behavior as a manual acceptance checklist. No tests are generated. |
-| `02-project-system-conversion` | Classic WAP → SDK-style `Microsoft.NET.Sdk.Web`, `packages.config` → `PackageReference`. Drops around 9 framework-provided packages and 12 binding redirects. **The code will not compile after this task — that is by design.** |
-| `03-aspnet-core-migration` | The real work. `Global.asax` → `Program.cs`, Autofac → built-in DI, Forms Auth → cookie auth, `Web.config` → `appsettings.json`, static files → `wwwroot`. In our run this was roughly 259 API fixes across 12 files. |
-| `04-final-validation` | Runs `dotnet run` and verifies products load from SQL Server, sign-in works for both accounts, the cart persists, and orders write back. |
+| **01-prerequisites** | Confirms the .NET 10 SDK and records current working behavior as a manual acceptance checklist. No tests are generated. |
+| **02-project-system-conversion** | Classic WAP → SDK-style **Microsoft.NET.Sdk.Web**, **packages.config** → **PackageReference**. Drops around 9 framework-provided packages and 12 binding redirects. **The code will not compile after this task — that is by design.** |
+| **03-aspnet-core-migration** | The real work. **Global.asax** → **Program.cs**, Autofac → built-in DI, Forms Auth → cookie auth, **Web.config** → **appsettings.json**, static files → **wwwroot**. In our run this was roughly 259 API fixes across 12 files. |
+| **04-final-validation** | Runs **dotnet run** and verifies products load from SQL Server, sign-in works for both accounts, the cart persists, and orders write back. |
 
 What should hold steady is the **shape**: establish prerequisites, convert the project system, port the application code, then validate. If your run produces six tasks instead of four, that is the agent splitting the same work differently — not a sign anything is wrong.
 
@@ -393,17 +418,19 @@ Once you approve the plan, the agent begins upgrading the application.
 >
 > An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, we will watch the agent work through the first few minutes and then move on to a pre-upgraded repository.
 >
-> In this workshop, **you only need to let the agent run for 5–10 minutes:**
+> In this workshop, **you only need to observe the agent for 5–10 minutes:**
 >
-> 1. Switch the agent to Autopilot so it can run continuously.
-> 2. **Read through this section and try things out** while the agent works—check the dashboard, inspect a background subagent, ask Copilot questions in the chat, or test out a steering message.
-> 3. **Don't stop the agent yet**—once you've explored the features in this section, Step 5️⃣ will show you how to stop the run and move on to the next module.
+> **Read through this section and try things out** while the agent works—check the dashboard, inspect a background subagent, ask Copilot questions in the chat, or test out a steering message. Once you've explored these features, Step 5️⃣ will show you how to stop the run and move on to the next module.
 
 During this phase:
 
 - Files are modified incrementally
 - Git commits are created for each major milestone
-- Progress is displayed in the chat interface, in `tasks.md`, and on the modernization dashboard
+- Progress is displayed in the chat interface, in **tasks.md**, and on the modernization dashboard
+
+The dashboard shows the current phase and which tasks are running, pending, or complete:
+
+![Modernization dashboard showing execution progress and task status](./images/dashboard-execution-progress.png)
 
 **Switch to Autopilot mode.** During execution the agent runs many commands, tool calls, and test builds. Rather than manually approving each action, switch the agent to run autonomously:
 
@@ -414,11 +441,9 @@ During this phase:
 
 This auto-approves tool calls so the agent can work through the migration tasks continuously. (In real-world customer engagements, teams often stay on default permissions until stakeholders are comfortable with the agent's actions).
 
-> 💡 **Git sign-in / identity prompt:** When the agent finishes a task and tries to commit, it may report that no Git identity is set up or ask you to sign in. If prompted, reply in the chat with `Commit with <your lab email>`, using the **Username** listed under **Azure portal** on the **Resources** tab. If you are not prompted, you can skip this note.
-
 **Observe and test while it runs:**
 
-Keep the dashboard and/or `tasks.md` open. As the agent works in Autopilot, monitor the chat box to observe its behavior. You can see how it approaches changes and which files it modifies. Copilot Chat is also available to answer your questions in real time:
+Keep the dashboard and/or **tasks.md** open. As the agent works in Autopilot, monitor the chat box to observe its behavior. You can see how it approaches changes and which files it modifies. Copilot Chat is also available to answer your questions in real time:
 
 ![Chat execution dialogue](./images/chat-execution-dialogue.png)
 
@@ -440,7 +465,7 @@ Check the **Activity** tab of the dashboard. It records the timeline, log, and c
 
 ![Activity log](./images/activity-log.png)
 
-### 🧭 Steering the agent
+### 🧭 Steering the agent: what to know as you run and guide it
 
 The agent decides each next step based on what it just observed, so it does not always move in a straight line. It can occasionally stall, drift, or pause on errors. You stay in control the whole time:
 
@@ -476,10 +501,10 @@ You do not need to let the agent finish the entire task list or troubleshoot any
 
 When the full upgrade finishes, the application has undergone significant modernization under the hood:
 
-- **Modern SDK-style projects:** Classic `.csproj` files and `packages.config` are converted to SDK-style projects targeting `net10.0` with `<PackageReference>`.
-- **Modern ASP.NET Core architecture:** `Global.asax` is replaced by `Program.cs`, Autofac is replaced by built-in ASP.NET Core dependency injection, and Forms Authentication moves to modern cookie authentication.
-- **Unified configuration:** Connection strings and application settings move from `Web.config` and `connectionStrings.config` into `appsettings.json`.
-- **CLI-first run experience:** The application runs cross-platform using standard `dotnet run`, completely removing dependencies on IIS Express and Windows Server.
+- **Modern SDK-style projects:** Classic **.csproj** files and **packages.config** are converted to SDK-style projects targeting **net10.0** with **PackageReference**.
+- **Modern ASP.NET Core architecture:** **Global.asax** is replaced by **Program.cs**, Autofac is replaced by built-in ASP.NET Core dependency injection, and Forms Authentication moves to modern cookie authentication.
+- **Unified configuration:** Connection strings and application settings move from **Web.config** and **connectionStrings.config** into **appsettings.json**.
+- **CLI-first run experience:** The application runs cross-platform using standard **dotnet run**, completely removing dependencies on IIS Express and Windows Server.
 - **Identical behavior:** The application connects to the same SQL Server database, serves the same catalog and images, authenticates users, and processes carts and orders identically to the legacy version.
 
 **3. Move to the next module.** Because letting the agent finish the entire upgrade may take an hour, the bootcamp provides a pre-upgraded repository so you can proceed without waiting.
@@ -493,11 +518,11 @@ Do not attempt to fix or manually finish the in-progress codebase from this modu
 By using GitHub Copilot Modernization, you've:
 
 - 🔹 Run an automated application assessment to uncover framework dependencies and migration risks
-- 🔹 Generated and reviewed a step-by-step modernization plan with `plan.md` and `tasks.md`
+- 🔹 Generated and reviewed a step-by-step modernization plan with **plan.md** and **tasks.md**
 - 🔹 Observed an AI upgrade agent execute real code migrations, package upgrades, and builds
 - 🔹 Learned how to monitor, inspect, and steer autonomous agents during complex multi-step tasks
 - 🔹 Understood what changes are required to transition a legacy .NET Framework app to modern .NET 10
 
 > 💡 **Going further: custom skills**
 >
-> The agent's built-in instructions cover steps common to .NET migrations. Organizations can add custom migration standards as Markdown files under `.github/skills/` in their repositories, and the agent will adhere to those conventions. See [GitHub Copilot upgrade scenarios and skills](https://learn.microsoft.com/dotnet/core/porting/github-copilot-upgrade/scenarios-and-skills) to learn more.
+> The agent's built-in instructions cover steps common to .NET migrations. Organizations can add custom migration standards as Markdown files under **.github/skills/** in their repositories, and the agent will adhere to those conventions. See [GitHub Copilot upgrade scenarios and skills](https://learn.microsoft.com/dotnet/core/porting/github-copilot-upgrade/scenarios-and-skills) to learn more.

@@ -25,9 +25,11 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
    code .
    ```
 
-5. If VS Code opens the folder in **Restricted Mode**, select **Manage**, then **Trust**.
+5. Check for a notification in the banner at the top of VS Code. If the folder opens in **Restricted Mode**, select **Manage**, then **Trust**. Once VS Code shows **In a Trusted Folder**, close that tab.
+
+   ![Restricted Mode banner](./images/restricted-mode-banner.png)
 6. Open `src\eShopLite.StoreFx\appsettings.json` and replace the placeholder password in the `StoreDbContext` connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user as they are.
-7. Confirm the app runs: open the VS Code terminal (`Ctrl+` `) and run `dotnet run --project src\eShopLite.StoreFx` (or ask Copilot Chat: `Run the app`), and verify the product catalog loads in your browser before continuing.
+7. Ask Copilot Chat to **Run the app** (and approve any tool call commands), then verify the product catalog loads in your browser before continuing.
 
 ## 📋 What you'll do
 
@@ -40,10 +42,14 @@ Right now, the storefront's pages are built with **ASP.NET MVC**. Each page is a
 
 Unlike Module 2, this step does change the pages themselves. Copilot will rebuild each page as a Blazor component. Because the pages are being rebuilt anyway, this is also a good moment to give the store a more modern look, so the prompt below asks for that too.
 
-With the Upgrade agent selected in the chat, use the following prompt to guide Copilot:
+Select the **Upgrade** agent from the agent picker in Copilot Chat, then use the following prompt to guide Copilot:
+
+![Select the Upgrade agent from the Copilot Chat agent picker](./images/select-upgrade-agent.png)
 
 ```plaintext
 Convert the existing ASP.NET MVC pages to Blazor components in this .NET 10 application. This includes:
+
+Before making any changes, create and switch to a new Git branch named blazor-ui-refresh. Keep all Blazor conversion changes on that branch.
 
 Identify the MVC views, controllers, models, and services involved.
 Recommend whether Blazor Server interactivity or static server rendering is most appropriate for this app.
@@ -65,11 +71,15 @@ Leverage Blazor components to make it look more modern, sleek, and aesthetic.
 
 ![The Upgrade agent finds no MVC-to-Blazor scenario and proceeds with a direct code change](./images/blazor-migration.png)
 
-If the agent asks you to confirm any options, choose the one it recommends. If it does not give a recommendation, ask it which option it recommends and why.
+If the agent asks you to confirm how to proceed, choose the default option, **Proceed directly**. This lets it make the Blazor changes outside the predefined upgrade-scenario workflow.
+
+![Choose the default Proceed directly option when prompted](./images/confirm-direct-migration.png)
 
 Notice what the agent says: no upgrade scenario covers MVC → Blazor, so it will do this as a **direct code change**. The Upgrade agent ships with tested scenarios for common migrations, but it is not limited to them. It is strong at understanding languages and frameworks and converting between them, and it still runs structured checks as it works, such as reading the app before it edits and building to verify its changes. Because the Upgrade agent is built on top of GitHub Copilot, you can also ask it questions and give it requests outside its predefined scenarios, just as you would any other Copilot agent.
 
-Copilot will convert the MVC pages to Blazor components, ensuring that all functionality is preserved and adding some new features. Expect this update to take ~10-30 min.
+Copilot will convert the MVC pages to Blazor components, aiming to preserve the app's functionality while giving it a more modern UI. Expect this update to take about 10–30 minutes.
+
+> **If the conversion gets stuck or takes longer than the workshop allows:** This UI refresh is useful, but it's not required for the Azure-readiness work or later steps. Stop the agent, switch back to the **main** branch, and continue; keep the **blazor-ui-refresh** branch so you can return to it later. The prepared app and following instructions let you proceed without waiting for the UI changes.
 
 This is our final page (yours may look different):
 
@@ -144,7 +154,7 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 5. **Narrow the scope, then move to planning.** Not everything the agent suggests belongs in this module. The database is migrated in Lab 05, the infrastructure (Bicep) is designed in Module 4, and the Dockerfile comes in Module 6. Tell the agent explicitly, so it doesn't make those changes:
 
    ```plaintext
-   Proceed to planning, but do not create a Dockerfile or infrastructure (Bicep/Terraform) files. Don't migrate or change the database. The app must keep connecting to the same existing SQL Server with the same connection details. Create a new branch for the changes.
+   Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details. Create a new branch for the changes.
    ```
 
    The modernize agent hands the work to the **planning-coordinator** agent, which writes the migration plan.
@@ -158,9 +168,8 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
    The plan is saved in the `.github/modernize` folder of your repository:
 
    - **`plan.md`** describes the changes the agent intends to make and why.
-   - **`tasks.json`** lists the tasks it will carry out, in order.
 
-   Read through the tasks. Your plan may have a different number of tasks, or different ones, from the person next to you; that's expected. If anything doesn't belong, such as a task that touches the database or creates infrastructure files, edit `plan.md` directly or tell the agent in the chat.
+   Read through the tasks in the file. Your plan may have a different number of tasks, or different ones, from the person next to you; that's expected. If anything doesn't belong, such as a task that touches the database or creates infrastructure files, edit `plan.md` directly or tell the agent in the chat.
 
    **Add one rule to the plan.** None of the Azure services exist yet, so the app has to keep working without them. Add this rule either by typing it in the chat and asking the agent to add it to the plan, or by navigating to the `.github/modernize` folder and editing `plan.md` directly:
 
@@ -182,7 +191,7 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
    Execute the plan.
    ```
 
-8. **Follow the progress.** The Migrate to Azure agents don't have the dashboard you used with the Upgrade agent in Module 2; that dashboard is specific to framework upgrades. Instead, the agent writes a `progress.md` file for each task in the `.github/modernize/code-migration` folder and checks off each step as it finishes. Each task follows the same pattern:
+8. **Follow the progress.** The Migrate to Azure agents don't have the dashboard you used with the Upgrade agent in Module 2; that dashboard is specific to framework upgrades. Instead, the agent *usually* writes a `progress.md` file for each task and checks off each step as it finishes. If you don't see a progress file, ask Copilot Chat: `Please create a progress.md file to track the migration's progress.` Each task follows the same pattern:
 
    - **Code migration:** the files it changes, such as the project file, `appsettings.json`, and `Program.cs`.
    - **Validation and fixing:** it builds the app, checks the libraries for known security vulnerabilities (CVEs), checks that the changes are consistent and complete, and runs any tests.
@@ -192,11 +201,11 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    If you're ever unsure how far along the migration is or what it's doing, ask in the chat, for example `What task are you on, and what's left?`
 
-9. **Approve as it goes.** It will re-run the build and ask for approval to run commands. Grant them, and read the per-phase summaries as they appear instead of waiting until the end.
+9. **Review tool calls as it goes.** The agent will rebuild the app and may ask permission to run commands. Review each request, approve it when appropriate, and read the per-phase summaries as they appear instead of waiting until the end.
 
    ![The permissions menu with Default Permissions, Sandboxing for terminal, Allow All, and Autopilot](./images/autopilot-permissions.png)
 
-   > 💡 **A note on Autopilot.** The permissions menu at the bottom of the chat also offers **Autopilot (Preview)**, which goes a step further than **Allow All**: instead of asking before every command, the agent works through the whole task on its own, staying within its permissions. It's good to know this exists, and it can speed things up here, where you control the environment and can review every commit afterward. In a customer environment, treat it carefully: the customer cannot see or stop each individual action while it runs, so letting the agent work completely unsupervised trades visibility and control for speed. Prefer **Default Permissions** or **Allow All** when a customer needs to stay in control of what the agent does.
+   > 💡 **Autopilot (Preview) is another option.** Unlike **Allow All**, Autopilot lets the agent continue through the task without pausing for approval before each command, within the permissions you've granted. It can speed up this workshop, but use the review-and-approve flow above if you want to inspect the agent's actions as they happen. In a customer environment, agree on the permission level first: Autopilot trades visibility and control during execution for speed, so use it only when the customer is comfortable with that trade-off.
 
 10. **Read the summary.** When every task is done, the agent posts a summary in the chat. It tells you:
 
