@@ -77,9 +77,16 @@ If the agent asks you to confirm how to proceed, choose the default option, **Pr
 
 Notice what the agent says: no upgrade scenario covers MVC → Blazor, so it will do this as a **direct code change**. The Upgrade agent ships with tested scenarios for common migrations, but it is not limited to them. It is strong at understanding languages and frameworks and converting between them, and it still runs structured checks as it works, such as reading the app before it edits and building to verify its changes. Because the Upgrade agent is built on top of GitHub Copilot, you can also ask it questions and give it requests outside its predefined scenarios, just as you would any other Copilot agent.
 
-Copilot will convert the MVC pages to Blazor components, aiming to preserve the app's functionality while giving it a more modern UI. Expect this update to take about 10–30 minutes.
+Copilot will convert the MVC pages to Blazor components, aiming to preserve the app's functionality while giving it a more modern UI. Expect this update to take about 10–20 minutes.
 
 > **If the conversion gets stuck or takes longer than the workshop allows:** This UI refresh is useful, but it's not required for the Azure-readiness work or later steps. Stop the agent, switch back to the **main** branch, and continue; keep the **blazor-ui-refresh** branch so you can return to it later. The prepared app and following instructions let you proceed without waiting for the UI changes.
+
+**While the agent works, complete these steps:**
+
+- [ ] **Follow its progress in Copilot Chat.** The agent posts paragraph-style updates describing what it has changed and what it plans to do next.
+- [ ] **Inspect a code change.** When Chat reports that it edited a file, select the file or change entry to open it in the editor. Look at the diff to see what the agent changed.
+- [ ] **Notice errors and recovery.** If the agent reports errors, watch how it investigates and tries to fix them. If it gets stuck, ask what went wrong and what it plans to try next.
+- [ ] **Ask a question.** Ask Copilot Chat what it is doing or why it made a particular change. The agent will answer and pause; when you're ready for it to continue the conversion, send `Continue`.
 
 This is our final page (yours may look different):
 
@@ -145,13 +152,17 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    ![Cloud readiness assessment showing the app on .NET 10](./images/migrate-to-azure-assessment.png)
 
-4. **Read the agent's suggestions.** After the assessment, the agent lists ideas in the chat for what to change or move to Azure. Yours may differ, but you will likely see suggestions for hosting, the database, secrets, and session or cache storage.
+4. **Read the agent's suggestions.** After the assessment, the agent lists what the app is today and the changes it recommends to run in Azure. It can identify work across hosting, the database, secrets, hardcoded values, and session or cache storage.
 
-   ![Example of the agent's suggestions for Azure](./images/migrate-to-azure-suggestions.png)
+   ![The agent summarizes the current application](./images/migrate-to-azure-suggestions-today.png)
 
-   The agent may suggest hosting options such as App Service, Container Apps, or AKS. You don't need to choose one now: the code changes in this module are the same for any of them. You'll compare the options and choose one in Module 4.
+   ![The agent recommends changes to prepare the app for Azure](./images/migrate-to-azure-suggestions-changes.png)
 
-5. **Narrow the scope, then move to planning.** Not everything the agent suggests belongs in this module. The database is migrated in Lab 05, the infrastructure (Bicep) is designed in Module 4, and the Dockerfile comes in Module 6. Tell the agent explicitly, so it doesn't make those changes:
+   Notice what the agent identified and why. Ask Copilot Chat about any suggestion you don't understand, or ask what tradeoffs a change would involve. The agent is capable of helping with this broad set of Azure-readiness work; the workshop deliberately spreads it across modules so you can focus on one part at a time.
+
+   The hosting choice is covered in Module 4, the database migration in Lab 05, and the Dockerfile in Module 6. Those items appear in the assessment because they are part of the overall journey, but we are not implementing them in this step.
+
+5. **Narrow the scope, then move to planning.** Tell the agent to plan the application-code changes for this step, while leaving the database unchanged and saving infrastructure and containerization for their later labs:
 
    ```plaintext
    Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details. Create a new branch for the changes.
@@ -169,7 +180,13 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    - **`plan.md`** describes the changes the agent intends to make and why.
 
-   Read through the tasks in the file. Your plan may have a different number of tasks, or different ones, from the person next to you; that's expected. If anything doesn't belong, such as a task that touches the database or creates infrastructure files, edit `plan.md` directly or tell the agent in the chat.
+   Read through the tasks in the plan. Your plan may have a different number of tasks, or different ones, from the person next to you; that's expected. If the plan doesn't list its tasks, check the same folder for `tasks.json`—it may be inside a `.metadata` subfolder. You can also ask Copilot Chat:
+
+   ```text
+   Summarize the approved plan and list its tasks in order, including what each task will change. Call out any task that touches the database or creates infrastructure files.
+   ```
+
+   If anything doesn't belong, such as a task that touches the database or creates infrastructure files, edit `plan.md` directly or tell the agent in the chat.
 
    **Add one rule to the plan.** None of the Azure services exist yet, so the app has to keep working without them. Add this rule either by typing it in the chat and asking the agent to add it to the plan, or by navigating to the `.github/modernize` folder and editing `plan.md` directly:
 
@@ -192,6 +209,12 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
    ```
 
 8. **Follow the progress.** The Migrate to Azure agents don't have the dashboard you used with the Upgrade agent in Module 2; that dashboard is specific to framework upgrades. Instead, the agent *usually* writes a `progress.md` file for each task and checks off each step as it finishes. If you don't see a progress file, ask Copilot Chat: `Please create a progress.md file to track the migration's progress.` Each task follows the same pattern:
+
+   To get a quick status update at any point, ask Copilot Chat:
+
+   ```text
+   Summarize progress against the approved plan: list completed tasks, the current task, remaining tasks, and any errors or blockers.
+   ```
 
    - **Code migration:** the files it changes, such as the project file, `appsettings.json`, and `Program.cs`.
    - **Validation and fixing:** it builds the app, checks the libraries for known security vulnerabilities (CVEs), checks that the changes are consistent and complete, and runs any tests.
