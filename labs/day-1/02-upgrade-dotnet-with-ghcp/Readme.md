@@ -391,7 +391,7 @@ Once you approve the plan, the agent begins upgrading the application.
 
 > ⏱️ **WORKSHOP NOTE: AGENTIC PACING**
 >
-> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In a real-world scenario, this can take **45 to 60+ minutes** and the exact duration varies based on the codebase.
+> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, we will watch the agent work through the first few minutes and then move on to a pre-upgraded repository.
 >
 > In this workshop, **you only need to let the agent run for 5–10 minutes:**
 >
@@ -414,7 +414,7 @@ During this phase:
 
 This auto-approves tool calls so the agent can work through the migration tasks continuously. (In real-world customer engagements, teams often stay on default permissions until stakeholders are comfortable with the agent's actions).
 
-> 💡 When the agent finishes a task and tries to commit, it may report that no Git identity is set up. Reply in the chat with `Commit with <your lab email>`, using the **Username** listed under **Azure portal** on the **Resources** tab.
+> 💡 **Git sign-in / identity prompt:** When the agent finishes a task and tries to commit, it may report that no Git identity is set up or ask you to sign in. If prompted, reply in the chat with `Commit with <your lab email>`, using the **Username** listed under **Azure portal** on the **Resources** tab. If you are not prompted, you can skip this note.
 
 **Observe and test while it runs:**
 
@@ -482,7 +482,7 @@ When the full upgrade finishes, the application has undergone significant modern
 - **CLI-first run experience:** The application runs cross-platform using standard `dotnet run`, completely removing dependencies on IIS Express and Windows Server.
 - **Identical behavior:** The application connects to the same SQL Server database, serves the same catalog and images, authenticates users, and processes carts and orders identically to the legacy version.
 
-**3. Move to the next module.** Because letting the agent finish the entire upgrade takes up to an hour, the bootcamp provides a pre-upgraded repository so you can proceed without waiting.
+**3. Move to the next module.** Because letting the agent finish the entire upgrade may take an hour, the bootcamp provides a pre-upgraded repository so you can proceed without waiting.
 
 Do not attempt to fix or manually finish the in-progress codebase from this module. Instead, proceed directly to the next lab.
 
