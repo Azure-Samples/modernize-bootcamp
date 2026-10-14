@@ -14,7 +14,7 @@
 > - Blob container: sqlmi-backups-@lab.LabInstance.Id
 > - Blob folder: eshop-@lab.LabInstance.Id
 > - DMS: caldova-lab05-sqlmig-@lab.LabInstance.Id
-> - DMS SQL Instance: caldova-lab05-sqlinst-@lab.LabInstance.Id
+> - DMS SQL Instance: caldovalab05sql@lab.LabInstance.Id
 
 
 An Azure policy in place enforces a certain naming convetion for these resources.
@@ -279,7 +279,7 @@ On the next page, configure details as shown.
 
 <b>Note: </b>
 
- DMS needs to configure a SQL Instance sqlinst-@lab.LabInstance.Id to track progress of migration for restartability. 
+ DMS needs to configure a SQL Instance caldovalab05sql@lab.LabInstance.Id to track progress of migration for restartability. 
  
  What you are entering here is information for that tracking database - not your source or target database. You need not manage this instance for this lab. 
 
