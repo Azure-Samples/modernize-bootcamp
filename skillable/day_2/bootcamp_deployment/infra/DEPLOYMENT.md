@@ -397,34 +397,17 @@ Because the application VNet is regional, delete the failed managed environment
 and application VNet before changing `ApplicationLocation` for the same
 environment name. Confirm every resolved resource ID before deletion.
 
-If Azure Database Migration Service fails while provisioning its managed
-`IaaSAntimalware` VM extension, first rerun the same deployment. The backing VM
-and extension are created by the DMS resource provider and are not controlled
-by this Bicep template. If the same failure repeats, inspect the failed DMS
-operation and inherited Azure Policy assignments, try another supported region,
-or open an Azure support request.
+DMS uses `Microsoft.DataMigration/sqlMigrationServices@2025-06-30` for SQL
+Server migrations, with no classic-service kind, SKU, or subnet binding.
+Migration jobs and any required self-hosted integration runtime are configured
+separately; see the
+[SQL Server migration automation guide](https://learn.microsoft.com/azure/dms/migration-dms-powershell-cli).
 
-The DMS resource explicitly declares the immutable classic-service kind as
-`Cloud`. This is required for idempotent retries because Azure retains a failed
-DMS resource and rejects later requests that omit or change its kind.
-
-If the retained DMS resource remains in terminal `Failed` state and has no
-`virtualNicId`, it cannot resume. Delete only that failed DMS resource, wait for
-deletion to complete, and rerun the full deployment:
-
-```powershell
-$dmsId = az resource list `
-  --resource-group 'rg-caldova-lab04-primary-<suffix>' `
-  --resource-type 'Microsoft.DataMigration/services' `
-  --query '[0].id' `
-  --output tsv
-
-az resource delete --ids $dmsId --api-version 2025-06-30
-az resource wait --deleted --ids $dmsId --api-version 2025-06-30
-```
-
-Confirm the resolved resource ID before running the delete command. This
-recreates only DMS; the successfully deployed Lab 04 resources remain intact.
+Incremental deployment does not convert or delete an existing classic
+`Microsoft.DataMigration/services` resource. It creates the SQL-specific
+resource under the same name but a different type. The existing network
+template is unchanged, including `snet-dms`, which the SQL-specific service
+does not use. Review retained classic resources separately before any cleanup.
 
 Inspect failed subscription operations:
 

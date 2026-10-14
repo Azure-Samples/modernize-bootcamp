@@ -120,7 +120,6 @@ module migration './modules/database-migration-service.bicep' = {
   params: {
     name: '${prefix}-${suffix}-dms'
     location: location
-    subnetId: network.outputs.dmsSubnetId
     tags: tags
   }
 }
