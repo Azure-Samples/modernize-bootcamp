@@ -1,10 +1,10 @@
-# ☁️ Lab 03: Get the App Ready for Azure
+# ☁️ Lab 03: Prepare the App Code for Azure
 
-Module 2 moved the storefront onto .NET 10. To do that, the upgrade also had to rewrite how the app starts up and where it keeps its settings (now in `appsettings.json`). What it did not do is make the app ready to run **in Azure**.
+Module 2 moved the storefront onto .NET 10. To do that, the upgrade also had to rewrite how the app starts up and where it keeps its settings (now in `appsettings.json`). What it did not do is change the app's code to work with **Azure services**, such as Key Vault for secrets or Redis for shopping carts.
 
-> 🎯 **This module: make the app ready for the cloud.** You work on the **application code**: rebuild the pages with Blazor, then close the gaps that would stop the app running well in Azure. Nothing is created in Azure. Module 4 then designs the Azure environment the app will run in.
+> 🎯 **This module: prepare the app's code for Azure.** You work on the **application code** only: rebuild the pages with Blazor, then close the code gaps that would stop the app working well with Azure services. Nothing is created in Azure and nothing is deployed. By the end, the app's code is *ready to use* Azure services, but the app is not running in Azure yet. Module 4 designs the Azure environment, and Module 6 deploys the app into it.
 
-You work in **GitHub Copilot Chat** for the whole module: first with the **Upgrade** agent to convert the pages to Blazor, then with the GitHub Copilot modernization extension's **Migrate to Azure** option to find and fix what the app needs before it can run in Azure.
+You work in **GitHub Copilot Chat** for the whole module: first with the **Upgrade** agent to convert the pages to Blazor, then with the GitHub Copilot modernization extension's **Migrate to Azure** option to find and fix the code changes the app needs before it can work with Azure services.
 
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
@@ -34,7 +34,7 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 ## 📋 What you'll do
 
 - 🚀 Rebuild the storefront's pages with Blazor components
-- ☁️ Ask whether the app is Azure ready, and fix what comes back
+- ☁️ Ask what the app's code needs to work with Azure services, and fix what comes back
 
 ## 1️⃣ Convert to Blazor pages
 
@@ -122,7 +122,7 @@ Use these demo logins when you check sign-in yourself:
 
 > 💡 The app does the same things it did at the end of Module 2 — that is the point. Everything so far changed *how* the app runs and renders, not *what* it does.
 
-## 2️⃣ Get the app cloud ready
+## 2️⃣ Prepare the app code for Azure
 
 The app runs on .NET 10 and renders through Blazor, but its code does not yet know how to work with Azure services such as Key Vault or managed identity. Nothing so far has touched that, because a framework upgrade has no reason to.
 
@@ -264,9 +264,9 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
 > 💡 Worth opening `appsettings.json` when the run finishes. Whatever the agent decided this app needs from Azure usually lands there as empty settings — a quick read tells you what the next module has to provision.
 
-> 🎉 **That's it — the app is Azure ready.**
+> 🎉 **That's it — the app's code is ready for Azure.**
 >
-> Three modules ago this was a .NET Framework 4.8 app that only ran on Windows Server behind IIS. It now builds on .NET 10, renders through Blazor, and is wired to support Azure services. Next module you design the Azure platform those settings expect.
+> Three modules ago this was a .NET Framework 4.8 app that only ran on Windows Server behind IIS. It now builds on .NET 10, renders through Blazor, and its code is wired to use Azure services. It is not running in Azure yet, because those services don't exist. Next module you design the Azure platform those settings expect, and Module 6 deploys the app onto it.
 
 ## 🔧 Troubleshooting common issues
 
@@ -293,8 +293,8 @@ If product images don't appear after modernization:
 By the end of this section, you should have:
 
 - 🔹 Converted the MVC pages to Blazor components
-- 🔹 Asked the agent directly whether the app is Azure ready
-- 🔹 Closed the cloud readiness gaps it found
+- 🔹 Asked the agent what the app's code needs to work with Azure services
+- 🔹 Closed the cloud readiness gaps it found in the code
 - 🔹 Kept the application buildable and its behavior unchanged throughout
 
 > **Next module preview:** Module 4 designs the Azure resources this app now expects, such as the private networks, the identities it signs in with, and the service that runs it. You plan them and have Copilot write them as Bicep files. Your instructor has already set up the real Azure environment, so your Bicep stays as files in your repository to review, not something you deploy. The app itself is deployed in Module 6.

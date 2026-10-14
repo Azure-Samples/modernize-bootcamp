@@ -33,7 +33,7 @@ The known-good application is under:
 labs/day-1/04-deploy-to-azure/sample-app/
 ```
 
-That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, and already Azure ready. If you modernized the root application in place, use its corresponding solution and project paths instead.
+That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, with its code already updated to use Azure services such as Key Vault and managed identity. If you modernized the root application in place, use its corresponding solution and project paths instead.
 
 ## 🔑 Bootstrap GitHub OIDC
 
