@@ -172,6 +172,15 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    ![The modernize agent delegating to the planning-coordinator agent](./images/planning-coordinator.png)
 
+   > 💡 **Why scope it down?** The agent could take the app from code changes through infrastructure and deployment in one pass. In this lab we deliberately don't, for two reasons:
+   >
+   > - **For you:** each part gets its own module, so you can focus on one step at a time (wire the code, design the IaC, deploy), examine what the agent produced, and practice with it before moving on.
+   > - **For your customers:** many won't want to wire the app for Azure, create the IaC, and deploy to production in one swoop. They may have change-control gates, need a security or architecture review between steps, or want to prove the approach on code before any resources exist. Knowing how to scope the agent to the right slice for a customer, and what it can do beyond that slice, is part of guiding the conversation.
+   >
+   > The prompt above is how you control the size of the job. You tell the agent what to do, what to leave alone, and what to assume is already in place. Change those instructions and the same agent can give you a smaller or bigger plan.
+   >
+   > In this lab, that prompt told the agent to change only the app code, leave the database alone, skip the Dockerfile and infrastructure files, and assume the Azure resources will exist later. That is why your plan is small. If you had asked it to "update the code, write the infrastructure, and deploy it", the same agent would have planned the whole journey in one go. With a customer, how much to take on at once is up to you and them.
+
 6. **Review the plan.** When the plan is ready, the agent tells you where to find it. Nothing has changed in your code yet, and the branch hasn't been created.
 
    ![The agent reports that the plan is ready for review](./images/migration-plan-ready.png)
