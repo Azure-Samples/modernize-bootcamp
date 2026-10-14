@@ -64,17 +64,15 @@ $managedInstanceDetails = @(
         --output json |
         ConvertFrom-Json
 )
-
-if ($managedInstanceDetails.Count -ne 1)
+if ($mnagedInstanceDetails.Count -ne 1)
 {
     throw "Expected exactly one SQL managed instance in resource group '$resourceGroup', but found $($managedInstanceDetails.Count)."
 }
-
-$managedInstanceDetails | Format-Table -AutoSize
 $managedInstance = $managedInstanceDetails[0].SQLMI
+$managedInstanceDetails | Format-Table -AutoSize
 ```
 
-You will use the managed instance region for Foundry when the selected model is available there:
+You will deploy a foundry resource in the same region as the managed instance. Determine the region.
 
 ```powershell
 $location = az sql mi show `
@@ -82,7 +80,6 @@ $location = az sql mi show `
     -n $managedInstance `
     --query location `
     --output tsv
-
 $location
 ```
 
@@ -102,7 +99,7 @@ $location
 
 ## 3. Enable the required SQL MI update policy (if needed)
 
-First inspect the current database format:
+First inspect the current database version to see if we need an upgrade:
 
 ```powershell
 az sql mi show `
@@ -128,7 +125,7 @@ az sql mi update `
     --output table
 ```
 
-The update is a long-running operation. After it finishes, verify the result:
+The update is a *long-running* operation. After it finishes, verify the result:
 
 ```powershell
 az sql mi show `
@@ -162,37 +159,28 @@ List the versions and SKUs of the example model available in the selected region
 $modelName = "gpt-5-mini"
 $modelSkuName = "GlobalStandard"
 $modelCapacity = 10
-
-
 $modelJson = az cognitiveservices model list `
     --location $location `
     --query "[?model.name=='$modelName'].{Name:model.name, Version:model.version, Format:model.format, SKUs:model.skus[].name}" `
     --output json `
     --only-show-errors
-
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to retrieve the model catalog for location '$location'."
 }
-
 $availableModels = @($modelJson | ConvertFrom-Json)
-
 if ($availableModels.Count -eq 0) {
     throw "Model '$modelName' is not available in '$location'."
 }
-
 $availableModels |
     Select-Object Name, Version, Format,
         @{Name = "SKUs"; Expression = { $_.SKUs -join ", " }} |
     Format-Table -AutoSize
-
 $selectedModel = $availableModels |
     Where-Object { $_.SKUs -contains $modelSkuName } |
     Select-Object -First 1
-
 if (-not $selectedModel) {
     throw "Model '$modelName' does not support SKU '$modelSkuName' in '$location'."
 }
-
 Write-Host "Model validation succeeded:`n  Model:    $($selectedModel.Name)`n  Version:  $($selectedModel.Version)`n  Format:   $($selectedModel.Format)`n  SKU:      $modelSkuName`n  Capacity: $modelCapacity"
 ```
 
@@ -203,15 +191,12 @@ $selectedModel = $availableModels |
     Where-Object { $_.Format -eq "OpenAI" -and $_.SKUs -contains $modelSkuName } |
     Sort-Object Version -Descending |
     Select-Object -First 1
-
 if (-not $selectedModel)
 {
     throw "Model '$modelName' with format 'OpenAI' and SKU '$modelSkuName' isn't available in '$location'."
 }
-
 $modelVersion = $selectedModel.Version
 $modelFormat = $selectedModel.Format
-
 $selectedModel | Format-List Name, Version, Format, SKUs
 ```
 
@@ -231,7 +216,6 @@ Create a Foundry resource of kind `AIServices`. The custom domain supplies the `
 ```powershell
 # Must be globally unique. Use lowercase letters, numbers, and hyphens.
 $foundryResource = "caldova-lab08-ai-@lab.LabInstance.Id"
-
 az cognitiveservices account create `
     -n $foundryResource `
     -g $resourceGroup `
@@ -263,7 +247,6 @@ Create a Foundry project under the same Foundry resource:
 ```powershell
 # The project name doesn't need to be globally unique; it must only be unique within this Foundry resource.
 $foundryProject = "caldova-lab08-proj-@lab.LabInstance.Id" 
-
 az cognitiveservices account project create `
     -n $foundryResource `
     -g $resourceGroup `
@@ -323,18 +306,6 @@ $miPrincipalId = az sql mi show `
     -n $managedInstance `
     --query identity.principalId `
     --output tsv
-
-$foundryResourceId = az cognitiveservices account show `
-    -n $foundryResource `
-    -g $resourceGroup `
-    --query id `
-    --output tsv
-
-$openAiUserRoleId = az role definition list `
-    -n "Cognitive Services OpenAI User" `
-    --query "[0].name" `
-    --output tsv
-
 az sql mi show `
     -g $resourceGroup `
     -n $managedInstance `
@@ -342,6 +313,21 @@ az sql mi show `
     --output table
 ```
 
+Next, find the full URI for the foundry resource and the Id for OpenAI role:
+
+```powershell
+$foundryResourceId = az cognitiveservices account show `
+    -n $foundryResource `
+    -g $resourceGroup `
+    --query id `
+    --output tsv
+$openAiUserRoleId = az role definition list `
+    -n "Cognitive Services OpenAI User" `
+    --query "[0].name" `
+    --output tsv
+Write-Host "Foundry resource ID: $foundryResourceId"
+Write-Host "OpenAI user role ID: $openAiUserRoleId"
+```
 Grant **Cognitive Services OpenAI User** at the Foundry resource scope:
 
 ```powershell
@@ -515,7 +501,9 @@ IF @modelResponse IS NULL
 SELECT @modelResponse AS AdCopy;
 ```
 
-Copy the AdCopy column full text and paste it into a text file.
+Copy the AdCopy column full text and paste it into a text file. 
+
+If you run the query again, see that you get a different text.
 
 `sp_invoke_external_rest_endpoint` wraps the service response under `$.result`. The `OPENJSON` extraction skips the preceding `reasoning` item, finds the `message` item containing `output_text`, and returns only its `text` value as `AdCopy`.
 
