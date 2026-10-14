@@ -125,7 +125,7 @@ Notice that there are several ways you can authenticate to SQL server using Entr
 
 #### Validate firewall access to SQL MI before begining.
 
- Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbount access to port 3342.  If not, add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
+ Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbound access to port 3342.  If not, add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
 
  ![NSG1](./images/NSG1.png)
 
@@ -313,7 +313,7 @@ If all is well,  the full backups would have been restored.
 
 The migration is not complete yet.  
 
-Since this is an online migration with minimal outage, we need to apply any incremental data that was added sunce the migration started. This means backup of transaction logs need to be restored. 
+Since this is an online migration with minimal outage, we need to apply any incremental data that was added since the migration started. This means backup of transaction logs need to be restored. 
 
 
 In this lab, we will add some data to simulate that.
