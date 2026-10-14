@@ -293,7 +293,7 @@ If product images don't appear after modernization:
 By the end of this section, you should have:
 
 - 🔹 Converted the MVC pages to Blazor components
-- 🔹 Assessed where Azure services fit the app (secrets, database access, cache)
+- 🔹 Assessed where Azure services fit the app (secrets, cache, static content, etc.)
 - 🔹 Made the code changes to support those services
 - 🔹 Kept the application buildable and its behavior unchanged throughout
 
