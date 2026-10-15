@@ -124,16 +124,24 @@ The Azure SQL Managed Instance configured in this lab is configured to authentic
 
 Notice that there are several ways you can authenticate to SQL server using Entra. In this lab, you must select authentication method <b>Entra with Password.</b>  The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used. 
 
-#### Validate firewall access to SQL MI before begining.
+#### Validate NSG inbound rules for SQL MI's subnet NSG before begining.
 
- Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbound access to port 3342.  If not, add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
+ Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbound access to port 3342.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
+ 
+ ![NSG2](./images/NSG2.png)
+ 
+ Click on *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. Navigate to the Inbound rules:
+
+ ![NSG3](./images/NSG3.png)
+ 
+ Add an inbound port rule like this:
 
  ![NSG1](./images/NSG1.png)
 
 5. Select the right user login to connect to SQL MI. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left under Security. 
 *Note* This will be the same user as your <b>azure login </b>. 
 
-![SQLMI_ENTRA](./images/sqlmi_entra.png)
+![SQLMI_ENTRA](./images/sqlmi_entra2.png)
 
 6. To retrieve the public endpoint FQDN and port number to use as part of the connection information, navigate to the Azure SQL Managed Instance in the portal.  Go to *Connection strings* under *settings* and lookup the public endpoint examples. You need to copy only the servername and the port, as shown here.
 
