@@ -10,11 +10,11 @@
 > 
 > They must follow a certain naming convention.  All resources you create must end with i.e. have a suffix @lab.LabInstance.Id.  Failing to do so, will block you from creating those Azure resources.
 >
-> - Storage account: caldovalab05st@lab.LabInstance.Id
-> - Blob container: sqlmi-backups-@lab.LabInstance.Id
-> - Blob folder: eshop-@lab.LabInstance.Id
-> - DMS: caldova-lab05-sqlmig-@lab.LabInstance.Id
-> - DMS SQL Instance: caldovalab05sql@lab.LabInstance.Id
+> - Storage account: `caldovalab05st@lab.LabInstance.Id`
+> - Blob container: `sqlmi-backups-@lab.LabInstance.Id`
+> - Blob folder: `eshop-@lab.LabInstance.Id`
+> - DMS: `caldova-lab05-sqlmig-@lab.LabInstance.Id`
+> - DMS SQL Instance: `caldovalab05sql@lab.LabInstance.Id`
 
 
 An Azure policy in place enforces a certain naming convetion for these resources.
@@ -185,7 +185,7 @@ Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go 
 
 #### 3. Storage Account
 
-Provision an Azure Storage Account caldovalab05st@lab.LabInstance.Id <b>in the same region as the Azure SQL Managed Instance </b>and create a Blob container sqlmi-backups-@lab.LabInstance.Id in it to store source database backup. 
+Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region as the Azure SQL Managed Instance </b>and create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store source database backup. 
 
 ![Storage1](./images/Storage_1.png)
 ![Storage3](./images/Storage_3.png)
@@ -207,8 +207,6 @@ Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in the storage accou
 ![Storage12](./images/Storage_12_2.png)
 
 #### 4. Database Migration Service (DMS)
-
-<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS) caldova-lab05-sqlmig-@lab.LabInstance.Id.
 
 <b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS) `caldova-lab05-sqlmig-@lab.LabInstance.Id`. Change the Target server type to Azure SQL Managed Instance.
 
@@ -288,7 +286,7 @@ On the next page, configure details as shown.
 
 <b>Note: </b>
 
- DMS needs to configure a SQL Instance caldovalab05sql@lab.LabInstance.Id to track progress of migration for restartability. 
+ DMS needs to configure a SQL Instance `caldovalab05sql@lab.LabInstance.Id` to track progress of migration for restartability. 
  
  What you are entering here is information for that tracking database - not your source or target database. You need not manage this instance for this lab. 
 
@@ -556,12 +554,12 @@ Unlike backing up the database files into a folder in an Azure Storage Account B
 Get the environment information.  Fill in all information for the variables according to your environment. Start the migration.
 
 ```powershell
-$StorageAccount = "<storage account name>"
+$StorageAccount = "caldovalab05st@lab.LabInstance.Id"
 $StorageResourceGroup = "<storage account resource group>"
 $MiResourceGroup = "<Azure SQL Managed Instance resource group>"
 $ManagedInstance = "<Azure SQL Managed Instance name>" 
 $MigrationResourceGroup = "<Database Migration Service Resource Group>"
-$MigrationService = "<Database Migration Service Name>"
+$MigrationService = "caldova-lab05-sqlmig-@lab.LabInstance.Id"
 
 $StorageAccountId = az storage account show `
     --resource-group $StorageResourceGroup `
