@@ -336,7 +336,7 @@ VALUES
 
 Next we need to backup the transaction logs to the storage account, in the same folder/location as the database backups.  Use SSMS to do this as well. Opt for *Transactions Logs* as the back up type.
 
-<b>Mote: </b> 
+<b>Note: </b> 
 
 Prefix the file name with "log_" so you can identify the file easily.
 
@@ -412,7 +412,7 @@ Validate
 For simplicity, the exercise will use the same Database Migration Service (DMS) and the same storage account 
 and backups as the previous exercise.
 
-The challenge uses Azure CLI from PowerShell. The `az datamigration` command group is an Azure CLI extension and requires Azure CLI 2.75.0 or later.
+The challenge uses Azure CLI from PowerShell. The <b>az datamigration</b> command group is an Azure CLI extension and requires Azure CLI 2.75.0 or later.
 
 ### 1. The Migration Mode
 
@@ -450,7 +450,7 @@ az provider show `
     --output tsv
 ```
 
-The expected provider registration state is `Registered`.
+The expected provider registration state is <b>Registered</b>.
 
 ### 4. Run the Migration Assessment
 
@@ -496,9 +496,9 @@ Review the resulting HTML or JSON for:
 
 - Server-level assessment issues
 - Database-level assessment issues
-- `TargetReadinesses.AzureSqlManagedInstance`
+- TargetReadinesses.AzureSqlManagedInstance
 - Warnings and errors
-- `DatabaseRestoreFails`
+- DatabaseRestoreFails
 - Impacted objects
 - Recommended remediation
 
