@@ -107,8 +107,6 @@ SSMS 22 is the latest version of Microsoft’s SQL Server Management Studio, a 6
 
  ![SSMS2](./images/Challenge_2_assessment_launch_1.png)
 
- <img src="./images/Challenge_2_assessment_launch_1.png" alt="SSMS2" width="200">
-
 
 2. #### <u>Do not Migrate or Upgrade the database</u>.
 
