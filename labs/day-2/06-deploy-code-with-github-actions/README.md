@@ -19,19 +19,14 @@ By the end of this lab, you will be able to:
 
 ## ✅ Prerequisites
 
-- completed the planning, Bicep generation, validation, and review walkthrough in [Lab 04](../../day-1/04-deploy-to-azure/README.md)
+- completed the planning, Bicep generation, validation, and review walkthrough in Lab 04
 - access to the instructor-preprovisioned Lab 04 platform
-- completed [Lab 05](../05-modernize-data/README.md), including the managed-identity database user
+- completed Lab 05, including the managed-identity database user
 - Azure access to read the Lab 04 deployment and configure federated credentials
 - GitHub `ADMIN` permission on the repository
-- your own fork of the modernized retail app (cloned in [Setup](#-setup) below)
+- your own fork of the modernized retail app (cloned in Setup below)
 - GitHub Actions enabled for the repository
 
-The known-good application is under:
-
-```text
-src/eShopLite.StoreFx
-```
 
 That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, with its code already updated to use Azure services such as Key Vault and managed identity. If you modernized the root application in place, use its corresponding solution and project paths instead.
 
@@ -106,7 +101,13 @@ Bootstrap your repository
 
 ```powershell
 az login
+```
+
+```powershell
 gh auth login
+```
+
+```powershell
 
 $subscriptionId = az account show --query id --output tsv
 .\assets\scripts\Initialize-Lab06RepositoryFromResourceGroups.ps1 `
@@ -261,6 +262,9 @@ Build the application before building its image:
 
 ```powershell
 dotnet restore .\eShopLiteFx.sln
+```
+
+```powershell
 dotnet build .\eShopLiteFx.sln `
   --configuration Release `
   --no-restore
@@ -272,17 +276,34 @@ Then build and test the container locally:
 
 ```powershell
 $context = '.\'
+```
+
+```powershell
 $dockerfile = Join-Path $context 'src\eShopLite.StoreFx\Dockerfile'
+```
+
+```powershell
 $image = 'caldova-retail:lab06-local'
+```
+
+```powershell
 
 docker build --file $dockerfile --tag $image $context
+```
+
+```powershell
 docker run --detach --rm `
   --name caldova-retail-lab06 `
   --publish 8080:8080 `
   --env 'ConnectionStrings__StoreDbContext=Server=localhost;Database=eShop;User ID=test;Password=NotUsed1!;Encrypt=True;TrustServerCertificate=True' `
   $image
+```
 
+```powershell
 Invoke-WebRequest http://localhost:8080/health
+```
+
+```powershell
 docker stop caldova-retail-lab06
 ```
 
@@ -505,7 +526,7 @@ Document:
 If your workflow does not validate and lab time is running short:
 
 1. preserve your workflow and failure logs
-2. compare it with [the completed workflow](../../../assets/solutions/lab06/lab06-retail-cicd.yml)
+2. compare it with the completed workflow in /assets/solutions/lab06/lab06-retail-cicd.yml
 3. copy the completed workflow into `.github/workflows/lab06-retail-cicd.yml`
 4. review every permission, environment, variable, and Azure command before committing
 5. explain the defect in your original workflow during the debrief
