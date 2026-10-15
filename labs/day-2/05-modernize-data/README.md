@@ -126,7 +126,7 @@ Notice that there are several ways you can authenticate to SQL server using Entr
 
 #### Validate NSG inbound rules for SQL MI's subnet NSG before begining.
 
- Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbound access to port 3342.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
+ Validate from the portal, that the NSG for the subnet that Azure SQL Managed Instance is allowing inbound access to port 3342.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
  
  ![NSG2](./images/NSG2.png)
  
