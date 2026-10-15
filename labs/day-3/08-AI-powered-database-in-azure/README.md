@@ -22,7 +22,7 @@ All Azure control-plane commands use Azure CLI. Run them from PowerShell. The da
 
 ## 1. Add an NSG rule to connect to SQL MI. Connect to the SQL Managed Instance and find the product 
 
- Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbount access to port 3342.  If not, add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
+Add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
 
  ![NSG1](../../day-2/05-modernize-data/images/NSG1.png)
 
@@ -33,7 +33,7 @@ Remember to use the public endpoint on port 3342 and use Entra with password opt
 
 ![Picture](../08-AI-powered-database-in-azure/images/SSMS_easier_connect_SQL_MI.png)
 
-Now lookup a particular product. In eshop database, run this query
+Now lookup a particular product. In this lab, we have named the database **eshop_ai**, it has the same data that you migrated in the migration lab.
 
 ```sql
 select * from dbo.Product where ID = 9 ;
