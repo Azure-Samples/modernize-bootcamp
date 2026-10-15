@@ -105,7 +105,10 @@ SSMS 22 is the latest version of Microsoft’s SQL Server Management Studio, a 6
 
 1. Using SSMS, connect to the SQL Server 2016  that resides on a VM in this lab environment. The connection to "on-premises" SQL server is preconfigured in the lab. Right click on the server and choose "Migrate SQL Server".
 
- ![SSMS](./images/Challenge_2_assessment_launch_1.png)
+ ![SSMS2](./images/Challenge_2_assessment_launch_1.png)
+
+ <img src="./images/Challenge_2_assessment_launch_1.png" alt="SSMS2" width="200">
+
 
 2. #### <u>Do not Migrate or Upgrade the database</u>.
 
@@ -268,7 +271,7 @@ Do you think it is ever possible to have a differential backup larger than full 
 
 Navigate to the Azure portal to the DMS service created earlier.  Select "New Migration".
 
-![DMS_6](./images/DMS_1.png)
+![DMS_6](./images/DMS_6.png)
 
 Next, choose the migration scenario - from Sql Server to Azure SQL MI.
 Choose <b>Blob</b> as backup location and <b>online</b> as backup mode.
