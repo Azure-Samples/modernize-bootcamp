@@ -242,9 +242,9 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    ![The permissions menu with Default Permissions, Sandboxing for terminal, Allow All, and Autopilot](./images/autopilot-permissions.png)
 
-   > 💡 **Autopilot (Preview) is another option.** Unlike **Allow All**, Autopilot lets the agent continue through the task without pausing for approval before each command, within the permissions you've granted. It can speed up this workshop, but use the review-and-approve flow above if you want to inspect the agent's actions as they happen. In a customer environment, agree on the permission level first: Autopilot trades visibility and control during execution for speed, so use it only when the customer is comfortable with that trade-off.
+   > 💡 **Autopilot (Preview) can shorten this step.** Like you did in Module 2, you can switch the permissions at the bottom right of Copilot Chat to **Autopilot (Preview)** so the agent keeps going without pausing for approval before each command. This is the longest part of the module, so it can cut down the waiting. Unlike **Allow All**, Autopilot works within the permissions you've granted. Stay on the review-and-approve flow above if you want to inspect the agent's actions as they happen, and note that either way the agent's steps and results may differ from the person next to you. In a customer environment, agree on the permission level first: Autopilot trades visibility and control during execution for speed, so use it only when the customer is comfortable with that trade-off.
 
-10. **Read the summary.** When every task is done, the agent posts a summary in the chat. It tells you:
+10. **Read the summary.** When every task is done, the agent posts a summary in the chat. Your summary may look a little different from the person next to you, since the agent's output varies from run to run, but it usually tells you:
 
     - which **branch** the changes are on. The agent creates a new local branch for this work from your Module 2 branch, and doesn't push anything to GitHub.
     - whether the app **builds**, and whether any **tests** ran. This app has no test projects, so expect no tests to run.
