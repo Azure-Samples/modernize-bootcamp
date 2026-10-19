@@ -75,7 +75,7 @@ cd caldova-retail-modernized
 code .
 ```
 
-If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the `caldova-retail-modernized` folder. If VSCode asks you to sign into GitHub again, authorize access there as well.
+If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the **caldova-retail-modernized folder**. If VSCode asks you to sign into GitHub again, authorize access there as well.
 
 If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
 
@@ -83,9 +83,9 @@ If VS Code opens the folder in **Restricted Mode**, select **Manage** in the ban
 
 ![VS Code showing the folder is trusted](./images/trusted-folder.png)
 
-You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
+You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
 
-> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned `caldova-retail-modernized` folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd caldova-retail-modernized` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
+> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **caldova-retail-modernized** folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd caldova-retail-modernized` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
 
 ## 🔑 Bootstrap GitHub OIDC
 
@@ -124,28 +124,28 @@ The script:
 2. validates the existing identities, target resources, and scoped role
    assignments without creating or changing them
 3. reads GitHub's effective OIDC subject prefix, including immutable owner and
-   repository IDs when enabled, then binds the build identity to `lab06` and
-   the deployment identity to `lab06-deploy` with environment-scoped
+   repository IDs when enabled, then binds the build identity to lab06 and
+   the deployment identity to lab06-deploy with environment-scoped
    federated credentials
-4. creates both GitHub environments, restricts `lab06-deploy` to `main`, and
+4. creates both GitHub environments, restricts lab06-deploy to main, and
    allows deployment without a required reviewer
 5. publishes and verifies the non-secret variables required by the workflow
 
 The script selects the newest matching deployment in each resource group and
-verifies that all four deployments have the same `prefix` and `suffix`
+verifies that all four deployments have the same prefix and suffix
 parameters before changing GitHub. If deployment history requires an older
 record, pass one or more of
-`-BootstrapDeploymentName`, `-PrimaryDeploymentName`,
-`-SecondaryDeploymentName`, and `-GlobalDeploymentName`.
+-BootstrapDeploymentName, -PrimaryDeploymentName,
+-SecondaryDeploymentName, and -GlobalDeploymentName.
 
 Each resource group is discovered independently from its
-`rg-caldova-lab04-bootstrap-`, `rg-caldova-lab04-primary-`,
-`rg-caldova-lab04-secondary-`, or `rg-caldova-lab04-global-` prefix. If more
+rg-caldova-lab04-bootstrap-, rg-caldova-lab04-primary-,
+rg-caldova-lab04-secondary-, or rg-caldova-lab04-global- prefix. If more
 than one resource group matches a prefix, supply the corresponding
-`-BootstrapResourceGroup`, `-PrimaryResourceGroup`, `-SecondaryResourceGroup`,
-or `-GlobalResourceGroup` override.
+-BootstrapResourceGroup, -PrimaryResourceGroup, -SecondaryResourceGroup,
+or -GlobalResourceGroup override.
 
-This keeps the `main` branch restriction but does not add a manual approval
+This keeps the main branch restriction but does not add a manual approval
 gate. The script emits a warning when it configures the environment without a
 required reviewer.
 
@@ -187,12 +187,12 @@ code-deployment identities**. Do not reuse the infrastructure identity.
 
 | Principal | Role | Scope | Purpose |
 | --- | --- | --- | --- |
-| Lab 06 build identity (`lab06`) | `AcrPush` | ACR | Push and inspect image manifests |
-| Lab 06 deployment identity (`lab06-deploy`) | `Container Apps Contributor` | Retail Container App | Create a revision by updating only the image |
-| Lab 06 deployment identity (`lab06-deploy`) | `Reader` | Front Door profile | Resolve the existing endpoint for the post-deployment smoke test |
-| Retail Container App system identity | `AcrPull` | ACR | Pull the released image at runtime |
-| Retail user-assigned runtime identity | `Key Vault Secrets User` | Lab Key Vault | Resolve future Key Vault-backed ACA secret references |
-| Retail user-assigned runtime identity | Contained database user | `eshop` database | Read and write migrated application data without a password |
+| Lab 06 build identity (lab06) | AcrPush | ACR | Push and inspect image manifests |
+| Lab 06 deployment identity (lab06-deploy) | Container Apps Contributor | Retail Container App | Create a revision by updating only the image |
+| Lab 06 deployment identity (lab06-deploy) | Reader | Front Door profile | Resolve the existing endpoint for the post-deployment smoke test |
+| Retail Container App system identity | AcrPull | ACR | Pull the released image at runtime |
+| Retail user-assigned runtime identity | Key Vault Secrets User | Lab Key Vault | Resolve future Key Vault-backed ACA secret references |
+| Retail user-assigned runtime identity | Contained database user | eshop database | Read and write migrated application data without a password |
 
 The workflow receives a short-lived Azure token only after GitHub presents an OIDC token whose repository and environment claims match the federated credential. No Azure client secret or ACR password is stored in GitHub.
 
@@ -201,12 +201,12 @@ deployment outputs:
 
 | Variable | Purpose |
 | --- | --- |
-| `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | OIDC sign-in context; `AZURE_CLIENT_ID` identifies the build identity in `lab06` and the deployment identity in `lab06-deploy` |
-| `LAB06_CONTAINER_REGISTRY_NAME` | Existing Lab 04 registry |
-| `LAB06_CONTAINER_APP_NAME` | Existing retail Container App |
-| `LAB06_RUNTIME_IDENTITY_RESOURCE_ID`, `LAB06_RUNTIME_IDENTITY_CLIENT_ID` | Bicep-owned runtime identity verification; neither value is a credential |
-| `LAB04_PRIMARY_RESOURCE_GROUP`, `LAB04_SECONDARY_RESOURCE_GROUP` | Registry, SQL, and application lookup scopes |
-| `LAB04_GLOBAL_RESOURCE_GROUP`, `LAB04_PREFIX`, `LAB04_SUFFIX` | Existing Front Door endpoint lookup |
+| AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID | OIDC sign-in context; AZURE_CLIENT_ID identifies the build identity in lab06 and the deployment identity in lab06-deploy |
+| LAB06_CONTAINER_REGISTRY_NAME | Existing Lab 04 registry |
+| LAB06_CONTAINER_APP_NAME | Existing retail Container App |
+| LAB06_RUNTIME_IDENTITY_RESOURCE_ID, LAB06_RUNTIME_IDENTITY_CLIENT_ID | Bicep-owned runtime identity verification; neither value is a credential |
+| LAB04_PRIMARY_RESOURCE_GROUP, LAB04_SECONDARY_RESOURCE_GROUP | Registry, SQL, and application lookup scopes |
+| LAB04_GLOBAL_RESOURCE_GROUP, LAB04_PREFIX, LAB04_SUFFIX | Existing Front Door endpoint lookup |
 
 These are GitHub variables, not secrets. Each identity's federated credential
 and resource-scoped role assignments are the authorization boundary.
@@ -243,16 +243,16 @@ Tell me about any place where the application and the infrastructure disagree.
 
 Check the result against the contract before you build it:
 
-- `mcr.microsoft.com/dotnet/sdk:10.0` only for restore and publish
-- `mcr.microsoft.com/dotnet/aspnet:10.0` for the smaller runtime image
+- mcr.microsoft.com/dotnet/sdk:10.0 only for restore and publish
+- mcr.microsoft.com/dotnet/aspnet:10.0 for the smaller runtime image
 - a non-root runtime user
-- port `8080` for platform ingress, and `/health` for pipeline and release probes
+- port 8080 for platform ingress, and /health for pipeline and release probes
 - a build context that excludes source-control metadata, build output, and local secret files
 
 > 💡 The credentials question is the interesting one. The app needs a database
 > connection at runtime, but the image must not contain it. Lab 04 Bicep owns
 > the passwordless connection-string environment variable and runtime identity;
-> Lab 05 grants that identity access after migrating `eshop`. GitHub Actions
+> Lab 05 grants that identity access after migrating eshop. GitHub Actions
 > changes only the image. If Copilot bakes configuration into the image or
 > rewrites environment variables during release, that is the failure to catch.
 
@@ -343,10 +343,10 @@ conditions. Stop after the plan.
 
 Review the plan. Reject it if:
 
-- a pull-request job receives `id-token: write`
+- a pull-request job receives **id-token: write**
 - the workflow uses an Azure client secret or ACR admin credentials
 - build and deployment happen in one unreviewed job
-- the image uses `latest`
+- the image uses latest
 - the Container App receives a SQL password
 - the workflow changes replica limits or infrastructure
 - deployment happens before the image is tested
@@ -371,7 +371,7 @@ Only create the workflow file. Do not push a branch, open a pull request, run
 the workflow, or deploy anything.
 ```
 
-Agent mode re-reads your repository and writes `.github/workflows/lab06-retail-cicd.yml`. Approve its file edits as it goes, and let it finish before you continue.
+Agent mode re-reads your repository and writes **.github/workflows/lab06-retail-cicd.yml**. Approve its file edits as it goes, and let it finish before you continue.
 
 Copilot generated the **entire** workflow from the plan — the pull-request validation job, the build-and-push job, and the deployment job. In the next three challenges you will **review that generated workflow one job at a time** before you run it. Do not hand-edit the file yet; read it first. If a job does not match the criteria in a challenge, ask Copilot to fix that part instead of editing the YAML yourself.
 
@@ -390,21 +390,21 @@ permissions:
   contents: read
 ```
 
-Confirm it has `pull_request` and `push` path filters for the retail app and workflow. The validation job should:
+Confirm it has pull_request and push path filters for the retail app and workflow. The validation job should:
 
 1. check out the commit
 2. set up .NET 10
 3. restore, build, and run available tests
 4. build the Docker image with a local tag
 5. start the container with a nonproduction dummy connection string
-6. poll `/health`
+6. poll /health
 7. stop the container even when the probe fails
 
 This job must **not** include Azure login. Forked pull requests must be able to validate without Azure access. If Azure login appears here, ask Copilot to move it to the deployment jobs.
 
 ## Challenge 4: Review Build and Push
 
-Confirm that, for pushes to `main`, a job uses the `lab06` GitHub environment and only these job permissions:
+Confirm that, for pushes to main, a job uses the lab06 GitHub environment and only these job permissions:
 
 ```yaml
 permissions:
@@ -412,7 +412,7 @@ permissions:
   id-token: write
 ```
 
-Confirm this job authenticates with `azure/login`, then signs in and pushes with:
+Confirm this job authenticates with azure/login, then signs in and pushes with:
 
 ```bash
 az acr login --name "$ACR_NAME"
@@ -429,9 +429,9 @@ Confirm the job resolves the digest from ACR and passes the digest-qualified ima
 
 ## Challenge 5: Review the Deployment
 
-Confirm a separate job uses the protected `lab06-deploy` environment and that it:
+Confirm a separate job uses the protected lab06-deploy environment and that it:
 
-1. authenticates through the `lab06-deploy` federated credential
+1. authenticates through the lab06-deploy federated credential
 2. verifies the target app and registry match Lab 04
 3. verifies the system identity, user-assigned runtime identity, and required
    Bicep-owned environment-variable names
@@ -463,12 +463,12 @@ git status --short
 Verify:
 
 - [ ] PR validation has no Azure permissions.
-- [ ] Deployment is limited to `main`.
-- [ ] `id-token: write` exists only on Azure jobs.
+- [ ] Deployment is limited to main.
+- [ ] id-token: write exists only on Azure jobs.
 - [ ] the image tag contains the complete commit SHA.
 - [ ] the deployed reference contains an ACR digest.
 - [ ] no registry or SQL password is used.
-- [ ] the deploy job uses `lab06-deploy`.
+- [ ] the deploy job uses lab06-deploy.
 - [ ] concurrency prevents overlapping production deployments.
 - [ ] the app is updated rather than recreated.
 
@@ -484,17 +484,17 @@ git push -u origin lab06-cicd
 gh pr create --fill
 ```
 
-Confirm validation succeeds on the pull request, review the changes, and merge. Approve `lab06-deploy` only after verifying that the image digest belongs to the merged commit.
+Confirm validation succeeds on the pull request, review the changes, and merge. Approve lab06-deploy only after verifying that the image digest belongs to the merged commit.
 
 ## ✅ Verify the Release
 
 In the workflow summary and Azure portal, verify:
 
-- a new image manifest exists in ACR with the `sha-<commit>` tag
+- a new image manifest exists in ACR with the sha-<commit> tag
 - the Container App revision references the same manifest digest
 - the revision is healthy
 - minimum replicas and autoscaling remain unchanged
-- `/health` succeeds through Front Door
+- /health succeeds through Front Door
 - catalog and sign-in paths can reach the migrated database
 - the previous revision remains visible for rollback evidence
 
@@ -511,7 +511,7 @@ az containerapp revision list `
   --output table
 ```
 
-Re-run the workflow using a revert commit, or update the app to the previously approved digest. Do not “fix” a failed release by moving the old image to the `latest` tag.
+Re-run the workflow using a revert commit, or update the app to the previously approved digest. Do not “fix” a failed release by moving the old image to the latest tag.
 
 Document:
 
