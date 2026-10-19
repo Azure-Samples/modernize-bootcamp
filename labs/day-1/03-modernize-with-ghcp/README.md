@@ -91,7 +91,7 @@ Leverage Blazor components to make it look more modern, sleek, and aesthetic.
 
 ![The Upgrade agent finds no MVC-to-Blazor scenario and proceeds with a direct code change](./images/blazor-migration.png)
 
-If the agent asks you to confirm how to proceed, choose the default option, **Proceed directly**. This lets it make the Blazor changes outside the predefined upgrade-scenario workflow. If it does have this pop-up, that is ok; that means it has already made a decision and begun to work.
+If the agent asks you to confirm how to proceed, choose the default option, **Proceed directly**. This lets it make the Blazor changes outside the predefined upgrade-scenario workflow. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.** If it does have this pop-up, that is ok; that means it has already made a decision and begun to work.
 
 ![Choose the default Proceed directly option when prompted](./images/confirm-direct-migration.png)
 
@@ -166,7 +166,7 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    A chat opens with the prompt "Migrate this application to Azure".
 
-2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5. If you don't see this question, that's okay: the agent may go straight to assessing the whole app. If nothing happens after a minute or two, send:
+2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.** If nothing happens after a minute or two, send:
 
    ```plaintext
    Assess my entire application for migration to Azure.
@@ -245,7 +245,7 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
     ![The agent's summary after executing the migration plan](./images/migration-summary.png)
 
-10. **Quick check: run the app.** Ask Copilot to build and run the app, then open the URL it gives you. The Azure settings are empty, so the app should work exactly as before: products load, sign-in works, and the cart works. If it fails to start, tell Copilot what you see.
+10. **Quick check: run the app.** Ask Copilot to build and run the app, then open the URL it gives you. The Azure settings are empty, so the app should work exactly as before: products load, sign-in works, and the cart works. If it fails to start, tell Copilot what you see. For example, if it can't connect to the database, ask Copilot where the database connection is stored now, and re-add the database password there if needed.
 
 > 🎉 **That's it — the app's code now supports the Azure services Copilot recommended.**
 >
