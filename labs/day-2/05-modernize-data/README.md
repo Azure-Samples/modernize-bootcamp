@@ -389,11 +389,13 @@ WHERE
  name like 'Test%' ;
 ```
 
-#### Congratulations - you have migrated to Azure SQL
+<b>Congratulations - you have migrated to Azure SQL</b>
 
-## Challenge 5 - Perform online migration using CLI
+## Challenge 5 - Perform online migration using CLI (Optional)
 
-### VM SQL Server to Azure SQL Managed Instance with Azure DMS Via CLI
+If you completed challenges 1- 4 in under 2.5 hours, you can proceed with challenge 5.  Otherwise click on *Next* in the set of instructions and move on to the apps portion of day 2.  You can always navigate back to this page and complete challenge 5 if you have time.
+
+### VM SQL Server to Azure SQL Managed Instance with Azure DMS Via CLI 
 
 ### Objective
 
