@@ -91,7 +91,7 @@ Leverage Blazor components to make it look more modern, sleek, and aesthetic.
 
 ![The Upgrade agent finds no MVC-to-Blazor scenario and proceeds with a direct code change](./images/blazor-migration.png)
 
-If the agent asks you to confirm how to proceed, choose the default option, **Proceed directly**. This lets it make the Blazor changes outside the predefined upgrade-scenario workflow. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.** If it does have this pop-up, that is ok; that means it has already made a decision and begun to work.
+If the agent asks you to confirm how to proceed, choose the default option, **Proceed directly**. This lets it make the Blazor changes outside the predefined upgrade-scenario workflow. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.**
 
 ![Choose the default Proceed directly option when prompted](./images/confirm-direct-migration.png)
 
