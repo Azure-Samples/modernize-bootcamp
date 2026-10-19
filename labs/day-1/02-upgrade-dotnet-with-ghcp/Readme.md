@@ -434,11 +434,16 @@ Once you approve the plan, the agent begins upgrading the application.
 
 > ⏱️ **WORKSHOP NOTE: AGENTIC PACING**
 >
-> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, we will watch the agent work through the first few minutes and then move on to a pre-upgraded repository.
+> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, you will watch the agent work through its first task and then move on to a pre-upgraded repository.
 >
-> In this workshop, **you only need to observe the agent for 5–10 minutes:**
+> **When can you move on?** You don't need to wait for the upgrade to finish. You can stop and go to Step 5️⃣ once both of these are true:
 >
-> **Read through this section and try things out** while the agent works—check the dashboard, inspect a background subagent, ask Copilot questions in the chat, or test out a steering message. Once you've explored these features, Step 5️⃣ will show you how to stop the run and move on to the next module.
+> 1. **The first task has finished.** It is checked off in the dashboard (or **tasks.md**), and a commit appears in the Source Control view.
+> 2. **You've tried the features below:** the dashboard, the Activity tab, and a steering message.
+>
+> If no task has finished after about 10 minutes, that's okay. Stop anyway and move on.
+>
+> While you wait, **read through this section and try things out.**
 
 During this phase:
 
@@ -507,7 +512,7 @@ The agent decides each next step based on what it just observed, so it does not 
 
 ## 5️⃣ Wrap Up & Transition
 
-Once you've tried everything in this section and let the agent run for about 5–10 minutes, you're ready to wrap up:
+You're ready to wrap up once the first task has finished and you've tried the features in the previous section. If no task has finished after about 10 minutes, wrap up anyway.
 
 **1. Stop the agent.** Select the **Stop** button in Copilot Chat to halt execution.
 
