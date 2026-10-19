@@ -23,7 +23,7 @@ By the end of this lab, you will be able to:
 - access to the instructor-preprovisioned Lab 04 platform
 - completed Lab 05, including the managed-identity database user
 - Azure access to read the Lab 04 deployment and configure federated credentials
-- GitHub `ADMIN` permission on the repository
+- GitHub ADMIN permission on the repository
 - your own fork of the modernized retail app (cloned in Setup below)
 - GitHub Actions enabled for the repository
 
