@@ -1,18 +1,35 @@
 # 🗣️ Talking Points
 
-Use these points to guide discussion while attendees work through the labs. They are for proctors and facilitators.
+Waiting on the agent? Use this page while a long step runs. **You don't need to read it all.** Pick the one topic that interests you most, read its **Start here** link, and come back for more if you have time. Your instructor may also lead a discussion on these topics.
 
-## 💬 Discussion topics
+Everything linked here is public documentation.
 
-- Share best practices for leading modernization conversations with customers.
-- Ask the room which of their customers could be good modernization candidates, and use those examples to spark discussion.
-- Highlight extra GitHub Copilot modernization tools: custom skills, the Agents window in VS Code, the CLI, and the modernization plugin.
-- Explain model selection: how to choose and switch models in GitHub Copilot, and when a different model may give better results.
-- Discuss tokenomics: how token usage drives cost.
+## 1. Leading modernization conversations with customers
 
-## ⏱️ Pacing notes
+**Think about:** Which of your customers could be good modernization candidates? Who has aging Java or .NET apps, framework upgrades, technical debt, or apps they're already discussing moving to Azure?
 
-- There will be times on Day 1 where the agentic process can take upwards of 30 minutes to run. We have avoided this where we can, but in reality this is just the nature of the process.
-- When about 70% of attendees are done with the .NET upgrade (and are partway into Lab 3), feel free to bring these topics up and pulse check. Keep in mind people will be at different points.
+- **Start here:** [Modernization agent overview](https://learn.microsoft.com/en-us/azure/developer/github-copilot-app-modernization/modernization-agent/overview). It frames a customer conversation as **Assess → Plan → Execute**.
+- **Go deeper:** [GitHub Copilot modernization documentation](https://learn.microsoft.com/en-us/azure/developer/github-copilot-app-modernization/). A good page to bookmark, with Java, .NET, C++, JavaScript/TypeScript, CLI, assessment, and migration guidance.
 
-More resources to come.
+## 2. Extra GitHub Copilot modernization tools
+
+**Think about:** Which of these would your customers actually use? Pick the one you're curious about.
+
+- **Custom skills:** teach Copilot your organization's standards. [Adding agent skills for GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)
+- **Agents window in VS Code:** assign work to agents and review the results across projects. [Use the Agents window](https://code.visualstudio.com/docs/agents/run/agents-window)
+- **Modernization CLI:** run modernization from the terminal. [Quickstart: install and use the modernization agent](https://learn.microsoft.com/en-us/azure/developer/github-copilot-app-modernization/modernization-agent/quickstart)
+- **Modernization plugin:** a multi-agent workflow for assessment, planning, and execution in Copilot CLI. [GitHub Copilot modernization repository](https://github.com/microsoft/github-copilot-modernization)
+
+## 3. Choosing and switching models
+
+**Think about:** When would a different model give better results for a modernization task?
+
+- **Start here:** [Changing the AI model for GitHub Copilot Chat](https://docs.github.com/copilot/how-tos/use-ai-models/change-the-chat-model). How to switch models in VS Code, and why they have different strengths.
+- **Go deeper:** [AI language models in VS Code](https://code.visualstudio.com/docs/agent-customization/language-models). A simple rule of thumb: use a faster model for quick questions and small edits, and a stronger reasoning model for complex refactoring, architecture decisions, or multi-step work.
+
+## 4. Tokenomics: how usage drives cost
+
+**Think about:** Model choice isn't only about quality, it's also about cost. How would you explain that to a customer?
+
+- **Start here:** [Changing the AI model for GitHub Copilot Chat](https://docs.github.com/copilot/how-tos/use-ai-models/change-the-chat-model). Different models use AI credits at different rates.
+- **Go deeper:** [AI language models in VS Code](https://code.visualstudio.com/docs/agent-customization/language-models). Turning up a reasoning model's effort produces more thinking tokens, which uses more credits.
