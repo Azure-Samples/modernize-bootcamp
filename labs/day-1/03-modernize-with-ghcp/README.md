@@ -19,7 +19,7 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 1. In Microsoft Edge, open this link: +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++. (Sign in with your lab credentials if prompted).
 2. Select **Fork**, then **Create fork** with the defaults left alone.
 3. In your new fork, select **Code**, then copy the **HTTPS** URL.
-4. Open PowerShell from your applications and clone your fork. Run this from the default location, **C:\Users\Admin**. If you still have PowerShell open from the previous module, make sure you are in the **C:\Users\Admin** folder first (run cd .. as needed until you are). In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail-dotnet10.git
+4. Open PowerShell from your applications and clone your fork. Run this from the default location, **C:\Users\Admin**. If you still have PowerShell open from the previous module, make sure you are in the **C:\Users\Admin** folder first (run `cd ..` as needed until you are). In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail-dotnet10.git
 
    ```powershell
    git clone <your-fork-url>
@@ -43,10 +43,10 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 
    > 💡 Notice how this is different from Module 2. The legacy .NET Framework app needed MSBuild and IIS Express to run. Now that the app is upgraded to .NET 10, it starts with the standard **dotnet run** command, with no IIS Express or Windows Server required.
 
-9. **Set your Git commit identity in Copilot Chat.** This is a new clone, so the identity you set in Module 2 doesn't carry over. Send this message, replacing the placeholders with your lab details:
+9. **Set your Git commit identity in Copilot Chat.** Do this again for this new copy of the repository, since Git may save the identity per repository. Send this message, replacing the placeholders with your lab details:
 
    ```plaintext
-   For the rest of this module, use <your name> and <your lab email> as the Git commit identity.
+   Use <your name> and <your lab email> as my Git commit identity.
    ```
 
    Use the **Username** listed under **Azure portal** on the **Resources** tab as your email. For your name, use the part before **@** in that email (for example, **user1-6614389**) or your own name. Whichever is fine. This lets the agent make commits later without stopping to ask for your identity.
@@ -292,51 +292,15 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    Keep an eye on it as it goes. The agent rebuilds the app and runs commands as it works. In Autopilot it doesn't wait for your approval, so read the per-phase summaries as they appear instead of waiting until the end. If you stayed on the default permissions, review each request it asks about and approve it when appropriate. Either way, the agent's steps and results may differ from the person next to you.
 
-9. **Read the summary.** When every task is done, the agent posts a summary in the chat. Your summary may look a little different from the person next to you, since the agent's output varies from run to run, but it usually tells you:
-
-    - which **branch** the changes are on. The agent creates a new local branch for this work from the branch you were on (**blazor-ui-refresh**), and doesn't push anything to GitHub.
-    - whether the app **builds**, and whether any **tests** ran. This app has no test projects, so expect no tests to run.
-    - a table of each **task**, its **result**, and the **commit** it made, so you can review each change on its own.
+9. **Read the summary.** When every task is done, the agent posts a summary in the chat: the branch your changes are on, whether the app builds, and a table of each task with its commit. Yours may look a little different from the person next to you. One thing to notice: none of the new Azure code has been tested against real Azure resources yet, because they don't exist until later modules.
 
     ![The agent's summary after executing the migration plan](./images/migration-summary.png)
 
-    Notice one honest line in the summary: none of the new Azure code has been run against real Azure resources yet. That's expected, because those resources don't exist until later modules. Each task also has its own `summary.md` in the `.github/modernize/code-migration` folder with more detail.
+10. **Quick check: run the app.** Ask Copilot to build and run the app, then open the URL it gives you. The Azure settings are empty, so the app should work exactly as before: products load, sign-in works, and the cart works. If it fails to start, tell Copilot what you see.
 
-    If the summary is too technical, ask for a plainer version:
-
-    ```plaintext
-    Summarize the changes you made at a high level, not file level.
-    ```
-
-10. **Build and run the app on the VM.** Your code is now on the new branch the agent created. Because none of the Azure settings are filled in, the app should skip Azure and keep working as before, for example by reading its database connection from local settings instead of Key Vault. Which Azure services the agent added can differ from the person next to you, so don't worry if your changes don't match exactly.
-
-    **First, ask where the database connection comes from now.** The app still needs it to run, since there is no real Key Vault yet. Ask Copilot:
-
-    ```plaintext
-    Where does the app get its database connection now, and do I need to change anything to run it locally?
-    ```
-
-    Read the answer before you act on it. If Copilot asks you to supply the connection details, use the same database password you used in setup, and don't paste passwords into the chat.
-
-    **Then build and run it.** Ask Copilot to build and run the app, and open the URL it gives you. The app should look and behave exactly as it did before this step: the products load, sign-in works for both demo accounts, and the cart keeps its contents.
-
-    If the app fails to start or something looks off, it's usually trying to reach an Azure service that doesn't exist yet. Tell Copilot what you see, and ask it to check that every Azure service falls back to the app's current behavior when its settings are empty. You can also ask Copilot to run this check for you:
-
-    ```plaintext
-    Verify the changes you made actually work. Run the app and check the behavior, don't just re-read the code. For anything you can't verify without Azure resources, say so explicitly rather than assuming it works.
-    ```
-
-> 💡 Before you move on, ask Copilot where the changes ended up, since the agent's results vary and the Azure settings may live in different places for each person:
+> 🎉 **That's it — the app's code now supports the Azure services Copilot recommended.**
 >
-> ```plaintext
-> Where did you add or read Azure settings in the code, and which Azure resource would each one need?
-> ```
->
-> A quick read tells you what the next module has to provision.
-
-> 🎉 **That's it — the app's code now supports the Azure services the GitHub Copilot modernization tooling recommended.**
->
-> Three modules ago this was a .NET Framework 4.8 app that only ran on Windows Server behind IIS. It now builds on .NET 10, renders through Blazor, and its code is wired to use Azure services such as Key Vault. It is not running in Azure yet, because those services don't exist. Next module you design the IaC to support those services and the overall cloud foundation, and Module 6 deploys the app onto it.
+> You started Module 2 with a .NET Framework 4.8 app on Windows Server. It now runs on .NET 10, renders with Blazor, and is wired to use Azure services such as Key Vault. It isn't running in Azure yet, because those services don't exist. In Module 4 you design them as infrastructure as code, and in Module 6 you deploy the app onto them.
 
 ## 🔧 Troubleshooting common issues
 

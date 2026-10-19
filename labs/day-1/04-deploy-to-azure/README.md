@@ -209,15 +209,15 @@ authentication, internal Container Apps environments, bounded scaling, determini
 role assignments, and parameter files with lab-sized defaults.
 
 Follow the approved module boundaries and entry-point contracts. After generation,
-build every Bicep entry point and list the files you created, the validation output,
-and all remaining warnings. Stop before making any unplanned correction.
+list the files you created and any assumptions you made. Stop before making any
+unplanned correction.
 ```
 
-Check the result in three steps.
+Check the result:
 
-**1. See what was generated.** In the VS Code Explorer, open `infra/lab04/student`. You should see the four entry points, `primary.bicep`, `secondary.bicep`, `global.bicep`, and `sqlmi.bicep`, plus a `modules` folder if Copilot split the Bicep into modules. The files inside `modules` will differ from the finished version, and that's fine.
+**1. Look at the files.** In the VS Code Explorer, open `infra/lab04/student`. You should see the four entry points (`primary.bicep`, `secondary.bicep`, `global.bicep`, `sqlmi.bicep`) plus any modules Copilot created. Names inside `modules` will differ from the finished version, and that's fine.
 
-**2. Build each entry point.** Run this in PowerShell:
+**2. Build them.** Open a terminal in VS Code (**Terminal → New Terminal**). It opens in PowerShell at your repository folder. Run:
 
 ```powershell
 foreach ($name in 'primary', 'secondary', 'global', 'sqlmi') {
@@ -226,37 +226,15 @@ foreach ($name in 'primary', 'secondary', 'global', 'sqlmi') {
 }
 ```
 
-You should see four "builds cleanly" lines. Building an entry point also builds every
-module it uses, so you don't need to build each file. Warnings, if any, print above the
-result line; read them, but they don't mean the build failed. For example, a message that
-a new Bicep release is available is harmless. If a file reports errors,
-paste the message into Copilot Chat and ask it to explain the cause before you fix anything.
+You should see four "builds cleanly" lines. Warnings are fine (a "new Bicep release is available" notice is harmless), but errors aren't. If a file has errors, paste the message into Copilot Chat and ask it to explain the cause before you fix anything.
 
-**3. Compare the design with the diagram.** Open `primary.bicep` in VS Code, then open the
-Bicep Visualizer (the **Open Visualizer** button at the top right of the editor, or
-**Bicep: Open Bicep Visualizer** from the Command Palette). Compare the resources and
-connections with the Required Final Architecture diagram above, then repeat for
-`secondary.bicep`. You're checking that the pieces you expect, such as Bastion, the VMs,
-the SQL private endpoint, and the Container Apps environment, are there and connected.
-
-Then commit what Copilot generated, so the review in the next challenge has a starting
-point to compare against:
+**3. Commit it.** So the review in the next challenge has a starting point to compare against, ask Copilot:
 
 ```text
 Commit the generated Bicep files under infra/lab04/student/ with a clear commit message.
 ```
 
-What a build does and doesn't tell you:
-
-- A successful build proves the Bicep is valid: its syntax, types, and references.
-- The review in Challenge 4 checks whether the design is right.
-- Only a real deployment shows whether it works: a name might already be taken, the
-  subscription might not have enough capacity, or company policies might block a setting.
-  You won't deploy your Bicep in this lab. Your instructor deployed the finished version,
-  and Module 6 deploys the app onto it.
-
-Use the [Lab 04 requirements](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/requirements.md)
-(`infra/lab04/requirements.md` in your fork) as the implementation checklist.
+A successful build only proves the Bicep is valid. It doesn't prove the design is right (that's the review in Challenge 4) or that it would deploy. You won't deploy your Bicep in this lab: your instructor already deployed the finished version, and Module 6 deploys the app onto it.
 
 ## 🧪 Challenge 4: Run the Human Review
 
@@ -269,25 +247,16 @@ infra/lab04/requirements.md.
 
 Report findings first, ordered by severity. Label each finding as a requirement
 violation, a risk, or a suggestion. Cite the affected file and explain the
-deployment or runtime consequence. Check Bicep correctness, dependency ordering,
+deployment or runtime consequence. Check dependency ordering,
 network and private DNS paths, least-privilege RBAC, secret exposure, availability,
 bounded scaling, parameterization, and deterministic naming. Do not edit files.
 ```
 
-Read each finding and use its label to decide. Fix the requirement violations, weigh the
-risks against the lab's time and cost limits, and treat suggestions as optional. Ask
-Copilot to make only the fixes you agree with. After each round, rebuild the four entry
-points, run `git diff -- .\infra\lab04\student` to see exactly what changed, and commit the
-round you accept. That keeps each fix reviewable on its own.
+Read each finding and use its label to decide which fixes you agree with: fix the requirement violations, weigh the risks, and treat suggestions as optional. Ask Copilot to make only those. After each round, rebuild with the command from Challenge 3 and check what changed in the **Source Control** view (red lines were removed, green lines were added), then commit the round you accept.
 
 Finally, compare your approach with
 [the complete implementation](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/complete/README.md)
-(`infra/lab04/complete/` in your fork). The finished version is a reference, not an
-answer key, and it has its own trade-offs. For example, it shares one username and
-password between both VMs and keeps Linux password sign-in on so Bastion can connect over
-SSH, its infrastructure identity needs broad permissions in both regional resource groups,
-and its Front Door Private Link connection can stay pending until someone approves it.
-Differences are things to discuss, not automatically mistakes. Be ready to explain:
+(`infra/lab04/complete/` in your fork). It's a reference, not an answer key, so differences are things to discuss, not automatically mistakes. Be ready to explain:
 
 - which requirements both implementations satisfy
 - where module boundaries or parameter choices differ

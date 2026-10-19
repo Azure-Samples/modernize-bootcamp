@@ -91,16 +91,15 @@ Walk around the storefront for a minute and notice how it behaves:
    If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **Authorize git-ecosystem**), then return to PowerShell. The clone starts once you are signed in.
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type the original repo link, +++https://github.com/Skillable-Events/caldova-retail+++, into the browser, follow the sign in, click the button to stay signed in, and then run the PowerShell command again.
 
-**3. Point the .NET SDK at the web build targets.** This app uses an older web project format that the .NET 10 SDK can't load on its own. It looks for a build file in its own folder, but the file is installed with the Visual Studio Build Tools. Without this step, the upgrade can fail when it starts, with an error about **Microsoft.WebApplication.targets**. Copilot can usually work this out on its own, but sometimes it gets stuck, and running this now prevents that. In the same PowerShell window, run:
+**3. Set the build tools path (one time).** Copilot can usually work this out on its own, but we include this step to prevent an error, or Copilot getting stuck, when the upgrade starts. It points the build at the files the legacy web project needs. In the same PowerShell window, run:
 
 ```powershell
 $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
 [Environment]::SetEnvironmentVariable("VSToolsPath", "$vs\MSBuild\Microsoft\VisualStudio\v17.0", "User")
 $env:VSToolsPath = "$vs\MSBuild\Microsoft\VisualStudio\v17.0"
-Test-Path "$env:VSToolsPath\WebApplications\Microsoft.WebApplication.targets"
 ```
 
-The last command should print **True**. The first three lines print nothing; that is expected. The setting is saved for your user, so you only need to do this once on your VM.
+These commands print nothing, which is expected. The setting is saved for your user, so you only need to do this once on your VM.
 
 > 💡 If VS Code is already open, close every VS Code window before the next step, so it picks up the new setting when it starts.
 
@@ -270,7 +269,7 @@ The rest of this module is the upgrade itself, in five steps.
 
 4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat.
 
-   > 💡 **If the error mentions Microsoft.WebApplication.targets**, the .NET SDK couldn't find the web build targets. Go back to Setup step **3. Point the .NET SDK at the web build targets** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
+   > 💡 **If the error mentions Microsoft.WebApplication.targets**, the .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
 
    Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
 
@@ -378,7 +377,7 @@ The options can vary between runs in this agentic flow. Hover over an option for
 - **In-place:** Modify the existing project.
 - **Side-by-side:** Create a new project alongside the existing one.
 
-For the Web project, change its **Project Approach** to **In-place rewrite** if that option is available. If the options differ or are missing, you can keep the defaults; the agent may present different choices depending on the scenario.
+Find the setting for the in place versus side-by-side run. It may be labeled **Project Approach** or **Web projects**. Change it to **In-place rewrite** if that option is available. If the options differ or are missing, you can keep the defaults; the agent may present different choices depending on the scenario.
 
 Keep the other defaults. To save time, skip the option to generate automated tests. The agent will still record a baseline of how the app looks and behaves before the upgrade, then use it to guide validation afterward. This baseline helps compare behavior, but it is not a substitute for automated regression tests.
 
