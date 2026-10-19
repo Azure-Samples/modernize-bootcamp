@@ -265,22 +265,6 @@ You do **not** deploy the Bicep you write, run the setup scripts, or delete anyt
 
 At the start of Lab 06, GitHub is given permission to deploy the app to this environment. It uses **OIDC**, which lets GitHub prove who it is to Azure each time it runs, so no password ever has to be stored in GitHub. That permission only covers releasing the app; it is not used to deploy your Lab 04 Bicep. The identity GitHub uses can only do three things: push app images to the container registry, update the storefront's Container App, and read the Front Door settings to test the result.
 
-## 🐢 Predeployed SQL Managed Instance
-
-Your instructor also set up an **Azure SQL Managed Instance** (SQL MI), a managed version of SQL Server in Azure. It uses the free offer when the subscription allows it, and a paid tier otherwise.
-
-To connect to it from the VM, you need to allow your VM's public IP address through its firewall. Run:
-
-```powershell
-az login
-.\assets\scripts\Enable-Lab04SqlMiPublicAccess.ps1 `
-  -SubscriptionId '<subscription-id>'
-```
-
-The script asks before it looks up your IP address. It then adds one firewall rule (an NSG rule) that allows only your address to reach the database on port 3342. Each participant gets their own rule, so you won't overwrite anyone else's. If your IP address changes, run the script again. Your instructor must give you **Network Contributor** access to the SQL MI firewall for this to work.
-
-Connect to the address the script shows you, and sign in with your Microsoft Entra (Azure) account. Signing in with a SQL username and password is turned off.
-
 ## ✅ Review Checklist
 
 - [ ] Every generated Bicep file builds without errors.
