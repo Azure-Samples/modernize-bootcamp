@@ -154,11 +154,11 @@ Commit all the Blazor conversion changes on the blazor-ui-refresh branch with a 
 
 The app runs on .NET 10 and renders through Blazor, but its code does not yet know how to work with Azure services such as Key Vault or managed identity. Nothing so far has touched that, because a framework upgrade has no reason to.
 
-**In this step you make code changes only.** You add the code the app needs to use Azure services, but you do not create the services themselves. We will create the IaC for those services in later modules.
+**In this step you make code changes only.** You add the code the app needs to use Azure services, but you do not create the services themselves.
 
-Think of each Azure service as a switch, and the switch is just a setting. In this step you add the code for a service and leave its switch off, so the app keeps running locally exactly as it did before. Once the app runs in Azure, those settings are filled in and the switches turn on. Module 4 designs the services, and Module 6 deploys the app onto them.
+Think of each Azure service as a switch, and the switch is just a setting. You add the code and leave the switch off, so the app keeps running locally exactly as before. Once the app runs in Azure, the settings get filled in and the switches turn on.
 
-For example, your plan might add code that can read secrets from **Azure Key Vault** or settings from **Azure App Configuration**, signing in with a managed identity instead of stored passwords. Each one only switches on when its address is provided. Until then, the app keeps reading its database connection from local settings, and the database itself doesn't change. The exact services in your plan may differ from the person next to you.
+For example, your plan might add code to read secrets from **Azure Key Vault**, which only turns on when a Key Vault address is provided. The services in your plan may differ from the person next to you.
 
 You'll use the same **GitHub Copilot modernization** extension you used in Module 2, this time with its **Migrate to Azure** option. Expect this step to take about 30–40 minutes, including the time the agent spends planning and making the changes.
 
@@ -241,19 +241,11 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
    For each task in the plan, explain in plain language what would go wrong in Azure without it.
    ```
 
-   **Challenge the plan.** You don't need to be an expert to ask good questions about it. Pick a task or Azure service in the plan and ask why it's there, what the alternative would be, and what it would cost or complicate:
+   **Optional: ask why.** Curious why the plan picked a service? Ask Copilot to defend it, and use the answer to learn, not to change the plan:
 
    ```plaintext
-   Why did you choose this Azure service for this task instead of the alternatives? What are the tradeoffs, and what would change if we skipped it?
+   Why did you choose this Azure service for this task instead of the alternatives, and what are the tradeoffs?
    ```
-
-   You can also ask what the plan might be missing:
-
-   ```plaintext
-   Are there other Azure services that would help this app, such as for monitoring, configuration, or security, that this plan doesn't include? For each one, explain what it would add and whether it's worth the extra work.
-   ```
-
-   Treat the answers as discussion points, not changes to make. The services in this plan are the ones the next modules build, so adding more would change what Module 4 has to provision. With a customer, though, these are exactly the questions that surface the next phase of the roadmap.
 
 7. **Run the plan.** When the plan looks right, switch the agent to Autopilot first, like you did in Module 2. During execution the agent runs many commands and test builds, and Autopilot lets it keep going without pausing for approval before each one:
 
@@ -272,9 +264,9 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    > ⏱️ **This is the longest part of the module.** The agent works through every task in the plan, building the app as it goes, and it can take about 30–40 minutes to run. Use the wait to follow its progress in the next step and read what it's doing.
    >
-   > 🗣️ **While it runs:** if timing lines up, your instructor will lead a discussion on some important topics during this wait. Feel free to use the [Talking Points](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/talking-points.md) as reading material and docs on those topics too. Customers will have questions beyond what this lab covers, so use the wait to practice: ask Copilot Chat about anything you're curious about and do your best to reason through the answer.
+   > 🗣️ **While it runs:** if timing lines up, your instructor will lead a discussion on some important topics during this wait. Feel free to use the [Talking Points](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/talking-points.md) as reading material and docs on those topics too. Customers will have questions beyond what this lab covers, so use the wait to read up on something you're curious about, such as custom skills, model selection, or the modernization CLI.
 
-8. **Follow the progress.** The Migrate to Azure agents don't have the dashboard you used with the Upgrade agent in Module 2; that dashboard is specific to framework upgrades. Instead, the agent *usually* writes a `progress.md` file for each task and checks off each step as it finishes. If you don't see a progress file, ask Copilot Chat: `Please create a progress.md file to track the migration's progress.` Each task follows the same pattern:
+8. **Follow the progress.** The Migrate to Azure agents don't have the dashboard you used with the Upgrade agent in Module 2; that dashboard is specific to the Upgrade agent. Instead, the agent *usually* writes a `progress.md` file for each task and checks off each step as it finishes. If you don't see a progress file, ask Copilot Chat: `Please create a progress.md file to track the migration's progress.` Each task follows the same pattern:
 
    - **Code migration:** the files it changes, such as the project file, `appsettings.json`, and `Program.cs`.
    - **Validation and fixing:** it builds the app, checks the libraries for known security vulnerabilities (CVEs), checks that the changes are consistent and complete, and runs any tests.
