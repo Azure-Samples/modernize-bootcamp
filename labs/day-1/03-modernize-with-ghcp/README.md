@@ -1,6 +1,6 @@
 # ☁️ Lab 03: Modernize the App Code for Azure
 
-Module 2 moved the storefront onto .NET 10. That upgrade changed the framework underneath, but not the app's pages, and not how the code works with **Azure services**, such as Key Vault for secrets or managed identity for sign-in. It also rewrote how the app starts up and where it keeps its settings (now in `appsettings.json`).
+Module 2 moved the storefront onto .NET 10. That upgrade changed the framework underneath, but not the app's pages, and not how the code works with **Azure services**, such as Key Vault for secrets or Redis for shopping carts. It also rewrote how the app starts up and where it keeps its settings (now in `appsettings.json`).
 
 > 🎯 **This module: prepare the app's code for Azure.** You work on the **application code** only. First you rebuild the pages with **Blazor**, Microsoft's current recommended way to build .NET web UIs. Then you close the code gaps that would stop the app working well with Azure services. Nothing is created in Azure and nothing is deployed. By the end, the app has a modern UI and its code is *ready to use* Azure services, but it is not running in Azure yet. Module 4 designs the Azure environment the app will run in, and Module 6 deploys the app into it.
 
