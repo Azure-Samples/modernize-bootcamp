@@ -438,7 +438,7 @@ Once you approve the plan, the agent begins upgrading the application.
 >
 > **When can you move on?** You don't need to wait for the upgrade to finish. You can stop and go to Step 5️⃣ once both of these are true:
 >
-> 1. **The first task has finished.** It is checked off in the dashboard (or **tasks.md**), and a commit appears in the Source Control view.
+> 1. **The first task has finished.** It is checked off in the dashboard or **tasks.md**, or the chat says so. Usually the agent posts that the task is done and committed, because you chose to commit after each task.
 > 2. **You've tried the features below:** the dashboard, the Activity tab, and a steering message.
 >
 > If no task has finished after about 10 minutes, that's okay. Stop anyway and move on.

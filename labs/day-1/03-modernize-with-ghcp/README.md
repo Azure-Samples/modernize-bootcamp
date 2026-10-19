@@ -152,7 +152,7 @@ Commit all the Blazor conversion changes on the blazor-ui-refresh branch with a 
 
 ## 2️⃣ Prepare the app code for Azure
 
-Now you make the app's code ready to use Azure services, such as Key Vault for secrets. This is **code changes only**: nothing is created or deployed in Azure.
+Creating an Azure service doesn't make your app use it. The app needs code that knows how to connect to the service. For example, to read secrets from Key Vault, the app needs code that calls Key Vault. In this step you add that code. This is **code changes only**: nothing is created or deployed in Azure.
 
 Think of each Azure service as a switch, and the switch is just a setting. You add the code and leave the switch off, so the app still runs locally exactly as before. When the app later runs in Azure, the settings are filled in and the switches turn on.
 
@@ -166,11 +166,15 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    A chat opens with the prompt "Migrate this application to Azure".
 
-2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5.
+2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5. If you don't see this question, that's okay: the agent may go straight to assessing the whole app. If nothing happens after a minute or two, send:
+
+   ```plaintext
+   Assess my entire application for migration to Azure.
+   ```
 
    ![Choosing to migrate the entire application](./images/migrate-to-azure-scope.png)
 
-3. **Read the assessment.** The agent assesses the app first, which can take a minute or two. Notice that **Frameworks** shows **net10.0**, because the assessment picks up your .NET 10 upgrade. Some issues from Module 2 are gone, and the ones left are what still stands between the app and Azure.
+3. **Read the assessment.** The agent assesses the app first, which can take a minute or two. Notice that **Frameworks** shows **net10.0**, because the assessment picks up your .NET 10 upgrade. Some issues from Module 2 are gone, and the ones left are what still stands between the app and Azure. Even when an issue isn't **Mandatory**, the **Potential** and **Optional** ones are best practice to resolve before moving to Azure.
 
    ![Cloud readiness assessment showing the app on .NET 10](./images/migrate-to-azure-assessment.png)
 
