@@ -53,7 +53,7 @@ Walk around the storefront for a minute and notice how it behaves:
 | `alice` | `Password1!` | Admin, Manager | Has existing order history |
 | `bob` | `Password1!` | Employee | Has existing order history |
 
-## 🛠️ Setup
+## 🛠️ Setup: Load the Legacy App Repository
 
 > The upgrade agent saves its changes in Git as it works, so run this module against **your own fork**: your own copy of the repository on GitHub. That way your changes don't affect the workshop repository or anyone else.
 
@@ -82,16 +82,28 @@ Walk around the storefront for a minute and notice how it behaves:
 
    ![Copy HTTPS URL](./images/copy-https.png)
 
-3. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location, **C:\Users\Admin**):
+3. Open PowerShell from your applications and clone your fork (run this from the default location, **C:\Users\Admin**). In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail.git
 
    ```powershell
    git clone <your-fork-url>
    ```
 
    If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **Authorize git-ecosystem**), then return to PowerShell. The clone starts once you are signed in.
-   > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, +++https://github.com/Skillable-Events/caldova-retail+++, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
+   > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type the original repo link, +++https://github.com/Skillable-Events/caldova-retail+++, into the browser, follow the sign in, click the button to stay signed in, and then run the PowerShell command again.
 
-**3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
+**3. Set the build tools path (one time).** Copilot can usually work this out on its own, but we include this step to prevent an error, or Copilot getting stuck, when the upgrade starts. It points the build at the files the legacy web project needs. In the same PowerShell window, run:
+
+```powershell
+$vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+[Environment]::SetEnvironmentVariable("VSToolsPath", "$vs\MSBuild\Microsoft\VisualStudio\v17.0", "User")
+$env:VSToolsPath = "$vs\MSBuild\Microsoft\VisualStudio\v17.0"
+```
+
+These commands print nothing, which is expected. The setting is saved for your user, so you only need to do this once on your VM.
+
+> 💡 If VS Code is already open, close every VS Code window before the next step, so it picks up the new setting when it starts.
+
+**4. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
 
 ```powershell
 cd caldova-retail
@@ -110,21 +122,15 @@ Check for any notification near the top banner like shown below. If VS Code open
 
 You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
 
-**4. Give the app its database password.** The app reads its connection string from **src\eShopLite.StoreFx\connectionStrings.config**. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user exactly as they are.
+**5. Give the app its database password.** The app reads its connection string from **src\eShopLite.StoreFx\connectionStrings.config**. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user exactly as they are.
 
 ![Replace the database password in connectionStrings.config](./images/db-password.png)
 
-## ▶️ Run the App
-
-To make sure the setup was completed correctly, ask Copilot Chat to build and launch the legacy app for you.
-
-> 💡 Running this .NET Framework app outside a server requires **MSBuild** (the tool that builds the app) and **IIS Express** (a small web server for testing), because legacy ASP.NET apps like this one can't be started with the usual **dotnet run**. Both tools are already installed on the VM, so there is nothing to set up. Keep it in mind for future customer scenarios where you need to run a legacy app yourself.
-
-Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
+**6. Open Copilot Chat and set your Git commit identity.** The upgrade agent saves its changes as Git commits, so it needs to know who you are before it starts. Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
 ![Open chat](./images/open-chat.png)
 
-Click the Copilot icon in the bottom status bar. If it says **Sign In**, you are not signed in to Copilot. Select **Sign In**:
+Click the Copilot icon in the bottom status bar. If it says **Sign In** or **Use AI Features**, you are not signed in to Copilot yet. Select it:
 
 ![Sign In in the Copilot status bar](./images/copilot-sign-in-status.png)
 
@@ -132,7 +138,21 @@ In the sign-in window, select **Continue with GitHub**. When the authorization p
 
 ![Continue with GitHub in the Copilot sign-in window](./images/copilot-sign-in-dialog.png)
 
-Then, type in the chatbox and submit this prompt:
+Then send this message in the chat, replacing the placeholders with your lab details:
+
+```plaintext
+For the rest of this upgrade, use <your name> and <your lab email> as the Git commit identity.
+```
+
+Use the **Username** listed under **Azure portal** on the **Resources** tab as your email. For your name, use the part before **@** in that email (for example, **user1-6614389**) or your own name. Whichever is fine. This lets the agent make commits later without stopping to ask for your identity.
+
+## ▶️ Run the App
+
+To make sure the setup was completed correctly, ask Copilot Chat to build and launch the legacy app for you.
+
+> 💡 Running this .NET Framework app outside a server requires **MSBuild** (the tool that builds the app) and **IIS Express** (a small web server for testing), because legacy ASP.NET apps like this one can't be started with the usual **dotnet run**. Both tools are already installed on the VM, so there is nothing to set up. Keep it in mind for future customer scenarios where you need to run a legacy app yourself.
+
+In Copilot Chat, which you opened and signed in to in the Setup section, submit this prompt:
 
 ```plaintext
 This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express. Tell me the URL when it is running.
@@ -207,7 +227,7 @@ You can run one at any time, without committing to an upgrade.
 
 ![Assessment](./images/full-assessment.png)
 
-Expand any issue to see what the extension found and the guidance it recommends — the affected code, why it matters for the target service, and what a fix would involve. This is the most useful part of the assessment: the counts tell you how big the job is, and the details are what you would walk a customer through.
+Expand any issue to see what the extension found and the guidance it recommends — the affected code, why it matters for the target service, and what a fix would involve. This is the most useful part of the assessment: the number of **Mandatory**, **Potential**, and **Optional** issues and the effort size show how big the job is, and the details are what you would walk a customer through.
 
 ![Expanded Issue](./images/expanded-issue.png)
 
@@ -247,7 +267,11 @@ The rest of this module is the upgrade itself, in five steps.
    >
    > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
-4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat. Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
+4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat.
+
+   > 💡 **If the error mentions Microsoft.WebApplication.targets**, the .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
+
+   Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
 
    - **Target Framework:** .NET 10
    - **Flow Mode:** Guided. The agent pauses after the assessment and again after the plan, so you can check its work before it changes any code. This is the best choice while you are learning, and with customers who want to approve each stage. **Automatic** runs from start to finish without stopping; use it once you know the tool and the change is low-risk.
@@ -255,7 +279,7 @@ The rest of this module is the upgrade itself, in five steps.
    - **Branch name:** upgrade-net10 (or whatever you prefer)
    - **Commit strategy:** Commit after each task. A commit is a saved checkpoint of the code, so you get one checkpoint per finished task.
    - **Branch Sync:** Auto (Merge). This keeps the upgrade workflow in sync with the source branch. We won't have any changes to the source branch in this case, but this is a great option to maintain git history while doing the upgrade.
-   - **Pending changes:** Commit. This saves any changes you have before starting the upgrade.
+   - **Pending changes:** Stash. The only change you've made so far is the database password, and we don't want it committed to Git. Stashing sets it aside temporarily so it stays out of the upgrade's commits.
 
    Select **Confirm** to start the upgrade with these settings.
 
@@ -264,14 +288,6 @@ The rest of this module is the upgrade itself, in five steps.
    The window should then show a confirmation. If it does not appear but Copilot Chat is still loading, that's okay—the modal sometimes gets stuck even while the agent continues. Watch the chat for progress.
 
    ![Copilot Chat displays confirmed modal](./images/confirmed-modal.png)
-
-   **Before continuing, set your Git commit identity in Copilot Chat.** Send this message (stop the chat if needed, and send), replacing the placeholders with your lab details:
-
-   ```plaintext
-   For the rest of this upgrade, use <your name> and <your lab email> as the Git commit identity.
-   ```
-
-   Use the **Username** listed under **Azure portal** on the **Resources** tab as your email. For your name, use the part before **@** in that email (for example, **user1-6614389**) or your own name. Whichever is fine. This lets the agent make commits later without stopping to ask for your identity. Tell Copilot to `continue the upgrade` after this if it stops.
 
 > ‼️ **IMPORTANT**
 >
@@ -283,7 +299,7 @@ The rest of this module is the upgrade itself, in five steps.
 
 ## 2️⃣ Initial Assessment
 
-Once the scenario starts, the agent runs the assessment before it plans or changes anything. You don't drive this stage — it runs on its own — but what it produces is what you review next.
+Once the scenario starts, the agent runs an assessment focused on upgrading to .NET 10 before it plans or changes anything. This is separate from the cloud readiness assessment you ran earlier, which looked at moving the app to Azure. You don't drive this stage — it runs on its own — but what it produces is what you review next.
 
 ### Dashboard initialization
 
@@ -345,7 +361,7 @@ The layout is the same for every .NET upgrade assessment, but sections only appe
 
 ### Confirm Upgrade Options
 
-First, the agent shows a pop-up with upgrade options. Look through them.
+First, the agent shows a second pop-up with upgrade options. This is separate from the one you answered when you started the upgrade, which set the target framework and the Git settings. This one is about how the code itself is upgraded. Look through the options.
 
 ![Upgrade options modal](./images/upgrade-options-ui.png)
 
@@ -361,7 +377,7 @@ The options can vary between runs in this agentic flow. Hover over an option for
 - **In-place:** Modify the existing project.
 - **Side-by-side:** Create a new project alongside the existing one.
 
-For the Web project, select **In-place rewrite** for **Project Approach** if that option is available. If the options differ or are missing, you can keep the defaults; the agent may present different choices depending on the scenario.
+Find the setting for the in place versus side-by-side run. It may be labeled **Project Approach** or **Web projects**. Change it to **In-place rewrite** if that option is available. If the options differ or are missing, you can keep the defaults; the agent may present different choices depending on the scenario.
 
 Keep the other defaults. To save time, skip the option to generate automated tests. The agent will still record a baseline of how the app looks and behaves before the upgrade, then use it to guide validation afterward. This baseline helps compare behavior, but it is not a substitute for automated regression tests.
 
@@ -397,6 +413,8 @@ The agent may list its tasks at the end of **plan.md**, or it may create a separ
 >
 > Because we chose **Guided** flow mode, the agent stops here and waits for you before it changes any code. This is the moment to edit **plan.md** — whatever you leave in it is what gets executed. In **Automatic** mode the agent would carry straight on without asking.
 
+When the plan looks right, approve it by telling the agent to go ahead in the chat (for example, send **Continue**). The agent may also offer an option to approve the plan. Your approval is what starts the upgrade in the next step.
+
 **2. Review the task list.**
 
 The task list checks off each task as it finishes. The agent decides how to split up the work, so **your task list may not match this one exactly**; names, counts, and order can change between runs. You don't need to understand every term below. In short, the agent checks prerequisites, updates the project files, rewrites the code that no longer works on .NET 10, and then tests the app. A typical breakdown looks like this:
@@ -416,11 +434,16 @@ Once you approve the plan, the agent begins upgrading the application.
 
 > ⏱️ **WORKSHOP NOTE: AGENTIC PACING**
 >
-> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, we will watch the agent work through the first few minutes and then move on to a pre-upgraded repository.
+> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, you will watch the agent work through its first task and then move on to a pre-upgraded repository.
 >
-> In this workshop, **you only need to observe the agent for 5–10 minutes:**
+> **When can you move on?** You don't need to wait for the upgrade to finish. You can stop and go to Step 5️⃣ once both of these are true:
 >
-> **Read through this section and try things out** while the agent works—check the dashboard, inspect a background subagent, ask Copilot questions in the chat, or test out a steering message. Once you've explored these features, Step 5️⃣ will show you how to stop the run and move on to the next module.
+> 1. **The first task has finished.** It is checked off in the dashboard or **tasks.md**, or the chat says so. Usually the agent posts that the task is done and committed, because you chose to commit after each task.
+> 2. **You've tried the features below:** the dashboard, the Activity tab, and a steering message.
+>
+> If no task has finished after about 10 minutes, that's okay. Stop anyway and move on.
+>
+> While you wait, **read through this section and try things out.**
 
 During this phase:
 
@@ -474,7 +497,9 @@ The agent decides each next step based on what it just observed, so it does not 
 
   ![Arrow on a background step in the chat](./images/background-process-arrow.png)
 
-- **Redirect mid-task.** Type your message while the agent is working and send it as a **steering** message (hover over your message and select **Steering**). Copilot reads it immediately before carrying on, rather than queuing it for after the step finishes.
+- **Redirect mid-task.** Type your message while the agent is working and send it as a **steering** message (hover over your message and select **Steering**, the arrow icon highlighted below). Copilot reads it immediately before carrying on, rather than queuing it for after the step finishes. For example, you could steer with a question like `What did you just change?`
+
+  ![Sending a message as a steering message while the agent is working](./images/steering-message.png)
 - **Handling stops or errors.** If the agent stops with an error, ask it to continue or diagnose the issue (for example, `Try to continue` or `Why did you get this error?`). In the example below, the agent paused during initialization; a follow-up prompt gets it moving again.
 
   ![Agent stopped with an error during upgrade initialization](./images/agent-stopped-error.png)
@@ -487,7 +512,7 @@ The agent decides each next step based on what it just observed, so it does not 
 
 ## 5️⃣ Wrap Up & Transition
 
-Once you've tried everything in this section and let the agent run for about 5–10 minutes, you're ready to wrap up:
+You're ready to wrap up once the first task has finished and you've tried the features in the previous section. If no task has finished after about 10 minutes, wrap up anyway.
 
 **1. Stop the agent.** Select the **Stop** button in Copilot Chat to halt execution.
 
@@ -509,7 +534,7 @@ When the full upgrade finishes, the application has undergone significant modern
 
 **3. Move to the next module.** Because letting the agent finish the entire upgrade may take an hour, the bootcamp provides a pre-upgraded repository so you can proceed without waiting.
 
-Do not attempt to fix or manually finish the in-progress codebase from this module. Instead, proceed directly to the next lab.
+Do not attempt to fix or manually finish the in-progress codebase from this module. Instead, proceed directly to the next lab. Module 3 starts from a fresh fork of the pre-upgraded repository, so you won't use this folder again.
 
 ---
 
