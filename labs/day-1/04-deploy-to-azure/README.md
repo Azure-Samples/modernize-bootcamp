@@ -1,6 +1,6 @@
 # ☁️ Lab 04: Design the Azure Foundation with GitHub Copilot
 
-In Module 3, you set up the app's code to use Azure services, such as reading its database password from Key Vault. Those services do not exist yet. In this module, you use GitHub Copilot to write the infrastructure as code (Bicep files) for them, and to build the secure cloud foundation the app will be deployed into.
+In Module 3, you set up the app's code to use Azure services, such as reading secrets from Key Vault. Those services do not exist yet. In this module, you use GitHub Copilot to write the infrastructure as code (Bicep files) for them, and to build the secure cloud foundation the app will be deployed into.
 
 > 🎯 **This module: build the cloud foundation the app will run on.** Module 3 changed the **app's code**. This module designs the **Azure resources** around it: the networks, databases, Key Vault, and container hosting the app needs. You will work with GitHub Copilot in agent mode to write them as Bicep files.
 
@@ -14,7 +14,7 @@ If you have not designed Azure infrastructure before, here is the whole process 
 
 - **Infrastructure as code (IaC)** means describing Azure resources (networks, databases, Key Vaults, container hosting) in files instead of clicking through the Azure portal. The files can be reviewed, versioned, and redeployed the same way every time.
 - **Bicep** is Azure's IaC language. Each `.bicep` file declares the resources to create and how they connect.
-- **The app tells you what to build.** In Module 3, Copilot wired the app to use Azure services through configuration, for example reading its database password from **Key Vault**. Each of those settings needs a real Azure resource behind it. If the app expects a Key Vault, the foundation must include one. If the app stores shopping carts in **Redis** so they survive across multiple app instances, the foundation must include a Redis cache.
+- **The app tells you what to build.** In Module 3, Copilot wired the app to use Azure services through configuration settings, for example reading secrets from **Key Vault**. Each of those settings needs a real Azure resource behind it. If the app expects a Key Vault, the foundation must include one. If the app stores shopping carts in **Redis** so they survive across multiple app instances, the foundation must include a Redis cache.
 - **The requirements tell you how to build it.** The required architecture and non-negotiable rules below cover security, networking, and resilience: private networking, no public IPs on VMs, no stored passwords, and at least two app replicas.
 
 You will work through four steps with GitHub Copilot, and you approve each one before moving on:
@@ -209,22 +209,51 @@ authentication, internal Container Apps environments, bounded scaling, determini
 role assignments, and parameter files with lab-sized defaults.
 
 Follow the approved module boundaries and entry-point contracts. After generation,
-build every Bicep entry point and show me the diff, validation output, and all
-remaining warnings. Stop before making any unplanned correction.
+build every Bicep entry point and list the files you created, the validation output,
+and all remaining warnings. Stop before making any unplanned correction.
 ```
 
-Inspect the result:
+Check the result in three steps.
+
+**1. See what was generated.** In the VS Code Explorer, open `infra/lab04/student`. You should see the four entry points, `primary.bicep`, `secondary.bicep`, `global.bicep`, and `sqlmi.bicep`, plus a `modules` folder if Copilot split the Bicep into modules. The files inside `modules` will differ from the finished version, and that's fine.
+
+**2. Build each entry point.** Run this in PowerShell:
 
 ```powershell
-Get-ChildItem .\infra\lab04\student -Recurse
-git diff -- .\infra\lab04\student
-Get-ChildItem .\infra\lab04\student -Filter *.bicep -Recurse |
-  ForEach-Object { az bicep build --file $_.FullName --stdout | Out-Null }
+foreach ($name in 'primary', 'secondary', 'global', 'sqlmi') {
+  az bicep build --file ".\infra\lab04\student\$name.bicep" --stdout | Out-Null
+  if ($LASTEXITCODE -eq 0) { "$name.bicep builds cleanly" } else { "$name.bicep has errors" }
+}
 ```
 
-Building checks that the Bicep is written correctly. It does **not** prove that it
-would deploy: a name might already be taken, the subscription might not have
-enough capacity, or company policies might block a setting.
+You should see four "builds cleanly" lines. Building an entry point also builds every
+module it uses, so you don't need to build each file. Warnings, if any, print above the
+result line; read them, but they don't mean the build failed. For example, a message that
+a new Bicep release is available is harmless. If a file reports errors,
+paste the message into Copilot Chat and ask it to explain the cause before you fix anything.
+
+**3. Compare the design with the diagram.** Open `primary.bicep` in VS Code, then open the
+Bicep Visualizer (the **Open Visualizer** button at the top right of the editor, or
+**Bicep: Open Bicep Visualizer** from the Command Palette). Compare the resources and
+connections with the Required Final Architecture diagram above, then repeat for
+`secondary.bicep`. You're checking that the pieces you expect, such as Bastion, the VMs,
+the SQL private endpoint, and the Container Apps environment, are there and connected.
+
+Then commit what Copilot generated, so the review in the next challenge has a starting
+point to compare against:
+
+```text
+Commit the generated Bicep files under infra/lab04/student/ with a clear commit message.
+```
+
+What a build does and doesn't tell you:
+
+- A successful build proves the Bicep is valid: its syntax, types, and references.
+- The review in Challenge 4 checks whether the design is right.
+- Only a real deployment shows whether it works: a name might already be taken, the
+  subscription might not have enough capacity, or company policies might block a setting.
+  You won't deploy your Bicep in this lab. Your instructor deployed the finished version,
+  and Module 6 deploys the app onto it.
 
 Use the [Lab 04 requirements](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/requirements.md)
 (`infra/lab04/requirements.md` in your fork) as the implementation checklist.
@@ -238,19 +267,27 @@ Review my generated files under infra/lab04/student/ against the approved plan
 and the Required Final Architecture and Non-Negotiable Requirements in
 infra/lab04/requirements.md.
 
-Report findings first, ordered by severity. Cite the affected file and explain the
+Report findings first, ordered by severity. Label each finding as a requirement
+violation, a risk, or a suggestion. Cite the affected file and explain the
 deployment or runtime consequence. Check Bicep correctness, dependency ordering,
 network and private DNS paths, least-privilege RBAC, secret exposure, availability,
 bounded scaling, parameterization, and deterministic naming. Do not edit files.
 ```
 
-Read each finding, decide which fixes you agree with, and ask Copilot to make only
-those. After each round of fixes, rebuild the Bicep and look at what changed.
+Read each finding and use its label to decide. Fix the requirement violations, weigh the
+risks against the lab's time and cost limits, and treat suggestions as optional. Ask
+Copilot to make only the fixes you agree with. After each round, rebuild the four entry
+points, run `git diff -- .\infra\lab04\student` to see exactly what changed, and commit the
+round you accept. That keeps each fix reviewable on its own.
 
 Finally, compare your approach with
 [the complete implementation](https://github.com/Skillable-Events/caldova-retail/blob/main/infra/lab04/complete/README.md)
-(`infra/lab04/complete/` in your fork). Differences
-are things to discuss, not automatically mistakes. Be ready to explain:
+(`infra/lab04/complete/` in your fork). The finished version is a reference, not an
+answer key, and it has its own trade-offs. For example, it shares one username and
+password between both VMs and keeps Linux password sign-in on so Bastion can connect over
+SSH, its infrastructure identity needs broad permissions in both regional resource groups,
+and its Front Door Private Link connection can stay pending until someone approves it.
+Differences are things to discuss, not automatically mistakes. Be ready to explain:
 
 - which requirements both implementations satisfy
 - where module boundaries or parameter choices differ
@@ -265,25 +302,9 @@ You do **not** deploy the Bicep you write, run the setup scripts, or delete anyt
 
 At the start of Lab 06, GitHub is given permission to deploy the app to this environment. It uses **OIDC**, which lets GitHub prove who it is to Azure each time it runs, so no password ever has to be stored in GitHub. That permission only covers releasing the app; it is not used to deploy your Lab 04 Bicep. The identity GitHub uses can only do three things: push app images to the container registry, update the storefront's Container App, and read the Front Door settings to test the result.
 
-## 🐢 Predeployed SQL Managed Instance
-
-Your instructor also set up an **Azure SQL Managed Instance** (SQL MI), a managed version of SQL Server in Azure. It uses the free offer when the subscription allows it, and a paid tier otherwise.
-
-To connect to it from the VM, you need to allow your VM's public IP address through its firewall. Run:
-
-```powershell
-az login
-.\assets\scripts\Enable-Lab04SqlMiPublicAccess.ps1 `
-  -SubscriptionId '<subscription-id>'
-```
-
-The script asks before it looks up your IP address. It then adds one firewall rule (an NSG rule) that allows only your address to reach the database on port 3342. Each participant gets their own rule, so you won't overwrite anyone else's. If your IP address changes, run the script again. Your instructor must give you **Network Contributor** access to the SQL MI firewall for this to work.
-
-Connect to the address the script shows you, and sign in with your Microsoft Entra (Azure) account. Signing in with a SQL username and password is turned off.
-
 ## ✅ Review Checklist
 
-- [ ] Every generated Bicep file builds without errors.
+- [ ] Every Bicep entry point builds cleanly.
 - [ ] The Bicep matches the approved plan, or any difference is written down and approved.
 - [ ] Every Azure setting the app reads (for example Key Vault, Application Insights, or Redis) is backed by a planned resource, or the gap is recorded with a reason.
 - [ ] Front Door reaches the app over a private connection (Private Link), not the public internet.

@@ -1,10 +1,12 @@
 # ☁️ Lab 03: Modernize the App Code for Azure
 
-Module 2 moved the storefront onto .NET 10. That upgrade changed the framework underneath, but not the app's pages, and not how the code works with **Azure services**, such as Key Vault for secrets or Redis for shopping carts. It also rewrote how the app starts up and where it keeps its settings (now in `appsettings.json`).
+Module 2 moved the storefront onto .NET 10. That upgrade changed the framework underneath, but not the app's pages, and not how the code works with **Azure services**, such as Key Vault for secrets or managed identity for sign-in. It also rewrote how the app starts up and where it keeps its settings (now in `appsettings.json`).
 
 > 🎯 **This module: prepare the app's code for Azure.** You work on the **application code** only. First you rebuild the pages with **Blazor**, Microsoft's current recommended way to build .NET web UIs. Then you close the code gaps that would stop the app working well with Azure services. Nothing is created in Azure and nothing is deployed. By the end, the app has a modern UI and its code is *ready to use* Azure services, but it is not running in Azure yet. Module 4 designs the Azure environment the app will run in, and Module 6 deploys the app into it.
 
 You work in **GitHub Copilot Chat** for the whole module: first with the **Upgrade** agent to convert the pages to Blazor, then with the GitHub Copilot modernization extension's **Migrate to Azure** option to assess where Azure services fit the app and make the code changes to support them.
+
+> ⚠️ **Expect variation.** As in Module 2, you're working with AI agents, so your plan, task list, code changes, and summary will differ from the screenshots and from the person next to you. That's expected. Use your judgment: review what the agent proposes, choose the option that makes sense, and ask it to explain anything unclear. If it seems stuck, ask what it's doing or tell it to continue.
 
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
 
@@ -17,22 +19,37 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 1. In Microsoft Edge, open this link: +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++. (Sign in with your lab credentials if prompted).
 2. Select **Fork**, then **Create fork** with the defaults left alone.
 3. In your new fork, select **Code**, then copy the **HTTPS** URL.
-4. Open PowerShell from your applications and run these commands from the default location (`C:\Users\Admin`). In the first command, **replace `<your-fork-url>` with the HTTPS URL you copied in the previous step** (delete the `<` and `>` too), so it looks like `git clone https://github.com/<your-account>/caldova-retail-dotnet10.git`:
+4. Open PowerShell from your applications and clone your fork. Run this from the default location, **C:\Users\Admin**. If you still have PowerShell open from the previous module, make sure you are in the **C:\Users\Admin** folder first (run cd .. as needed until you are). In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail-dotnet10.git
 
    ```powershell
    git clone <your-fork-url>
-   cd caldova-retail-dotnet10
-   code .
    ```
 
    If you are asked to sign in, choose **Sign in with your browser**, approve the authorization, then return to PowerShell. The clone starts once you are signed in.
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type the original repo link, +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++, into the browser, follow the sign in, click the button to stay signed in, and then run the PowerShell command again.
 
-5. Check for a notification in the banner at the top of VS Code. If the folder opens in **Restricted Mode**, select **Manage**, then **Trust**. Once VS Code shows **In a Trusted Folder**, close that tab.
+5. Open the storefront folder in VS Code. Run these commands in PowerShell:
+
+   ```powershell
+   cd caldova-retail-dotnet10
+   code .
+   ```
+
+6. Check for a notification in the banner at the top of VS Code. If the folder opens in **Restricted Mode**, select **Manage**, then **Trust**. Once VS Code shows **In a Trusted Folder**, close that tab.
 
    ![Restricted Mode banner](./images/restricted-mode-banner.png)
-6. Open `src\eShopLite.StoreFx\appsettings.json` and replace the placeholder password in the `StoreDbContext` connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user as they are.
-7. Ask Copilot Chat to **Run the app** (and approve any tool call commands), then verify the product catalog loads in your browser before continuing.
+7. Open **src\eShopLite.StoreFx\appsettings.json** and replace the placeholder password in the **StoreDbContext** connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user as they are.
+8. Ask Copilot Chat to **Run the app** (and approve any tool call commands), then verify the product catalog loads in your browser before continuing.
+
+   > 💡 Notice how this is different from Module 2. The legacy .NET Framework app needed MSBuild and IIS Express to run. Now that the app is upgraded to .NET 10, it starts with the standard **dotnet run** command, with no IIS Express or Windows Server required.
+
+9. **Set your Git commit identity in Copilot Chat.** This is a new clone, so the identity you set in Module 2 doesn't carry over. Send this message, replacing the placeholders with your lab details:
+
+   ```plaintext
+   For the rest of this module, use <your name> and <your lab email> as the Git commit identity.
+   ```
+
+   Use the **Username** listed under **Azure portal** on the **Resources** tab as your email. For your name, use the part before **@** in that email (for example, **user1-6614389**) or your own name. Whichever is fine. This lets the agent make commits later without stopping to ask for your identity.
 
 ## 📋 What you'll do
 
@@ -41,7 +58,7 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 
 ## 1️⃣ Convert to Blazor pages
 
-Right now, the storefront's pages are built with **ASP.NET MVC**. Each page is a *view* (an HTML template with blanks), and a separate *controller* handles each request, gets the data, and fills in the template. In this step you move the pages to **Blazor**, Microsoft's newer way to build web pages in .NET. With Blazor, each page is a *component*: a single file that holds both the page's layout and its code, built from reusable pieces such as a product card or the cart. The app still runs on .NET 10; only the way its pages are built changes.
+Right now, the storefront's pages are built with **ASP.NET MVC**. Each page is a *view* (an HTML template with blanks), and a separate *controller* handles each request, gets the data, and fills in the template. In this step you move the pages to **Blazor**, Microsoft's newer way to build web pages in .NET. With Blazor, each page is a *component*: a single file that holds both the page's layout and its code, built from reusable pieces such as a product card or the cart. This isn't another framework upgrade. Blazor is part of .NET 10, so the app stays on .NET 10 and the storefront does the same things. What changes is how each page is built.
 
 Unlike Module 2, this step does change the pages themselves. Copilot will rebuild each page as a Blazor component. Because the pages are being rebuilt anyway, this is also a good moment to give the store a more modern look, so the prompt below asks for that too.
 
@@ -82,7 +99,7 @@ Notice what the agent says: no upgrade scenario covers MVC → Blazor, so it wil
 
 Copilot will convert the MVC pages to Blazor components, aiming to preserve the app's functionality while giving it a more modern UI. Expect this update to take about 10–20 minutes.
 
-> **If the conversion gets stuck or takes longer than the workshop allows:** This UI refresh is useful, but it's not required for the Azure-readiness work or later steps. Stop the agent, switch back to the **main** branch, and continue; keep the **blazor-ui-refresh** branch so you can return to it later. The prepared app and following instructions let you proceed without waiting for the UI changes.
+> **If the conversion gets stuck or takes longer than the workshop allows:** This UI refresh is useful, but it's not required for the Azure code changes or later steps. Stop the agent, switch back to the **main** branch, and continue; keep the **blazor-ui-refresh** branch so you can return to it later. The prepared app and following instructions let you proceed without waiting for the UI changes.
 
 **While the agent works, complete these steps:**
 
@@ -125,13 +142,23 @@ Use these demo logins when you check sign-in yourself:
 
 > 💡 The app does the same things it did at the end of Module 2 — that is the point. Everything so far changed *how* the app runs and renders, not *what* it does.
 
+### 💾 Commit your Blazor changes
+
+Don't skip this one, even if Copilot already built and tested the app for you. Once the app builds and runs the way you expect, commit! A commit saves your changes to Git on the **blazor-ui-refresh** branch, so your work is safe and the next step starts from a clean slate. Ask Copilot Chat:
+
+```plaintext
+Commit all the Blazor conversion changes on the blazor-ui-refresh branch with a clear commit message.
+```
+
 ## 2️⃣ Prepare the app code for Azure
 
 The app runs on .NET 10 and renders through Blazor, but its code does not yet know how to work with Azure services such as Key Vault or managed identity. Nothing so far has touched that, because a framework upgrade has no reason to.
 
-**In this step you make code changes only.** You add the code the app needs to use Azure services, but you do not create the services themselves. We will create the IaC for services in later modules.
+**In this step you make code changes only.** You add the code the app needs to use Azure services, but you do not create the services themselves. We will create the IaC for those services in later modules.
 
-For example, if the app has the database password hard-coded in a config file today, in this step, you wire the code to read that secret from **Azure Key Vault** instead.
+Think of each Azure service as a switch, and the switch is just a setting. In this step you add the code for a service and leave its switch off, so the app keeps running locally exactly as it did before. Once the app runs in Azure, those settings are filled in and the switches turn on. Module 4 designs the services, and Module 6 deploys the app onto them.
+
+For example, your plan might add code that can read secrets from **Azure Key Vault** or settings from **Azure App Configuration**, signing in with a managed identity instead of stored passwords. Each one only switches on when its address is provided. Until then, the app keeps reading its database connection from local settings, and the database itself doesn't change. The exact services in your plan may differ from the person next to you.
 
 You'll use the same **GitHub Copilot modernization** extension you used in Module 2, this time with its **Migrate to Azure** option. Expect this step to take about 30–40 minutes, including the time the agent spends planning and making the changes.
 
@@ -151,7 +178,7 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
 
    ![Choosing to migrate the entire application](./images/migrate-to-azure-scope.png)
 
-3. **Review the assessment.** The agent runs the same **cloud readiness assessment** you saw in Module 2, because it needs to know what to change before the app can move to Azure. This time, notice that **Frameworks** shows **net10.0**: the assessment picks up the upgrade you just did. Compare it with the Module 2 report: some issues are gone because of the upgrade, and the ones left are what still stands between the app and Azure.
+3. **Review the assessment.** The agent runs the same **cloud readiness assessment** you saw in Module 2, because it needs to know what to change before the app can move to Azure. It may take a minute or two for the report to show up. When it does, notice that **Frameworks** shows **net10.0**: the assessment picks up the upgrade you just did. Compare it with the Module 2 report: some issues are gone because of the upgrade, and the ones left are what still stands between the app and Azure.
 
    ![Cloud readiness assessment showing the app on .NET 10](./images/migrate-to-azure-assessment.png)
 
@@ -184,23 +211,23 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
    >
    > In this lab, that prompt told the agent to change only the app code, leave the database alone, skip the Dockerfile and infrastructure files, and assume the Azure resources will exist later. That is why your plan is small. If you had asked it to "update the code, write the infrastructure, and deploy it", the same agent would have planned the whole journey in one go. With a customer, how much to take on at once is up to you and them.
 
-6. **Review the plan.** When the plan is ready, the agent tells you where to find it. Nothing has changed in your code yet, and the branch hasn't been created.
+6. **Review the plan.** When the plan is ready, the agent lets you know in the chat. Nothing has changed in your code yet, and the branch hasn't been created.
 
    ![The agent reports that the plan is ready for review](./images/migration-plan-ready.png)
 
-   The plan is saved in the `.github/modernize` folder of your repository:
+   To read it, open the **.github/modernize** folder in your repository:
 
-   - **`plan.md`** describes the changes the agent intends to make and why.
+   - **plan.md** describes the changes the agent intends to make and why.
 
-   Read through the tasks in the plan. Your plan may have a different number of tasks, or different ones, from the person next to you; that's expected. If the plan doesn't list its tasks, check the same folder for `tasks.json`—it may be inside a `.metadata` subfolder. You can also ask Copilot Chat:
+   Read through the tasks in the plan. Your plan may have a different number of tasks, or different ones, from the person next to you; that's expected. If the plan doesn't list its tasks, check the same folder for **tasks.json**—it may be inside a **.metadata** subfolder. You can also ask Copilot Chat:
 
    ```text
    Summarize the approved plan and list its tasks in order, including what each task will change. Call out any task that touches the database or creates infrastructure files.
    ```
 
-   If anything doesn't belong, such as a task that touches the database or creates infrastructure files, edit `plan.md` directly or tell the agent in the chat.
+   If anything doesn't belong, such as a task that touches the database or creates infrastructure files, edit **plan.md** directly or tell the agent in the chat.
 
-   **Add one rule to the plan.** None of the Azure services exist yet, so the app has to keep working without them. Add this rule either by typing it in the chat and asking the agent to add it to the plan, or by navigating to the `.github/modernize` folder and editing `plan.md` directly:
+   **Add one rule to the plan.** None of the Azure services exist yet, so the app has to keep working without them. Add this rule either by typing it in the chat and asking the agent to add it to the plan, or by navigating to the **.github/modernize** folder and editing **plan.md** directly:
 
    ```plaintext
    Every Azure service added by this plan must be optional and switched on only by a configuration setting; when the setting is empty, the app must run exactly as it did before without contacting Azure, and if the settings for a service are only partly filled in, the app must stop at startup with a clear error instead of silently falling back.
@@ -214,15 +241,46 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
    For each task in the plan, explain in plain language what would go wrong in Azure without it.
    ```
 
-7. **Run the plan.** When the plan looks right, send:
+   **Challenge the plan.** You don't need to be an expert to ask good questions about it. Pick a task or Azure service in the plan and ask why it's there, what the alternative would be, and what it would cost or complicate:
+
+   ```plaintext
+   Why did you choose this Azure service for this task instead of the alternatives? What are the tradeoffs, and what would change if we skipped it?
+   ```
+
+   You can also ask what the plan might be missing:
+
+   ```plaintext
+   Are there other Azure services that would help this app, such as for monitoring, configuration, or security, that this plan doesn't include? For each one, explain what it would add and whether it's worth the extra work.
+   ```
+
+   Treat the answers as discussion points, not changes to make. The services in this plan are the ones the next modules build, so adding more would change what Module 4 has to provision. With a customer, though, these are exactly the questions that surface the next phase of the roadmap.
+
+7. **Run the plan.** When the plan looks right, switch the agent to Autopilot first, like you did in Module 2. During execution the agent runs many commands and test builds, and Autopilot lets it keep going without pausing for approval before each one:
+
+   1. Select **Default permissions** at the bottom right of the Copilot Chat window.
+   2. Select **Autopilot (Preview)**.
+
+   ![The permissions menu with Default Permissions, Sandboxing for terminal, Allow All, and Autopilot](./images/autopilot-permissions.png)
+
+   In a customer environment, agree on the permission level first: Autopilot trades visibility and control during execution for speed, so use it only when the customer is comfortable with that trade-off.
+
+   Then send:
 
    ```plaintext
    Execute the plan.
    ```
 
    > ⏱️ **This is the longest part of the module.** The agent works through every task in the plan, building the app as it goes, and it can take about 30–40 minutes to run. Use the wait to follow its progress in the next step and read what it's doing.
+   >
+   > 🗣️ **While it runs:** if timing lines up, your instructor will lead a discussion on some important topics during this wait. Feel free to use the [Talking Points](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/talking-points.md) as reading material and docs on those topics too. Customers will have questions beyond what this lab covers, so use the wait to practice: ask Copilot Chat about anything you're curious about and do your best to reason through the answer.
 
 8. **Follow the progress.** The Migrate to Azure agents don't have the dashboard you used with the Upgrade agent in Module 2; that dashboard is specific to framework upgrades. Instead, the agent *usually* writes a `progress.md` file for each task and checks off each step as it finishes. If you don't see a progress file, ask Copilot Chat: `Please create a progress.md file to track the migration's progress.` Each task follows the same pattern:
+
+   - **Code migration:** the files it changes, such as the project file, `appsettings.json`, and `Program.cs`.
+   - **Validation and fixing:** it builds the app, checks the libraries for known security vulnerabilities (CVEs), checks that the changes are consistent and complete, and runs any tests.
+   - **Task summary:** at the end of each task, it commits the changes and writes a `summary.md` explaining what it did for that task.
+
+   ![A task's progress.md file during the migration](./images/migration-progress.png)
 
    To get a quick status update at any point, ask Copilot Chat:
 
@@ -230,23 +288,13 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
    Summarize progress against the approved plan: list completed tasks, the current task, remaining tasks, and any errors or blockers.
    ```
 
-   - **Code migration:** the files it changes, such as the project file, `appsettings.json`, and `Program.cs`.
-   - **Validation and fixing:** it builds the app, checks the libraries for known security vulnerabilities (CVEs), checks that the changes are consistent and complete, and runs any tests.
-   - **Final summary:** it commits the changes and writes a `summary.md` explaining what it did.
-
-   ![A task's progress.md file during the migration](./images/migration-progress.png)
-
    If you're ever unsure how far along the migration is or what it's doing, ask in the chat, for example `What task are you on, and what's left?`
 
-9. **Review tool calls as it goes.** The agent will rebuild the app and may ask permission to run commands. Review each request, approve it when appropriate, and read the per-phase summaries as they appear instead of waiting until the end.
+   Keep an eye on it as it goes. The agent rebuilds the app and runs commands as it works. In Autopilot it doesn't wait for your approval, so read the per-phase summaries as they appear instead of waiting until the end. If you stayed on the default permissions, review each request it asks about and approve it when appropriate. Either way, the agent's steps and results may differ from the person next to you.
 
-   ![The permissions menu with Default Permissions, Sandboxing for terminal, Allow All, and Autopilot](./images/autopilot-permissions.png)
+9. **Read the summary.** When every task is done, the agent posts a summary in the chat. Your summary may look a little different from the person next to you, since the agent's output varies from run to run, but it usually tells you:
 
-   > 💡 **Autopilot (Preview) can shorten this step.** Like you did in Module 2, you can switch the permissions at the bottom right of Copilot Chat to **Autopilot (Preview)** so the agent keeps going without pausing for approval before each command. This is the longest part of the module, so it can cut down the waiting. Unlike **Allow All**, Autopilot works within the permissions you've granted. Stay on the review-and-approve flow above if you want to inspect the agent's actions as they happen, and note that either way the agent's steps and results may differ from the person next to you. In a customer environment, agree on the permission level first: Autopilot trades visibility and control during execution for speed, so use it only when the customer is comfortable with that trade-off.
-
-10. **Read the summary.** When every task is done, the agent posts a summary in the chat. Your summary may look a little different from the person next to you, since the agent's output varies from run to run, but it usually tells you:
-
-    - which **branch** the changes are on. The agent creates a new local branch for this work from your Module 2 branch, and doesn't push anything to GitHub.
+    - which **branch** the changes are on. The agent creates a new local branch for this work from the branch you were on (**blazor-ui-refresh**), and doesn't push anything to GitHub.
     - whether the app **builds**, and whether any **tests** ran. This app has no test projects, so expect no tests to run.
     - a table of each **task**, its **result**, and the **commit** it made, so you can review each change on its own.
 
@@ -260,13 +308,15 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
     Summarize the changes you made at a high level, not file level.
     ```
 
-11. **Build and run the app on the VM.** Your code is now on the new branch the agent created. Because none of the Azure settings are filled in, the app should skip Azure entirely and work exactly as before: for example, it reads its database connection from local settings instead of Key Vault, and keeps shopping carts in memory instead of Redis.
+10. **Build and run the app on the VM.** Your code is now on the new branch the agent created. Because none of the Azure settings are filled in, the app should skip Azure and keep working as before, for example by reading its database connection from local settings instead of Key Vault. Which Azure services the agent added can differ from the person next to you, so don't worry if your changes don't match exactly.
 
-    **First, check where the database connection lives now.** We still need it to run the app, since Key Vault isn't wired up to a real Key Vault yet. Ask Copilot:
+    **First, ask where the database connection comes from now.** The app still needs it to run, since there is no real Key Vault yet. Ask Copilot:
 
     ```plaintext
-    Where is the database connection string now? We still need it to run the app since Key Vault isn't wired up yet. Put it in user secrets and run this if needed.
+    Where does the app get its database connection now, and do I need to change anything to run it locally?
     ```
+
+    Read the answer before you act on it. If Copilot asks you to supply the connection details, use the same database password you used in setup, and don't paste passwords into the chat.
 
     **Then build and run it.** Ask Copilot to build and run the app, and open the URL it gives you. The app should look and behave exactly as it did before this step: the products load, sign-in works for both demo accounts, and the cart keeps its contents.
 
@@ -276,11 +326,17 @@ You'll use the same **GitHub Copilot modernization** extension you used in Modul
     Verify the changes you made actually work. Run the app and check the behavior, don't just re-read the code. For anything you can't verify without Azure resources, say so explicitly rather than assuming it works.
     ```
 
-> 💡 Worth opening `appsettings.json` when the run finishes. Whatever the agent decided this app needs from Azure usually lands there as empty settings — a quick read tells you what the next module has to provision.
+> 💡 Before you move on, ask Copilot where the changes ended up, since the agent's results vary and the Azure settings may live in different places for each person:
+>
+> ```plaintext
+> Where did you add or read Azure settings in the code, and which Azure resource would each one need?
+> ```
+>
+> A quick read tells you what the next module has to provision.
 
 > 🎉 **That's it — the app's code now supports the Azure services the GitHub Copilot modernization tooling recommended.**
 >
-> Three modules ago this was a .NET Framework 4.8 app that only ran on Windows Server behind IIS. It now builds on .NET 10, renders through Blazor, and its code is wired to use Azure services such as Key Vault and Redis. It is not running in Azure yet, because those services don't exist. Next module you design the IaC to support those services and the overall cloud foundation, and Module 6 deploys the app onto it.
+> Three modules ago this was a .NET Framework 4.8 app that only ran on Windows Server behind IIS. It now builds on .NET 10, renders through Blazor, and its code is wired to use Azure services such as Key Vault. It is not running in Azure yet, because those services don't exist. Next module you design the IaC to support those services and the overall cloud foundation, and Module 6 deploys the app onto it.
 
 ## 🔧 Troubleshooting common issues
 
