@@ -169,7 +169,7 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    ![Migrate to Azure in the GitHub Copilot modernization extension](./images/migrate-to-azure-button.png)
 
-   A chat opens with the prompt "Migrate this application to Azure".
+   A chat opens with the prompt "Migrate this application to Azure". If the chat doesn't open with this prompt, close out of the extension and select **Migrate to Azure** again.
 
 2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.** If nothing happens after a minute or two, send:
 
@@ -191,7 +191,7 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    Some of these are covered in later modules, so we won't do them now.
 
-5. **Check the model, then limit the job and plan.** First, check the model picker at the bottom of the Copilot Chat box. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), select it again. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
+5. **Check the model, then limit the job and plan.** First, check the model picker, the dropdown under the chat box that shows the current model. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), scroll down to **Other Models** and select it again. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
 
    ```plaintext
    Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details.

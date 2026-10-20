@@ -140,7 +140,13 @@ In the sign-in window, select **Continue with GitHub**. When the authorization p
 
 ![Continue with GitHub in the Copilot sign-in window](./images/copilot-sign-in-dialog.png)
 
-Next, open the model picker at the bottom of the Copilot Chat box and select **Claude Opus 5.5**. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default.
+Next, open the model picker, the dropdown under the chat box that shows the current model (for example, **Auto**):
+
+![The model picker under the chat box, showing Auto](./images/model-picker.png)
+
+Scroll down to **Other Models** and select **Claude Opus 5.5**. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default.
+
+![Claude Opus 5.5 selected in the Other Models list](./images/model-picker-opus.png)
 
 Then send this message in the chat, replacing the placeholders with your lab details:
 
