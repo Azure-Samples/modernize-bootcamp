@@ -55,7 +55,9 @@ Walk around the storefront for a minute and notice how it behaves:
 
 ## 🛠️ Setup: Load the Legacy App Repository
 
-> The upgrade agent saves its changes in Git as it works, so run this module against **your own fork**: your own copy of the repository on GitHub. That way your changes don't affect the workshop repository or anyone else.
+> **How the pieces fit.** The app you just looked at, **https://app01**, is the running app on the app server, which is a VM. Its source code lives in a GitHub repository. In this setup you make your own copy of that repository (a **fork**), then download it to this workstation (a **clone**). That puts the code on your machine, so you can assess and upgrade it here.
+>
+> The upgrade agent saves its changes in Git as it works. Working in your own fork means your changes don't affect the workshop repository or anyone else.
 
 **1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser +++https://github.com/Skillable-Events/caldova-retail+++
 
@@ -213,11 +215,13 @@ You can run one at any time, without committing to an upgrade.
 
 ![Selecting Start Assessment in the modernization extension](./images/start-assessment.png)
 
-**3. Choose Recommended Assessment.** You are offered a Recommended or a Custom assessment. For this lab, we will proceed with Recommended. Custom does a deeper review of the whole codebase, including how it is structured and how its data is organized, and takes much longer.
+**3. Choose Recommended Assessment.** You are offered a Recommended or a Custom assessment. For this lab, we will proceed with Recommended. Custom covers more: it does a deeper review of the whole codebase, including how it is structured and how its data is organized, and takes much longer.
 
 ![Selecting the Recommended Assessment](./images/recommended-assessment.png)
 
 **4. Leave the default target as Cloud Readiness.** Select **OK** with the Cloud Readiness box checked. This measures how ready the app is for Azure. It may take ~30 seconds to appear as running. Expect it to run for a couple of minutes.
+
+You'll also see a **Security** option, which identifies security issues using ISO 5055 and recommends fixes. You can run a security review with either the Recommended or the Custom assessment. We'll leave it unchecked in this lab, but it's worth knowing about when a customer asks about security.
 
 ![Recommended Assessment with Cloud Readiness checked](./images/cloud-readiness-target.png)
 
@@ -242,6 +246,8 @@ In the top right corner of the assessment there is an option to **Create Plan**,
 ## 🚀 Upgrading to .NET 10
 
 The rest of this module is the upgrade itself, in five steps.
+
+> 💡 **Can't see everything on your screen?** If you aren't using a monitor or a larger screen, the Copilot Chat can be hard to see. Press **Ctrl** and **-** (minus) to zoom out and fit more on screen, or select the full screen button on Skillable ![Full screen button](./images/full-screen-button.png).
 
 ## 1️⃣ Initiate the Upgrade
 
@@ -393,6 +399,10 @@ Once you confirm, the agent writes the plan.
 
 ![Allow reading the Upgrade Agent's SKILL.md file](./images/approve-upgrade-skill-file.png)
 
+These instruction files live inside the extension itself, in the **.vscode\extensions** folder in your user profile on the VM. There is a file for each stage of the workflow: **assessment.md**, **planning.md**, and **execution.md**. The folder name includes the extension's version number, so yours may differ.
+
+![The Upgrade Agent extension's skill files, including assessment.md, planning.md, and execution.md](./images/upgrade-agent-skill-files.png)
+
 ### Review the Generated Plan
 
 When Copilot says the plan is ready, open the **plan.md** file.
@@ -438,7 +448,7 @@ Once you approve the plan, the agent begins upgrading the application.
 >
 > **When can you move on?** You don't need to wait for the upgrade to finish. You can stop and go to Step 5️⃣ once both of these are true:
 >
-> 1. **The first task has finished.** It is checked off in the dashboard or **tasks.md**, or the chat says so. Usually the agent posts that the task is done and committed, because you chose to commit after each task.
+> 1. **The first task has finished.** It is checked off in the **dashboard** or **tasks.md** (in the same folder as **plan.md**, if the agent created one), or the chat says so. Usually the agent posts that the task is done and committed, because you chose to commit after each task.
 > 2. **You've tried the features below:** the dashboard, the Activity tab, and a steering message.
 >
 > If no task has finished after about 10 minutes, that's okay. Stop anyway and move on.
@@ -492,10 +502,17 @@ Check the **Activity** tab of the dashboard. It records the timeline, log, and c
 
 The agent decides each next step based on what it just observed, so it does not always move in a straight line. It can occasionally stall, drift, or pause on errors. You stay in control the whole time:
 
-- **It seems slow or stalled.** If the chat is not producing output as quickly as you expect, stop the run and type `continue`.
+- **It seems slow or stalled.** If nothing new appears in the chat for 3–5 minutes, select **Stop** to stop the run, then send `continue`.
+- **It says "1 confirmation pending" but no confirmation pop-up appears.** This is a tool problem, not something you did. Select **Stop**, then send `continue` to get it unstuck.
+
+  ![The chat shows 1 confirmation pending](./images/confirmation-pending.png)
 - **Inspect what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to view the background subagents reviewing or validating a task.
 
   ![Arrow on a background step in the chat](./images/background-process-arrow.png)
+
+  Hovering over a subagent also shows its details, such as what it is doing and which tool it is running:
+
+  ![Hovering over a subagent shows its details](./images/subagent-hover.png)
 
 - **Redirect mid-task.** Type your message while the agent is working and send it as a **steering** message (hover over your message and select **Steering**, the arrow icon highlighted below). Copilot reads it immediately before carrying on, rather than queuing it for after the step finishes. For example, you could steer with a question like `What did you just change?`
 
