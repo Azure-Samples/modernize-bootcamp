@@ -128,7 +128,7 @@ You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a
 
 ![Replace the database password in connectionStrings.config](./images/db-password.png)
 
-**6. Open Copilot Chat and set your Git commit identity.** The upgrade agent saves its changes as Git commits, so it needs to know who you are before it starts. Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
+**6. Open Copilot Chat, pick a model, and set your Git commit identity.** The upgrade agent saves its changes as Git commits, so it needs to know who you are before it starts. Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
 ![Open chat](./images/open-chat.png)
 
@@ -139,6 +139,8 @@ Click the Copilot icon in the bottom status bar. If it says **Sign In** or **Use
 In the sign-in window, select **Continue with GitHub**. When the authorization page opens in your browser, select **Continue**, then **Authorize Visual-Studio-Code**. Return to VS Code when authorization is complete.
 
 ![Continue with GitHub in the Copilot sign-in window](./images/copilot-sign-in-dialog.png)
+
+Next, open the model picker at the bottom of the Copilot Chat box and select **Claude Opus 5.5**. We use the same model so everyone's results are more similar. Any model works, so if it isn't available, keep the default.
 
 Then send this message in the chat, replacing the placeholders with your lab details:
 
@@ -271,7 +273,7 @@ The rest of this module is the upgrade itself, in five steps.
 
    > 💡 **PICKING A MODEL**
    >
-   > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
+   > **We use Claude Opus 5.5 in this bootcamp** to keep results more consistent, and because we prefer the most powerful models for code analysis. The default works too. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
 4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat.
 

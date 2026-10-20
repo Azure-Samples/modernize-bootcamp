@@ -42,8 +42,9 @@ Model decides how much thinking you are paying for. The list in the picker chang
 | **Reasoning models** | Holding a whole solution in view at once; catching cross-cutting assumptions that need several files read together | Assessment, plan mode, anything that has already failed twice |
 | **Fast models** | Well-specified mechanical work | Converting one page, adding an endpoint whose shape you decided, renaming things |
 
-Three practical notes:
+Four practical notes:
 
+- **In this bootcamp we use Claude Opus 5.5** so everyone's results are more similar, but any model works. You set it once in Module 2, and you may need to set it again in Module 3 if a new chat resets it.
 - **Hover a model in the picker** to see its cost tier — Low, Medium, or High. An assessment across a whole solution is worth the high tier. Renaming a file is not.
 - **When the agent stalls or loops, switch to a stronger model rather than rephrasing the prompt a fourth time.** The conversation context carries over when you change models.
 - **Do not switch mid-task** while the agent is actively executing. Let it finish or stop it first.

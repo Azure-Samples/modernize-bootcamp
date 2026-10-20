@@ -191,7 +191,7 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    Some of these are covered in later modules, so we won't do them now.
 
-5. **Pick a model, then limit the job and plan.** First, open the model picker at the bottom of the Copilot Chat box and select **Claude Opus 5.5**. We ask everyone to use the same model in an effort to get more similar results across the room. If it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
+5. **Check the model, then limit the job and plan.** First, check the model picker at the bottom of the Copilot Chat box. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), select it again. We ask everyone to use the same model in an effort to get more similar results across the room. Any model works, so if it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
 
    ```plaintext
    Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details.
