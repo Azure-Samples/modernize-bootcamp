@@ -506,6 +506,7 @@ The agent decides each next step based on what it just observed, so it does not 
 - **It says "1 confirmation pending" but no confirmation pop-up appears.** This is a tool problem, not something you did. Select **Stop**, then send `continue` to get it unstuck.
 
   ![The chat shows 1 confirmation pending](./images/confirmation-pending.png)
+
 - **Inspect what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to view the background subagents reviewing or validating a task.
 
   ![Arrow on a background step in the chat](./images/background-process-arrow.png)
@@ -513,6 +514,10 @@ The agent decides each next step based on what it just observed, so it does not 
   Hovering over a subagent also shows its details, such as what it is doing and which tool it is running:
 
   ![Hovering over a subagent shows its details](./images/subagent-hover.png)
+
+- **See what it has changed.** Select the **files changed** line at the bottom of the chat (for example, "13 files changed") to see every file the agent has edited so far. Look around, but don't select **Undo**, since that would revert the agent's work.
+
+  ![The files changed list at the bottom of the chat](./images/files-changed.png)
 
 - **Redirect mid-task.** Type your message while the agent is working and send it as a **steering** message (hover over your message and select **Steering**, the arrow icon highlighted below). Copilot reads it immediately before carrying on, rather than queuing it for after the step finishes. For example, you could steer with a question like `What did you just change?`
 

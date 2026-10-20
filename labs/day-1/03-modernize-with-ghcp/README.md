@@ -275,7 +275,13 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
 9. **Read the summary.** When every task is done, the agent posts a summary in the chat: the branch your changes are on, whether the app builds, and each task with its commit. Yours will differ from the person next to you. One thing to notice: none of the new Azure code has been tested against real Azure yet, because those services don't exist until later modules.
 
+    Also look for any outstanding issues the summary notes. In a real engagement, you would work through these with the agent until the app reaches a satisfactory state. We're showing you that this can happen, but we'll move on. It won't block the rest of the labs.
+
     ![The agent's summary after executing the migration plan](./images/migration-summary.png)
+
+    To see exactly what the agent changed, select the **files changed** line at the bottom of the chat (for example, "13 files changed"). It lists every file it edited. Just look around, and don't select **Undo**, since that would revert the agent's work.
+
+    ![The files changed list at the bottom of the chat](./images/files-changed.png)
 
 10. **Optional: check it still runs.** Want proof the app still works? Ask Copilot to build and run it, then open the URL it gives you. With the Azure settings empty, the app should still load.
 
