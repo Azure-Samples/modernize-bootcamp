@@ -191,7 +191,7 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    Some of these are covered in later modules, so we won't do them now.
 
-5. **Check the model, then limit the job and plan.** First, check the model picker at the bottom of the Copilot Chat box. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), select it again. We ask everyone to use the same model in an effort to get more similar results across the room. Any model works, so if it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
+5. **Check the model, then limit the job and plan.** First, check the model picker at the bottom of the Copilot Chat box. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), select it again. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
 
    ```plaintext
    Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details.
@@ -278,10 +278,6 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
     Also look for any outstanding issues the summary notes. In a real engagement, you would work through these with the agent until the app reaches a satisfactory state. We're showing you that this can happen, but we'll move on. It won't block the rest of the labs.
 
     ![The agent's summary after executing the migration plan](./images/migration-summary.png)
-
-    To see exactly what the agent changed, select the **files changed** line at the bottom of the chat (for example, "13 files changed"). It lists every file it edited. Just look around, and don't select **Undo**, since that would revert the agent's work.
-
-    ![The files changed list at the bottom of the chat](./images/files-changed.png)
 
 10. **Optional: check it still runs.** Want proof the app still works? Ask Copilot to build and run it, then open the URL it gives you. With the Azure settings empty, the app should still load.
 

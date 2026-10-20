@@ -140,7 +140,7 @@ In the sign-in window, select **Continue with GitHub**. When the authorization p
 
 ![Continue with GitHub in the Copilot sign-in window](./images/copilot-sign-in-dialog.png)
 
-Next, open the model picker at the bottom of the Copilot Chat box and select **Claude Opus 5.5**. We use the same model so everyone's results are more similar. Any model works, so if it isn't available, keep the default.
+Next, open the model picker at the bottom of the Copilot Chat box and select **Claude Opus 5.5**. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default.
 
 Then send this message in the chat, replacing the placeholders with your lab details:
 
@@ -273,7 +273,7 @@ The rest of this module is the upgrade itself, in five steps.
 
    > 💡 **PICKING A MODEL**
    >
-   > **We use Claude Opus 5.5 in this bootcamp** to keep results more consistent, and because we prefer the most powerful models for code analysis. The default works too. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
+   > **We use Claude Opus 5.5 in this bootcamp** to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
 4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat.
 

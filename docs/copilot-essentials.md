@@ -44,7 +44,7 @@ Model decides how much thinking you are paying for. The list in the picker chang
 
 Four practical notes:
 
-- **In this bootcamp we use Claude Opus 5.5** so everyone's results are more similar, but any model works. You set it once in Module 2, and you may need to set it again in Module 3 if a new chat resets it.
+- **In this bootcamp we use Claude Opus 5.5** to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too. You set it once in Module 2, and you may need to set it again in Module 3 if a new chat resets it.
 - **Hover a model in the picker** to see its cost tier — Low, Medium, or High. An assessment across a whole solution is worth the high tier. Renaming a file is not.
 - **When the agent stalls or loops, switch to a stronger model rather than rephrasing the prompt a fourth time.** The conversation context carries over when you change models.
 - **Do not switch mid-task** while the agent is actively executing. Let it finish or stop it first.
@@ -141,11 +141,7 @@ The general rule: **two failed attempts means change something structural** — 
 
 ### Watching what it is doing
 
-You don't have to wait for the end to see what an agent is up to:
-
-- **Inspect a subagent.** Hover over a step in the chat. If an arrow appears on the right, select it to see the background subagents working on a task. Hovering over a subagent shows its type, the model it is using, and the tool it is running.
-- **See what it has changed.** Select the **files changed** line at the bottom of the chat (for example, "13 files changed") to see every file the agent has edited so far. Look around, but don't select **Undo**, since that would revert the agent's work.
-- **Don't panic if the dashboard lags.** A tool's dashboard can fall behind while the agent keeps working. If commits are landing in Source Control or files are updating in the chat, it is making progress.
+You don't have to wait for the end to see what an agent is up to. Hover over a step in the chat. If an arrow appears on the right, select it to see the background subagents working on a task. Hovering over a subagent shows its type, the model it is using, and the tool it is running.
 
 ## 💰 What it costs
 
