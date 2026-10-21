@@ -42,8 +42,9 @@ Model decides how much thinking you are paying for. The list in the picker chang
 | **Reasoning models** | Holding a whole solution in view at once; catching cross-cutting assumptions that need several files read together | Assessment, plan mode, anything that has already failed twice |
 | **Fast models** | Well-specified mechanical work | Converting one page, adding an endpoint whose shape you decided, renaming things |
 
-Three practical notes:
+Four practical notes:
 
+- **In this bootcamp we use Claude Opus 5.5** to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too. You set it once in Module 2, and you may need to set it again in Module 3 if a new chat resets it.
 - **Hover a model in the picker** to see its cost tier — Low, Medium, or High. An assessment across a whole solution is worth the high tier. Renaming a file is not.
 - **When the agent stalls or loops, switch to a stronger model rather than rephrasing the prompt a fourth time.** The conversation context carries over when you change models.
 - **Do not switch mid-task** while the agent is actively executing. Let it finish or stop it first.
@@ -119,15 +120,17 @@ When a tool asks for approval you choose the scope: this once, this session, thi
 
 Whatever level you pick, the review still belongs to you.
 
-## 🛑 Reining it in
+## 🧭 Steering the agent
 
 Agents go off track. Recovering is a skill, and it is mostly about acting early.
 
 | Situation | What to do |
 | --- | --- |
-| It is heading the wrong way, mid-run | **Send a message while the request is still running** to steer it, or queue a follow-up for when it finishes |
+| It is heading the wrong way, mid-run | **Send a message while the request is still running** to steer it (hover over your message and select **Steering**), or queue a follow-up for when it finishes. A plain message can pause the agent, and you'll need to tell it to `continue` |
 | It has gone badly wrong | **Stop it**, then send a new prompt rather than trying to correct in place |
 | It paused or stopped mid-task | Tell it `continue` |
+| Nothing new has appeared in the chat for 3–5 minutes | It may be stuck. Select **Stop**, then send `continue` |
+| The chat says **1 confirmation pending** but no confirmation pop-up appears | A tool problem, not something you did. Select **Stop**, then send `continue` to get it unstuck |
 | The last few turns made things worse | Use **checkpoints** to rewind to a known good state — far better than fixing cascading errors forward |
 | It is looping on the same error | Switch to a stronger model and tell it to continue. Context carries over |
 | Long conversation, answers getting vaguer | `/compact` to summarise older context — optionally `/compact focus on the API design decisions` |
@@ -135,6 +138,10 @@ Agents go off track. Recovering is a skill, and it is mostly about acting early.
 | Moving to an unrelated task | Start a new session with `Ctrl+N`. Do not pile unrelated work into one thread |
 
 The general rule: **two failed attempts means change something structural** — the model, the scope, or the context — rather than trying a third wording.
+
+### Watching what it is doing
+
+You don't have to wait for the end to see what an agent is up to. Hover over a step in the chat. If an arrow appears on the right, select it to see the background subagents working on a task. Hovering over a subagent shows its type, the model it is using, and the tool it is running.
 
 ## 💰 What it costs
 

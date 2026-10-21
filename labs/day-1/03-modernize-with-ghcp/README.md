@@ -39,7 +39,7 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 
    ![Restricted Mode banner](./images/restricted-mode-banner.png)
 7. Open **src\eShopLite.StoreFx\appsettings.json** and replace the placeholder password in the **StoreDbContext** connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user as they are.
-8. Ask Copilot Chat to **Run the app** (and approve any tool call commands), then verify the product catalog loads in your browser before continuing.
+8. Ask Copilot Chat to **Run the app** (and approve any tool call commands), then verify the product catalog loads in your browser by selecting the **Products** tab before continuing.
 
    > 💡 Notice how this is different from Module 2. The legacy .NET Framework app needed MSBuild and IIS Express to run. Now that the app is upgraded to .NET 10, it starts with the standard **dotnet run** command, with no IIS Express or Windows Server required.
 
@@ -169,7 +169,7 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    ![Migrate to Azure in the GitHub Copilot modernization extension](./images/migrate-to-azure-button.png)
 
-   A chat opens with the prompt "Migrate this application to Azure".
+   A chat opens with the prompt "Migrate this application to Azure". If the chat doesn't open with this prompt, close out of the extension and select **Migrate to Azure** again.
 
 2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.** If nothing happens after a minute or two, send:
 
@@ -191,16 +191,10 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    Some of these are covered in later modules, so we won't do them now.
 
-5. **Pick a model, then limit the job and plan.** First, open the model picker at the bottom of the Copilot Chat box and select **Claude Opus 5.5**. We ask everyone to use the same model in an effort to get more similar results across the room. If it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
+5. **Check the model, then limit the job and plan.** First, check the model picker, the dropdown under the chat box that shows the current model. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), scroll down to **Other Models** and select it again. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
 
    ```plaintext
-   Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details.
-
-   Keep all Azure service setup in one place in the startup code, not scattered across files. List every configuration key the app reads for Azure in appsettings.json with an empty placeholder value, so the file shows everything the deployment must provide.
-
-   Make sure the plan also covers secrets in Key Vault, a Redis cache for session and cart data, and observability with Application Insights, even if the assessment didn't flag them.
-
-   Create a new branch for the changes.
+   Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details. Keep all Azure service setup in one place in the startup code, not scattered across files. List every configuration key the app reads for Azure in appsettings.json with an empty placeholder value, so the file shows everything the deployment must provide. Make sure the plan also covers secrets in Key Vault, a Redis cache for session and cart data, and observability with Application Insights. Create a new branch for the changes.
    ```
 
    In plain terms, this prompt tells the agent to:
@@ -209,14 +203,14 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
    - **Assume the Azure resources will exist later,** and read their addresses from settings.
    - **Leave the database alone.**
    - **Keep the Azure setup tidy.** All in one place in the startup code, with every setting listed (empty) in **appsettings.json**. The agent's output can vary, and this keeps it tighter and more standard, so it's easier to review.
-   - **Include the services we want,** even if the assessment didn't flag them: Key Vault for secrets, Redis for session and cart data, and Application Insights for observability. The assessment finds problems in the code. This line adds what you want the app to have, the same way you would bring your own requirements to a customer engagement.
+   - **Name the services we want.** The assessment should detect these, but we already know we want them, so we list them to make sure they're in the plan: Key Vault for secrets, Redis for session and cart data, and Application Insights for observability.
    - **Work on a new branch.**
 
    The agent now writes a plan. It may ask you to approve tool calls along the way, such as reading files or running commands. Read what it's about to do, then approve it.
 
    ![The modernize agent delegating to the planning-coordinator agent](./images/planning-coordinator.png)
 
-   > 💡 **Reminder:** while the **planning-coordinator** is running, you can hover over the subagent in the chat and select it to see all the tasks it's doing, like you did in Module 2.
+   > 💡 **Reminder:** while the **planning-coordinator** is running, you can hover over the subagent in the chat and select it to see all the tasks it's doing, like you did in Module 2. The same goes for any subagent in GitHub Copilot.
 
    ![Hovering over the planning-coordinator subagent shows its details](./images/subagent-details.png)
 
@@ -275,7 +269,15 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
 9. **Read the summary.** When every task is done, the agent posts a summary in the chat: the branch your changes are on, whether the app builds, and each task with its commit. Yours will differ from the person next to you. One thing to notice: none of the new Azure code has been tested against real Azure yet, because those services don't exist until later modules.
 
+    Also look for any outstanding issues the summary notes. In a real engagement, you would work through these with the agent until the app reaches a satisfactory state. We're showing you that this can happen, but we'll move on. It won't block the rest of the labs.
+
     ![The agent's summary after executing the migration plan](./images/migration-summary.png)
+
+    **Optional: peek at the code.** Check where the Azure setup lives, for example **Program.cs**. If you are unsure where the code lives, as Copilot where the Azure setup code is. You'll see some code for Redis, like this (yours may look different):
+
+    ![Example of generated startup code that connects to Redis only when it is enabled, using a managed identity credential](./images/redis-startup-code.png)
+
+    - **The switch:** the **if (redisEnabled)** check means the Redis code only runs when a Redis setting is filled in. This shows the switch constraint we put in the plan was upheld.
 
 10. **Optional: check it still runs.** Want proof the app still works? Ask Copilot to build and run it, then open the URL it gives you. With the Azure settings empty, the app should still load.
 
@@ -313,11 +315,13 @@ If product images don't appear after modernization:
 
 ## ✅ Verification
 
-By the end of this section, you should have:
+By the end of this section, you should be able to check each of these:
 
-- 🔹 Converted the MVC pages to Blazor components
-- 🔹 Assessed where Azure services fit the app (secrets, cache, static content, etc.)
-- 🔹 Made the code changes to support those services
-- 🔹 Kept the application buildable and its behavior unchanged throughout
+- 🔹 **Converted the MVC pages to Blazor.** Check: **src\eShopLite.StoreFx\Components\Pages** has **.razor** files (like **Home.razor**; names may differ), and there are no **Controllers** or **Views** folders or **.cshtml** files left.
+- 🔹 **Ran assess, plan, and execute for Azure.** Check: you kept the plan to app code only (no database changes, no infrastructure files generated), and **plan.md** in the **.github/modernize** folder has tasks for Key Vault, Redis, and Application Insights.
+- 🔹 **Made the code changes for those services.** Check: the Azure setup is in one place in the startup code (usually **Program.cs**; ask Copilot if you can't find it), and **appsettings.json** lists each Azure setting with an empty value.
+- 🔹 **Kept the app working.** Check: it builds and runs with the Azure settings empty, and the **Products** tab still loads.
 
-> **Next module preview:** Module 4 designs the Azure resources this app now expects, such as the private networks, the identities it signs in with, and the service that runs it. You plan them and have Copilot write them as Bicep files. Your instructor has already set up the real Azure environment, so your Bicep stays as files in your repository to review, not something you deploy. The app itself is deployed in Module 6.
+If you have trouble verifying any of these, message Copilot in the chat and ask it to fix it. It's also okay if you don't fix it. This won't block the next lab.
+
+> **Next module preview:** Module 4 does two things. First, it writes the infrastructure as code (IaC) for the Azure services this app now expects, such as Key Vault, Redis, and Application Insights. Second, it designs the cloud foundation around them: the secure networking, identities, and hosting the app will run on. You plan it and have Copilot write it as Bicep files. Your instructor has already set up the real Azure environment, so your Bicep stays as files in your repository to review, not something you deploy. The app itself is deployed in Module 6.

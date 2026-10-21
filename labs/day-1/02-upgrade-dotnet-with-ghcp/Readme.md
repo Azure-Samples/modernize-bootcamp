@@ -128,7 +128,7 @@ You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a
 
 ![Replace the database password in connectionStrings.config](./images/db-password.png)
 
-**6. Open Copilot Chat and set your Git commit identity.** The upgrade agent saves its changes as Git commits, so it needs to know who you are before it starts. Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
+**6. Open Copilot Chat, pick a model, and set your Git commit identity.** The upgrade agent saves its changes as Git commits, so it needs to know who you are before it starts. Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
 ![Open chat](./images/open-chat.png)
 
@@ -139,6 +139,14 @@ Click the Copilot icon in the bottom status bar. If it says **Sign In** or **Use
 In the sign-in window, select **Continue with GitHub**. When the authorization page opens in your browser, select **Continue**, then **Authorize Visual-Studio-Code**. Return to VS Code when authorization is complete.
 
 ![Continue with GitHub in the Copilot sign-in window](./images/copilot-sign-in-dialog.png)
+
+Next, open the model picker, the dropdown under the chat box that shows the current model (for example, **Auto**):
+
+![The model picker under the chat box, showing Auto](./images/model-picker.png)
+
+Scroll down to **Other Models** and select **Claude Opus 5.5**. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default.
+
+![Claude Opus 5.5 selected in the Other Models list](./images/model-picker-opus.png)
 
 Then send this message in the chat, replacing the placeholders with your lab details:
 
@@ -271,7 +279,7 @@ The rest of this module is the upgrade itself, in five steps.
 
    > 💡 **PICKING A MODEL**
    >
-   > **The default is fine for this lab.** If you do change it, prefer a powerful model like Claude Opus. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
+   > **We use Claude Opus 5.5 in this bootcamp** to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
 4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat.
 
@@ -506,6 +514,7 @@ The agent decides each next step based on what it just observed, so it does not 
 - **It says "1 confirmation pending" but no confirmation pop-up appears.** This is a tool problem, not something you did. Select **Stop**, then send `continue` to get it unstuck.
 
   ![The chat shows 1 confirmation pending](./images/confirmation-pending.png)
+
 - **Inspect what it is doing right now.** Hover over a step in the chat. If an arrow appears on the right, select it to view the background subagents reviewing or validating a task.
 
   ![Arrow on a background step in the chat](./images/background-process-arrow.png)
@@ -513,6 +522,10 @@ The agent decides each next step based on what it just observed, so it does not 
   Hovering over a subagent also shows its details, such as what it is doing and which tool it is running:
 
   ![Hovering over a subagent shows its details](./images/subagent-hover.png)
+
+- **See what it has changed.** Select the **files changed** line at the bottom of the chat (for example, "13 files changed") to see every file the agent has edited so far. Look around, but don't select **Undo**, since that would revert the agent's work.
+
+  ![The files changed list at the bottom of the chat](./images/files-changed.png)
 
 - **Redirect mid-task.** Type your message while the agent is working and send it as a **steering** message (hover over your message and select **Steering**, the arrow icon highlighted below). Copilot reads it immediately before carrying on, rather than queuing it for after the step finishes. For example, you could steer with a question like `What did you just change?`
 
