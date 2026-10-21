@@ -103,9 +103,13 @@ Bootstrap your repository
 az login
 ```
 
+Choose **Work or School Account** and follow the prompts to login to az cli.
+
 ```powershell
 gh auth login
 ```
+
+Follow the prompts to log in GitHub Cli
 
 ```powershell
 
