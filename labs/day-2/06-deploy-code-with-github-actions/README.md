@@ -1,6 +1,8 @@
 # 🚀 Lab 06: Deploy Code with GitHub Actions
 
-Lab 04 examined the design of a secure Azure platform, and the instructor-preprovisioned environment supplies that platform for this lab. Lab 05 migrated the `eshop` database, and the Container App still runs a placeholder image. In this challenge, you will create a CI/CD workflow that validates the modernized retail application, builds a container, pushes an immutable image to the existing Azure Container Registry, and releases a new Azure Container Apps revision.
+In this lab, you will use GitHub Copilot to create a GitHub Actions CI/CD workflow that takes the modernized retail application from source code to a running release on Azure. You will build on the secure platform examined in Lab 04 and supplied by the instructor-preprovisioned environment, along with the `eshop` database migrated in Lab 05. The workflow will validate the application, build and test a container, push an immutable image to the existing Azure Container Registry, and deploy that image to Azure Container Apps, replacing the placeholder image.
+
+GitHub Copilot helps you turn the application's requirements and the existing platform's deployment contract into a working workflow rather than starting from a generic YAML template. You will use **Agent** mode to inspect the repository and generate the container files, then **Plan** mode to propose the workflow for your review before returning to **Agent** mode to implement it. This approach reduces repetitive authoring and helps connect application-specific build steps with OIDC authentication, image publishing, and deployment requirements. You remain responsible for reviewing each generated job, asking Copilot to correct gaps, and validating the workflow and deployed application before considering the release complete.
 
 This lab takes approximately **60-75 minutes**.
 
@@ -120,6 +122,9 @@ $subscriptionId = az account show --query id --output tsv
   -DeploymentBranch 'main'
 ```
 
+> [!NOTE]
+> ℹ️ **Informational — for reference only:** The following list explains what the script does automatically. These are not additional steps for you to perform.
+
 The script:
 
 1. examines successful deployments in the preprovisioned resource groups and
@@ -153,7 +158,7 @@ This keeps the main branch restriction but does not add a manual approval
 gate. The script emits a warning when it configures the environment without a
 required reviewer.
 
-To test discovery and print the selected deployments and reconstructed values
+<!-- To test discovery and print the selected deployments and reconstructed values
 without changing Azure resources or GitHub, run:
 
 > 💻 **Run this in the terminal.**
@@ -161,7 +166,7 @@ without changing Azure resources or GitHub, run:
 ```powershell
 .\assets\scripts\Test-Lab06ResourceGroupDeploymentValues.ps1 `
   -SubscriptionId $subscriptionId
-```
+``` -->
 
 The probe emits JSON and accepts the same four optional deployment-name
 overrides.
@@ -185,6 +190,9 @@ flowchart LR
 ```
 
 ## 🔐 Identity and RBAC
+
+> [!NOTE]
+> ℹ️ **Informational — for reference only:** The tables below summarize the identities and roles already provisioned in the Lab 04 environment and the GitHub variables published by the bootstrap script. They document the existing configuration; you do not need to create these identities or assign these roles.
 
 The preprovisioned Lab 04 environment includes **separate code build and
 code-deployment identities**. Do not reuse the infrastructure identity.
