@@ -96,12 +96,10 @@ Walk around the storefront for a minute and notice how it behaves:
 **3. Set the build tools path (one time).** Copilot can usually work this out on its own, but we include this step to prevent an error, or Copilot getting stuck, when the upgrade starts. It points the build at the files the legacy web project needs. In the same PowerShell window, run:
 
 ```powershell
-$vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
-[Environment]::SetEnvironmentVariable("VSToolsPath", "$vs\MSBuild\Microsoft\VisualStudio\v17.0", "User")
-$env:VSToolsPath = "$vs\MSBuild\Microsoft\VisualStudio\v17.0"
+$vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -property installationPath; [Environment]::SetEnvironmentVariable("VSToolsPath", "$vs\MSBuild\Microsoft\VisualStudio\v17.0", "User"); $env:VSToolsPath = "$vs\MSBuild\Microsoft\VisualStudio\v17.0"
 ```
 
-These commands print nothing, which is expected. The setting is saved for your user, so you only need to do this once on your VM.
+This command prints nothing, which is expected. The setting is saved for your user, so you only need to do this once on your VM.
 
 > 💡 If VS Code is already open, close every VS Code window before the next step, so it picks up the new setting when it starts.
 
@@ -281,9 +279,20 @@ The rest of this module is the upgrade itself, in five steps.
    >
    > **We use Claude Opus 5.5 in this bootcamp** to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
-4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together). If you get an error instead of the pop-up, type `Try again` in the chat.
+4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together).
 
-   > 💡 **If the error mentions Microsoft.WebApplication.targets**, the .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
+   > 💡 **If something goes wrong, work down this list.** As the scenario starts, you should see a step like this in the chat:
+   >
+   > ![The DotnetVersionScenarioInitializer step in the chat](./images/scenario-initializer.png)
+   >
+   > 1. **You get an error instead of the pop-up, or you don't see this step or anything about the dotnet-version-upgrade scenario.** The skill may be temporarily unable to bind. Select **Stop**, then send `Try again`.
+   > 2. **It is still stuck.** Point it at the scenario files. They live in the extension's folder, and the version number in the folder name can differ, so ask it to find the folder:
+   >
+   >    ```plaintext
+   >    Look in C:\Users\Admin\.vscode\extensions for the folder that starts with ms-dotnettools.upgrade-agent. Under it, find the dotnet-version-upgrade scenario in upgrade\dotnet\skills\scenarios and use it.
+   >    ```
+   >
+   > 3. **The error mentions Microsoft.WebApplication.targets.** The .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
 
    Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
 
