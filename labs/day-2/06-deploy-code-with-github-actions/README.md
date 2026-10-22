@@ -61,7 +61,13 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
    ![Copy HTTPS URL](./images/copy-https.png)
 
-3. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location -- C:\Users\Admin):
+3. Enable GitHub Actions is the new repository
+
+![Enable GitHub Actions](./images/enable_github_actions1.png)
+
+![Enable GitHub Actions](./images/enable_github_actions2.png)
+
+4. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location -- C:\Users\Admin):
 
    ```powershell
    git clone <your-fork-url>
