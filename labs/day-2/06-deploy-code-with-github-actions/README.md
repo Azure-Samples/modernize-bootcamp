@@ -89,6 +89,23 @@ You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a
 
 > 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **caldova-retail-modernized** folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd caldova-retail-modernized` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
 
+## 🔑 Authorize VS CODE
+
+In VSCODE select the agent in the bottom right, and click the "Use AI Features" button.
+![Select Agent Icon](./images/vscode_auth.1.png)
+
+The **Sign in to use GitHub Copilot** prompt opens and select Continue with GitHub
+
+![Select Agent Icon](./images/vscode_auth.2.png)
+
+The browser opens displaying an "Authorize with Visual Stusio Code" prompt. Select Continue
+![Select Agent Icon](./images/vscode_auth.3.png)
+
+Finally select **Authorize Visual Stusio Code** on the next prompt.
+![Select Agent Icon](./images/vscode_auth.4.png)
+
+
+
 ## 🔑 Bootstrap GitHub OIDC
 
 The Azure platform is already provisioned, but its GitHub federation cannot be
@@ -116,6 +133,9 @@ Follow the prompts to log in GitHub Cli
 ```powershell
 
 $subscriptionId = az account show --query id --output tsv
+```
+
+```powershell
 .\assets\scripts\Initialize-Lab06RepositoryFromResourceGroups.ps1 `
   -SubscriptionId $subscriptionId `
   -AllowDeploymentWithoutRequiredReviewer `
