@@ -62,7 +62,7 @@ Right now, the storefront's pages are built with **ASP.NET MVC**. Each page is a
 
 Unlike Module 2, this step does change the pages themselves. Copilot will rebuild each page as a Blazor component. Because the pages are being rebuilt anyway, this is also a good moment to give the store a more modern look, so the prompt below asks for that too.
 
-Confirm Copilot Chat is in **Agent** mode in the agent picker (switch it if it isn't). We use **Agent** mode here because no upgrade scenario covers MVC → Blazor.
+Confirm Copilot Chat is in **Agent** mode in the agent picker (switch it if it isn't). We use **Agent** mode here. No upgrade scenario covers MVC → Blazor.
 
 ![The agent picker, set to Agent](./images/agent-mode.png)
 
@@ -186,9 +186,9 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    A chat opens with the prompt "Migrate this application to Azure". If the chat doesn't open with this prompt, close out of the extension and select **Migrate to Azure** again.
 
-2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.** If nothing happens after a minute or two, send:
+2. **Choose the scope.** When the agent asks **What do you want to migrate to Azure?**, select **My entire application**, then **Submit**. You'll narrow the job down in step 5. **If it doesn't have this pop-up, that is okay. That means it has already made a decision and begun to work.** If nothing happens after a minute or two, or you get an error, send:
 
-   ```plaintext
+   ```text
    Assess my entire application for migration to Azure.
    ```
 
@@ -207,7 +207,15 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 5. **Check the model, then limit the job and plan.** First, check the model picker, the dropdown under the chat box that shows the current model. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), scroll down to **Other Models** and select it again. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default. Then send this prompt. It keeps the job to app code only and leaves the database, Docker, and infrastructure for later:
 
    ```text
-   Proceed to planning. Include the application code changes needed to run this app on Azure. Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM). I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration. Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details. Keep all Azure service setup in one place in the startup code, not scattered across files. List every configuration key the app reads for Azure in appsettings.json with an empty placeholder value, so the file shows everything the deployment must provide. Make sure the plan also covers secrets in Key Vault, a Redis cache for session and cart data, and observability with Application Insights. Create a new branch for the changes.
+   Proceed to planning. Include the application code changes needed to run this app on Azure.
+   Don't generate a Dockerfile or any infrastructure-as-code files (Bicep/Terraform/ARM).
+   I'll provision the Azure resources later, so assume they exist and read endpoints and connection strings from configuration.
+   Don't migrate or change the database: the app must keep using the same existing SQL Server with the same connection details.
+   Keep all Azure service setup in one place in the startup code, not scattered across files.
+   List every configuration key the app reads for Azure in appsettings.json with an empty placeholder value,
+   so the file shows everything the deployment must provide.
+   Make sure the plan also covers secrets in Key Vault, a Redis cache for session and cart data, and observability with Application Insights.
+   Create a new branch for the changes.
    ```
 
    In plain terms, this prompt tells the agent to:
@@ -245,8 +253,9 @@ You'll use the **Migrate to Azure** option in the GitHub Copilot modernization e
 
    ```text
    Add this condition to the plan:
-
-   Every Azure service added by this plan must be optional and switched on only by a configuration setting; when the setting is empty, the app must run exactly as it did before without contacting Azure, and if the settings for a service are only partly filled in, the app must stop at startup with a clear error instead of silently falling back.
+   Every Azure service added by this plan must be optional and switched on only by a configuration setting;
+   when the setting is empty, the app must run exactly as it did before without contacting Azure,
+   and if the settings for a service are only partly filled in, the app must stop at startup with a clear error instead of silently falling back.
    ```
 
    This is the switch idea from earlier: with no Azure settings the app runs as it does today, and a half-filled service stops with a clear error instead of being quietly ignored.

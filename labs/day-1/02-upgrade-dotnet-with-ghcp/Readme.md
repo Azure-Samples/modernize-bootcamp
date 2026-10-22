@@ -162,8 +162,10 @@ To make sure the setup was completed correctly, ask Copilot Chat to build and la
 
 In Copilot Chat, which you opened and signed in to in the Setup section, submit this prompt:
 
-```plaintext
-This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express. Tell me the URL when it is running.
+```text
+This is a .NET Framework 4.8 ASP.NET MVC app using packages.config.
+Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express.
+Tell me the URL when it is running.
 ```
 
 Watch Copilot Chat while it works. VS Code may ask you to approve a tool call before Copilot can run a command. Approve any tool calls, like downloading NuGet packages (libraries the app depends on) needed to build and run the solution.
@@ -288,8 +290,9 @@ The rest of this module is the upgrade itself, in five steps.
    > 1. **You get an error instead of the pop-up, or you don't see this step or anything about the dotnet-version-upgrade scenario.** The skill may be temporarily unable to bind. Select **Stop**, then send `Try again`.
    > 2. **It is still stuck.** Point it at the scenario files. They live in the extension's folder, and the version number in the folder name can differ, so ask it to find the folder:
    >
-   >    ```plaintext
-   >    Look in C:\Users\Admin\.vscode\extensions for the folder that starts with ms-dotnettools.upgrade-agent. Under it, find the dotnet-version-upgrade scenario in upgrade\dotnet\skills\scenarios and use it.
+   >    ```text
+   >    Look in C:\Users\Admin\.vscode\extensions for the folder that starts with ms-dotnettools.upgrade-agent.
+   >    Under it, find the dotnet-version-upgrade scenario in upgrade\dotnet\skills\scenarios and use it.
    >    ```
    >
    > 3. **The error mentions Microsoft.WebApplication.targets.** The .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
