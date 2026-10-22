@@ -293,6 +293,11 @@ The rest of this module is the upgrade itself, in five steps.
    >    ```
    >
    > 3. **The error mentions Microsoft.WebApplication.targets.** The .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
+   > 4. **If none of this is working,** GitHub Copilot can still do the upgrade by hand. In the agent picker, switch from the **Upgrade** agent to **Agent** mode, then prompt it in the chat:
+   >
+   >    ```plaintext
+   >    Upgrade this app to .NET 10.
+   >    ```
 
    Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
 
@@ -459,16 +464,16 @@ What should hold steady is the **shape**: establish prerequisites, convert the p
 
 Once you approve the plan, the agent begins upgrading the application.
 
-> ⏱️ **WORKSHOP NOTE: AGENTIC PACING**
+> ‼️ ⏱️ **IMPORTANT: WORKSHOP NOTE ON PACING. YOU DON'T NEED TO WAIT FOR THE UPGRADE TO FINISH**
 >
 > An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, you will watch the agent work through its first task and then move on to a pre-upgraded repository.
 >
-> **When can you move on?** You don't need to wait for the upgrade to finish. You can stop and go to Step 5️⃣ once both of these are true:
+> **You can stop and go to Step 5️⃣ once both of these are true:**
 >
 > 1. **The first task has finished.** It is checked off in the **dashboard** or **tasks.md** (in the same folder as **plan.md**, if the agent created one), or the chat says so. Usually the agent posts that the task is done and committed, because you chose to commit after each task.
 > 2. **You've tried the features below:** the dashboard, the Activity tab, and a steering message.
 >
-> If no task has finished after about 10 minutes, that's okay. Stop anyway and move on.
+> **If no task has finished after about 10 minutes, that's okay.** Stop anyway and move on.
 >
 > While you wait, **read through this section and try things out.**
 
