@@ -131,6 +131,10 @@ gh auth login
 Follow the prompts to log in GitHub Cli
 
 ```powershell
+gh repo set-default origin
+```
+
+```powershell
 
 $subscriptionId = az account show --query id --output tsv
 ```
@@ -273,6 +277,9 @@ Requirements:
 Tell me about any place where the application and the infrastructure disagree.
 ```
 
+Review the chat window, review any prompts that are presented to allow the agent task.
+![Allow agent task](./images/allow_task.png)
+
 Check the result against the contract before you build it:
 
 - mcr.microsoft.com/dotnet/sdk:10.0 only for restore and publish
@@ -335,9 +342,9 @@ docker run --detach --rm `
 Invoke-WebRequest http://localhost:8080/health
 ```
 
-```powershell
+<!-- ```powershell
 docker stop caldova-retail-lab06
-```
+``` -->
 
 The dummy connection string permits startup but is never used by the health endpoint. It is only for a local container smoke test.
 
@@ -509,8 +516,21 @@ Push a branch and open a pull request. From the repository root:
 > 💻 **Run this in the terminal.**
 
 ```powershell
+git config --global user.email "your.email@example.com"
+git config --global user.name "Your Name"
+```
+
+<!-- ```powershell
 git switch -c lab06-cicd
 git add .\.github\workflows\lab06-retail-cicd.yml
+git commit -m "Add Lab 06 retail CI/CD workflow"
+git push -u origin lab06-cicd
+gh pr create --fill
+``` -->
+
+```powershell
+git switch -c lab06-cicd
+git add .
 git commit -m "Add Lab 06 retail CI/CD workflow"
 git push -u origin lab06-cicd
 gh pr create --fill
