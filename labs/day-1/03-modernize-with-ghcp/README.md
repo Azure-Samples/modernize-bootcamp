@@ -62,7 +62,11 @@ Right now, the storefront's pages are built with **ASP.NET MVC**. Each page is a
 
 Unlike Module 2, this step does change the pages themselves. Copilot will rebuild each page as a Blazor component. Because the pages are being rebuilt anyway, this is also a good moment to give the store a more modern look, so the prompt below asks for that too.
 
-Switch Copilot Chat to **Agent** mode in the agent picker, then use the following prompt to guide Copilot. We use **Agent** mode here because no upgrade scenario covers MVC → Blazor:
+Confirm Copilot Chat is in **Agent** mode in the agent picker (switch it if it isn't). We use **Agent** mode here because no upgrade scenario covers MVC → Blazor.
+
+![The agent picker, set to Agent](./images/agent-mode.png)
+
+Then use the following prompt to guide Copilot:
 
 ```text
 Convert the existing ASP.NET MVC pages to Blazor components in this .NET 10 application. This includes:
@@ -92,6 +96,8 @@ The agent starts converting the pages. It may ask you to approve tool calls, suc
 ```plaintext
 Yes, proceed.
 ```
+
+If any other pop-up appears, select the default option, then tell Copilot to continue.
 
 Copilot will convert the MVC pages to Blazor components, aiming to preserve the app's functionality while giving it a more modern UI. Expect this update to take about 10–20 minutes.
 
@@ -329,6 +335,6 @@ By the end of this section, you should be able to check each of these:
 - 🔹 **Made the code changes for those services.** Check: the Azure setup is in one place in the startup code (usually **Program.cs**; ask Copilot if you can't find it), and **appsettings.json** lists each Azure setting with an empty value.
 - 🔹 **Kept the app working.** Check: it builds and runs with the Azure settings empty, and the **Products** tab still loads.
 
-If you have trouble verifying any of these, message Copilot in the chat and ask it to fix it. It's also okay if you don't fix it. This won't block the next lab.
+If you have trouble verifying any of these, message Copilot in the chat and ask it to fix it. It's also okay if you don't fix it. This won't block the next lab, it is for your learning.
 
 > **Next module preview:** Module 4 does two things. First, it writes the infrastructure as code (IaC) for the Azure services this app now expects, such as Key Vault, Redis, and Application Insights. Second, it designs the cloud foundation around them: the secure networking, identities, and hosting the app will run on. You plan it and have Copilot write it as Bicep files. Your instructor has already set up the real Azure environment, so your Bicep stays as files in your repository to review, not something you deploy. The app itself is deployed in Module 6.
