@@ -130,12 +130,9 @@ Agents go off track. Recovering is a skill, and it is mostly about acting early.
 | It has gone badly wrong | **Stop it**, then send a new prompt rather than trying to correct in place |
 | It paused or stopped mid-task | Tell it `continue` |
 | Nothing new has appeared in the chat for 3–5 minutes | It may be stuck. Select **Stop**, then send `continue` |
-| The chat says **1 confirmation pending** but no confirmation pop-up appears | A tool problem, not something you did. Select **Stop**, then send `continue` to get it unstuck |
+| The chat says **1 confirmation pending** but shows nothing to approve or deny | A tool problem, not something you did. Ask it to `continue`. If it stays stuck, select **Stop**, then send `continue` |
 | The last few turns made things worse | Use **checkpoints** to rewind to a known good state — far better than fixing cascading errors forward |
-| It is looping on the same error | Switch to a stronger model and tell it to continue. Context carries over |
-| Long conversation, answers getting vaguer | `/compact` to summarise older context — optionally `/compact focus on the API design decisions` |
-| You want to try a different approach | `/fork` to branch the conversation instead of re-prompting from scratch |
-| Moving to an unrelated task | Start a new session with `Ctrl+N`. Do not pile unrelated work into one thread |
+| It is looping on the same error | **Stop** it, narrow the request to one step, and tell it to `continue` |
 
 The general rule: **two failed attempts means change something structural** — the model, the scope, or the context — rather than trying a third wording.
 
@@ -171,7 +168,7 @@ Run `/chronicle:cost-tips` in any session for recommendations based on your own 
 | --- | --- | --- |
 | Answers are generic, or describe code you do not have | It is guessing at your project shape | Describe the architecture explicitly and `#`-reference the real files |
 | Same build error recurring across attempts | Model too small for the reasoning required | Switch to a reasoning model and tell it to continue |
-| Agent loops on one task | Scope too large, or context polluted | Stop, `/compact` or start fresh, and re-scope to one step |
+| Agent loops on one task | Scope too large, or context polluted | Stop and re-scope to one step |
 | Edits contradict the plan it just wrote | Context lost over a long run | Rewind to a checkpoint and re-anchor it on the plan file |
 | It stalls waiting on approvals | Every tool call is prompting | Approve for the session, or raise the permission level |
 | It changed more than you expected | Agent mode on an under-specified prompt | Rewind, then re-run in plan mode first |

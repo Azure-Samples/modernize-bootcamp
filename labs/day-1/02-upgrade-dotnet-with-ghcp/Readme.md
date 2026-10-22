@@ -528,7 +528,7 @@ Check the **Activity** tab of the dashboard. It records the timeline, log, and c
 The agent decides each next step based on what it just observed, so it does not always move in a straight line. It can occasionally stall, drift, or pause on errors. You stay in control the whole time:
 
 - **It seems slow or stalled.** If nothing new appears in the chat for 3–5 minutes, select **Stop** to stop the run, then send `continue`.
-- **It says "1 confirmation pending" but no confirmation pop-up appears.** This is a tool problem, not something you did. Select **Stop**, then send `continue` to get it unstuck.
+- **It says "1 confirmation pending" but shows nothing to approve or deny.** This is a tool problem, not something you did. Ask it to `continue`. If it stays stuck, select **Stop**, then send `continue`.
 
   ![The chat shows 1 confirmation pending](./images/confirmation-pending.png)
 
