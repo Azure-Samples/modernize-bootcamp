@@ -1,6 +1,8 @@
 # 🚀 Lab 06: Deploy Code with GitHub Actions
 
-Lab 04 examined the design of a secure Azure platform, and the instructor-preprovisioned environment supplies that platform for this lab. Lab 05 migrated the `eshop` database, and the Container App still runs a placeholder image. In this challenge, you will create a CI/CD workflow that validates the modernized retail application, builds a container, pushes an immutable image to the existing Azure Container Registry, and releases a new Azure Container Apps revision.
+In this lab, you will use GitHub Copilot to create a GitHub Actions CI/CD workflow that takes the modernized retail application from source code to a running release on Azure. You will build on the secure platform examined in Lab 04 and supplied by the instructor-preprovisioned environment, along with the `eshop` database migrated in Lab 05. The workflow will validate the application, build and test a container, push an immutable image to the existing Azure Container Registry, and deploy that image to Azure Container Apps, replacing the placeholder image.
+
+GitHub Copilot helps you turn the application's requirements and the existing platform's deployment contract into a working workflow rather than starting from a generic YAML template. You will use **Agent** mode to inspect the repository and generate the container files, then **Plan** mode to propose the workflow for your review before returning to **Agent** mode to implement it. This approach reduces repetitive authoring and helps connect application-specific build steps with OIDC authentication, image publishing, and deployment requirements. You remain responsible for reviewing each generated job, asking Copilot to correct gaps, and validating the workflow and deployed application before considering the release complete.
 
 This lab takes approximately **60-75 minutes**.
 
@@ -19,21 +21,16 @@ By the end of this lab, you will be able to:
 
 ## ✅ Prerequisites
 
-- completed the planning, Bicep generation, validation, and review walkthrough in [Lab 04](../../day-1/04-deploy-to-azure/README.md)
+- completed the planning, Bicep generation, validation, and review walkthrough in Lab 04
 - access to the instructor-preprovisioned Lab 04 platform
-- completed [Lab 05](../05-modernize-data/README.md), including the managed-identity database user
+- completed Lab 05, including the managed-identity database user
 - Azure access to read the Lab 04 deployment and configure federated credentials
-- GitHub `ADMIN` permission on the repository
-- your own fork of the modernized retail app (cloned in [Setup](#-setup) below)
+- GitHub ADMIN permission on the repository
+- your own fork of the modernized retail app (cloned in Setup below)
 - GitHub Actions enabled for the repository
 
-The known-good application is under:
 
-```text
-src/eShopLite.StoreFx
-```
-
-That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, and already Azure ready. If you modernized the root application in place, use its corresponding solution and project paths instead.
+That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor, with its code already updated to use Azure services such as Key Vault and managed identity. If you modernized the root application in place, use its corresponding solution and project paths instead.
 
 ## 🛠️ Setup
 
@@ -64,7 +61,13 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
    ![Copy HTTPS URL](./images/copy-https.png)
 
-3. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location -- C:\Users\Admin):
+3. Enable GitHub Actions is the new repository
+
+![Enable GitHub Actions](./images/enable_github_actions1.png)
+
+![Enable GitHub Actions](./images/enable_github_actions2.png)
+
+4. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location -- C:\Users\Admin):
 
    ```powershell
    git clone <your-fork-url>
@@ -80,7 +83,7 @@ cd caldova-retail-modernized
 code .
 ```
 
-If `code` is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the `caldova-retail-modernized` folder. If VSCode asks you to sign into GitHub again, authorize access there as well.
+If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the **caldova-retail-modernized folder**. If VSCode asks you to sign into GitHub again, authorize access there as well.
 
 If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
 
@@ -88,9 +91,26 @@ If VS Code opens the folder in **Restricted Mode**, select **Manage** in the ban
 
 ![VS Code showing the folder is trusted](./images/trusted-folder.png)
 
-You are in the right place when the Explorer shows `eShopLiteFx.sln` next to a `src` folder.
+You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
 
-> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned `caldova-retail-modernized` folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd caldova-retail-modernized` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
+> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **caldova-retail-modernized** folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd caldova-retail-modernized` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
+
+## 🔑 Authorize VS CODE
+
+In VSCODE select the agent in the bottom right, and click the "Use AI Features" button.
+![Select Agent Icon](./images/vscode_auth.1.png)
+
+The **Sign in to use GitHub Copilot** prompt opens and select Continue with GitHub
+
+![Select Agent Icon](./images/vscode_auth.2.png)
+
+The browser opens displaying an "Authorize with Visual Stusio Code" prompt. Select Continue
+![Select Agent Icon](./images/vscode_auth.3.png)
+
+Finally select **Authorize Visual Stusio Code** on the next prompt.
+![Select Agent Icon](./images/vscode_auth.4.png)
+
+
 
 ## 🔑 Bootstrap GitHub OIDC
 
@@ -106,14 +126,34 @@ Bootstrap your repository
 
 ```powershell
 az login
+```
+
+Choose **Work or School Account** and follow the prompts to login to az cli.
+
+```powershell
 gh auth login
+```
+
+Follow the prompts to log in GitHub Cli
+
+```powershell
+gh repo set-default origin
+```
+
+```powershell
 
 $subscriptionId = az account show --query id --output tsv
+```
+
+```powershell
 .\assets\scripts\Initialize-Lab06RepositoryFromResourceGroups.ps1 `
   -SubscriptionId $subscriptionId `
   -AllowDeploymentWithoutRequiredReviewer `
   -DeploymentBranch 'main'
 ```
+
+> [!NOTE]
+> ℹ️ **Informational — for reference only:** The following list explains what the script does automatically. These are not additional steps for you to perform.
 
 The script:
 
@@ -123,32 +163,32 @@ The script:
 2. validates the existing identities, target resources, and scoped role
    assignments without creating or changing them
 3. reads GitHub's effective OIDC subject prefix, including immutable owner and
-   repository IDs when enabled, then binds the build identity to `lab06` and
-   the deployment identity to `lab06-deploy` with environment-scoped
+   repository IDs when enabled, then binds the build identity to lab06 and
+   the deployment identity to lab06-deploy with environment-scoped
    federated credentials
-4. creates both GitHub environments, restricts `lab06-deploy` to `main`, and
+4. creates both GitHub environments, restricts lab06-deploy to main, and
    allows deployment without a required reviewer
 5. publishes and verifies the non-secret variables required by the workflow
 
 The script selects the newest matching deployment in each resource group and
-verifies that all four deployments have the same `prefix` and `suffix`
+verifies that all four deployments have the same prefix and suffix
 parameters before changing GitHub. If deployment history requires an older
 record, pass one or more of
-`-BootstrapDeploymentName`, `-PrimaryDeploymentName`,
-`-SecondaryDeploymentName`, and `-GlobalDeploymentName`.
+-BootstrapDeploymentName, -PrimaryDeploymentName,
+-SecondaryDeploymentName, and -GlobalDeploymentName.
 
 Each resource group is discovered independently from its
-`rg-caldova-lab04-bootstrap-`, `rg-caldova-lab04-primary-`,
-`rg-caldova-lab04-secondary-`, or `rg-caldova-lab04-global-` prefix. If more
+rg-caldova-lab04-bootstrap-, rg-caldova-lab04-primary-,
+rg-caldova-lab04-secondary-, or rg-caldova-lab04-global- prefix. If more
 than one resource group matches a prefix, supply the corresponding
-`-BootstrapResourceGroup`, `-PrimaryResourceGroup`, `-SecondaryResourceGroup`,
-or `-GlobalResourceGroup` override.
+-BootstrapResourceGroup, -PrimaryResourceGroup, -SecondaryResourceGroup,
+or -GlobalResourceGroup override.
 
-This keeps the `main` branch restriction but does not add a manual approval
+This keeps the main branch restriction but does not add a manual approval
 gate. The script emits a warning when it configures the environment without a
 required reviewer.
 
-To test discovery and print the selected deployments and reconstructed values
+<!-- To test discovery and print the selected deployments and reconstructed values
 without changing Azure resources or GitHub, run:
 
 > 💻 **Run this in the terminal.**
@@ -156,7 +196,7 @@ without changing Azure resources or GitHub, run:
 ```powershell
 .\assets\scripts\Test-Lab06ResourceGroupDeploymentValues.ps1 `
   -SubscriptionId $subscriptionId
-```
+``` -->
 
 The probe emits JSON and accepts the same four optional deployment-name
 overrides.
@@ -181,17 +221,20 @@ flowchart LR
 
 ## 🔐 Identity and RBAC
 
+> [!NOTE]
+> ℹ️ **Informational — for reference only:** The tables below summarize the identities and roles already provisioned in the Lab 04 environment and the GitHub variables published by the bootstrap script. They document the existing configuration; you do not need to create these identities or assign these roles.
+
 The preprovisioned Lab 04 environment includes **separate code build and
 code-deployment identities**. Do not reuse the infrastructure identity.
 
 | Principal | Role | Scope | Purpose |
 | --- | --- | --- | --- |
-| Lab 06 build identity (`lab06`) | `AcrPush` | ACR | Push and inspect image manifests |
-| Lab 06 deployment identity (`lab06-deploy`) | `Container Apps Contributor` | Retail Container App | Create a revision by updating only the image |
-| Lab 06 deployment identity (`lab06-deploy`) | `Reader` | Front Door profile | Resolve the existing endpoint for the post-deployment smoke test |
-| Retail Container App system identity | `AcrPull` | ACR | Pull the released image at runtime |
-| Retail user-assigned runtime identity | `Key Vault Secrets User` | Lab Key Vault | Resolve future Key Vault-backed ACA secret references |
-| Retail user-assigned runtime identity | Contained database user | `eshop` database | Read and write migrated application data without a password |
+| Lab 06 build identity (lab06) | AcrPush | ACR | Push and inspect image manifests |
+| Lab 06 deployment identity (lab06-deploy) | Container Apps Contributor | Retail Container App | Create a revision by updating only the image |
+| Lab 06 deployment identity (lab06-deploy) | Reader | Front Door profile | Resolve the existing endpoint for the post-deployment smoke test |
+| Retail Container App system identity | AcrPull | ACR | Pull the released image at runtime |
+| Retail user-assigned runtime identity | Key Vault Secrets User | Lab Key Vault | Resolve future Key Vault-backed ACA secret references |
+| Retail user-assigned runtime identity | Contained database user | eshop database | Read and write migrated application data without a password |
 
 The workflow receives a short-lived Azure token only after GitHub presents an OIDC token whose repository and environment claims match the federated credential. No Azure client secret or ACR password is stored in GitHub.
 
@@ -200,12 +243,12 @@ deployment outputs:
 
 | Variable | Purpose |
 | --- | --- |
-| `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | OIDC sign-in context; `AZURE_CLIENT_ID` identifies the build identity in `lab06` and the deployment identity in `lab06-deploy` |
-| `LAB06_CONTAINER_REGISTRY_NAME` | Existing Lab 04 registry |
-| `LAB06_CONTAINER_APP_NAME` | Existing retail Container App |
-| `LAB06_RUNTIME_IDENTITY_RESOURCE_ID`, `LAB06_RUNTIME_IDENTITY_CLIENT_ID` | Bicep-owned runtime identity verification; neither value is a credential |
-| `LAB04_PRIMARY_RESOURCE_GROUP`, `LAB04_SECONDARY_RESOURCE_GROUP` | Registry, SQL, and application lookup scopes |
-| `LAB04_GLOBAL_RESOURCE_GROUP`, `LAB04_PREFIX`, `LAB04_SUFFIX` | Existing Front Door endpoint lookup |
+| AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID | OIDC sign-in context; AZURE_CLIENT_ID identifies the build identity in lab06 and the deployment identity in lab06-deploy |
+| LAB06_CONTAINER_REGISTRY_NAME | Existing Lab 04 registry |
+| LAB06_CONTAINER_APP_NAME | Existing retail Container App |
+| LAB06_RUNTIME_IDENTITY_RESOURCE_ID, LAB06_RUNTIME_IDENTITY_CLIENT_ID | Bicep-owned runtime identity verification; neither value is a credential |
+| LAB04_PRIMARY_RESOURCE_GROUP, LAB04_SECONDARY_RESOURCE_GROUP | Registry, SQL, and application lookup scopes |
+| LAB04_GLOBAL_RESOURCE_GROUP, LAB04_PREFIX, LAB04_SUFFIX | Existing Front Door endpoint lookup |
 
 These are GitHub variables, not secrets. Each identity's federated credential
 and resource-scoped role assignments are the authorization boundary.
@@ -240,18 +283,21 @@ Requirements:
 Tell me about any place where the application and the infrastructure disagree.
 ```
 
+Review the chat window, review any prompts that are presented to allow the agent task.
+![Allow agent task](./images/allow_task.png)
+
 Check the result against the contract before you build it:
 
-- `mcr.microsoft.com/dotnet/sdk:10.0` only for restore and publish
-- `mcr.microsoft.com/dotnet/aspnet:10.0` for the smaller runtime image
+- mcr.microsoft.com/dotnet/sdk:10.0 only for restore and publish
+- mcr.microsoft.com/dotnet/aspnet:10.0 for the smaller runtime image
 - a non-root runtime user
-- port `8080` for platform ingress, and `/health` for pipeline and release probes
+- port 8080 for platform ingress, and /health for pipeline and release probes
 - a build context that excludes source-control metadata, build output, and local secret files
 
 > 💡 The credentials question is the interesting one. The app needs a database
 > connection at runtime, but the image must not contain it. Lab 04 Bicep owns
 > the passwordless connection-string environment variable and runtime identity;
-> Lab 05 grants that identity access after migrating `eshop`. GitHub Actions
+> Lab 05 grants that identity access after migrating eshop. GitHub Actions
 > changes only the image. If Copilot bakes configuration into the image or
 > rewrites environment variables during release, that is the failure to catch.
 
@@ -261,6 +307,9 @@ Build the application before building its image:
 
 ```powershell
 dotnet restore .\eShopLiteFx.sln
+```
+
+```powershell
 dotnet build .\eShopLiteFx.sln `
   --configuration Release `
   --no-restore
@@ -272,19 +321,36 @@ Then build and test the container locally:
 
 ```powershell
 $context = '.\'
+```
+
+```powershell
 $dockerfile = Join-Path $context 'src\eShopLite.StoreFx\Dockerfile'
+```
+
+```powershell
 $image = 'caldova-retail:lab06-local'
+```
+
+```powershell
 
 docker build --file $dockerfile --tag $image $context
+```
+
+```powershell
 docker run --detach --rm `
   --name caldova-retail-lab06 `
   --publish 8080:8080 `
   --env 'ConnectionStrings__StoreDbContext=Server=localhost;Database=eShop;User ID=test;Password=NotUsed1!;Encrypt=True;TrustServerCertificate=True' `
   $image
-
-Invoke-WebRequest http://localhost:8080/health
-docker stop caldova-retail-lab06
 ```
+
+```powershell
+Invoke-WebRequest http://localhost:8080/health
+```
+
+<!-- ```powershell
+docker stop caldova-retail-lab06
+``` -->
 
 The dummy connection string permits startup but is never used by the health endpoint. It is only for a local container smoke test.
 
@@ -322,10 +388,10 @@ conditions. Stop after the plan.
 
 Review the plan. Reject it if:
 
-- a pull-request job receives `id-token: write`
+- a pull-request job receives **id-token: write**
 - the workflow uses an Azure client secret or ACR admin credentials
 - build and deployment happen in one unreviewed job
-- the image uses `latest`
+- the image uses latest
 - the Container App receives a SQL password
 - the workflow changes replica limits or infrastructure
 - deployment happens before the image is tested
@@ -350,7 +416,7 @@ Only create the workflow file. Do not push a branch, open a pull request, run
 the workflow, or deploy anything.
 ```
 
-Agent mode re-reads your repository and writes `.github/workflows/lab06-retail-cicd.yml`. Approve its file edits as it goes, and let it finish before you continue.
+Agent mode re-reads your repository and writes **.github/workflows/lab06-retail-cicd.yml**. Approve its file edits as it goes, and let it finish before you continue.
 
 Copilot generated the **entire** workflow from the plan — the pull-request validation job, the build-and-push job, and the deployment job. In the next three challenges you will **review that generated workflow one job at a time** before you run it. Do not hand-edit the file yet; read it first. If a job does not match the criteria in a challenge, ask Copilot to fix that part instead of editing the YAML yourself.
 
@@ -369,21 +435,21 @@ permissions:
   contents: read
 ```
 
-Confirm it has `pull_request` and `push` path filters for the retail app and workflow. The validation job should:
+Confirm it has pull_request and push path filters for the retail app and workflow. The validation job should:
 
 1. check out the commit
 2. set up .NET 10
 3. restore, build, and run available tests
 4. build the Docker image with a local tag
 5. start the container with a nonproduction dummy connection string
-6. poll `/health`
+6. poll /health
 7. stop the container even when the probe fails
 
 This job must **not** include Azure login. Forked pull requests must be able to validate without Azure access. If Azure login appears here, ask Copilot to move it to the deployment jobs.
 
 ## Challenge 4: Review Build and Push
 
-Confirm that, for pushes to `main`, a job uses the `lab06` GitHub environment and only these job permissions:
+Confirm that, for pushes to main, a job uses the lab06 GitHub environment and only these job permissions:
 
 ```yaml
 permissions:
@@ -391,7 +457,7 @@ permissions:
   id-token: write
 ```
 
-Confirm this job authenticates with `azure/login`, then signs in and pushes with:
+Confirm this job authenticates with azure/login, then signs in and pushes with:
 
 ```bash
 az acr login --name "$ACR_NAME"
@@ -408,9 +474,9 @@ Confirm the job resolves the digest from ACR and passes the digest-qualified ima
 
 ## Challenge 5: Review the Deployment
 
-Confirm a separate job uses the protected `lab06-deploy` environment and that it:
+Confirm a separate job uses the protected lab06-deploy environment and that it:
 
-1. authenticates through the `lab06-deploy` federated credential
+1. authenticates through the lab06-deploy federated credential
 2. verifies the target app and registry match Lab 04
 3. verifies the system identity, user-assigned runtime identity, and required
    Bicep-owned environment-variable names
@@ -442,12 +508,12 @@ git status --short
 Verify:
 
 - [ ] PR validation has no Azure permissions.
-- [ ] Deployment is limited to `main`.
-- [ ] `id-token: write` exists only on Azure jobs.
+- [ ] Deployment is limited to main.
+- [ ] id-token: write exists only on Azure jobs.
 - [ ] the image tag contains the complete commit SHA.
 - [ ] the deployed reference contains an ACR digest.
 - [ ] no registry or SQL password is used.
-- [ ] the deploy job uses `lab06-deploy`.
+- [ ] the deploy job uses lab06-deploy.
 - [ ] concurrency prevents overlapping production deployments.
 - [ ] the app is updated rather than recreated.
 
@@ -456,24 +522,37 @@ Push a branch and open a pull request. From the repository root:
 > 💻 **Run this in the terminal.**
 
 ```powershell
+git config --global user.email "your.email@example.com"
+git config --global user.name "Your Name"
+```
+
+<!-- ```powershell
 git switch -c lab06-cicd
 git add .\.github\workflows\lab06-retail-cicd.yml
 git commit -m "Add Lab 06 retail CI/CD workflow"
 git push -u origin lab06-cicd
 gh pr create --fill
+``` -->
+
+```powershell
+git switch -c lab06-cicd
+git add .
+git commit -m "Add Lab 06 retail CI/CD workflow"
+git push -u origin lab06-cicd
+gh pr create --fill
 ```
 
-Confirm validation succeeds on the pull request, review the changes, and merge. Approve `lab06-deploy` only after verifying that the image digest belongs to the merged commit.
+Confirm validation succeeds on the pull request, review the changes, and merge. Approve lab06-deploy only after verifying that the image digest belongs to the merged commit.
 
 ## ✅ Verify the Release
 
 In the workflow summary and Azure portal, verify:
 
-- a new image manifest exists in ACR with the `sha-<commit>` tag
+- a new image manifest exists in ACR with the sha-<commit> tag
 - the Container App revision references the same manifest digest
 - the revision is healthy
 - minimum replicas and autoscaling remain unchanged
-- `/health` succeeds through Front Door
+- /health succeeds through Front Door
 - catalog and sign-in paths can reach the migrated database
 - the previous revision remains visible for rollback evidence
 
@@ -490,7 +569,7 @@ az containerapp revision list `
   --output table
 ```
 
-Re-run the workflow using a revert commit, or update the app to the previously approved digest. Do not “fix” a failed release by moving the old image to the `latest` tag.
+Re-run the workflow using a revert commit, or update the app to the previously approved digest. Do not “fix” a failed release by moving the old image to the latest tag.
 
 Document:
 
@@ -505,7 +584,7 @@ Document:
 If your workflow does not validate and lab time is running short:
 
 1. preserve your workflow and failure logs
-2. compare it with [the completed workflow](../../../assets/solutions/lab06/lab06-retail-cicd.yml)
+2. compare it with the completed workflow in /assets/solutions/lab06/lab06-retail-cicd.yml
 3. copy the completed workflow into `.github/workflows/lab06-retail-cicd.yml`
 4. review every permission, environment, variable, and Azure command before committing
 5. explain the defect in your original workflow during the debrief

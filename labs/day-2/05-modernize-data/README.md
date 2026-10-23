@@ -10,14 +10,14 @@
 > 
 > They must follow a certain naming convention.  All resources you create must end with i.e. have a suffix @lab.LabInstance.Id.  Failing to do so, will block you from creating those Azure resources.
 >
-> - Storage account: caldovalab05st@lab.LabInstance.Id
-> - Blob container: sqlmi-backups-@lab.LabInstance.Id
-> - Blob folder: eshop-@lab.LabInstance.Id
-> - DMS: caldova-lab05-sqlmig-@lab.LabInstance.Id
-> - DMS SQL Instance: caldovalab05sql@lab.LabInstance.Id
+> - Storage account: `caldovalab05st@lab.LabInstance.Id`
+> - Blob container: `sqlmi-backups-@lab.LabInstance.Id`
+> - Blob folder: `eshop-@lab.LabInstance.Id`
+> - DMS: `caldova-lab05-sqlmig-@lab.LabInstance.Id`
+> - DMS SQL Instance: `caldovalab05sql@lab.LabInstance.Id`
 
 
-An Azure policy in place enforces a certain naming convetion for these resources.
+An Azure policy in place enforces a certain naming convention for these resources.
 
 ## SQL Server to Azure SQL Database — Student Migration Challenges
 
@@ -32,7 +32,7 @@ Learning objectives
 Students will learn to:
 
 * Gather information about a SQL server database.
-* Learn about diffenent authentication mechanisms in SQL server.
+* Learn about different authentication mechanisms in SQL server.
 * Learn about different types of backups and migration techniques.
 * Run an assessment of the source SQL Server database, analyze the report.
 * Create Azure Data Migration Service (DMS)
@@ -51,11 +51,11 @@ Students will learn to:
 Use master;
 select @@version ;
 ```
-5. Right click on database eshop and click on peroperties to determine database size, collation, disk file name and size of database files and "recovery mode", as shown.
+5. Right click on database eshop and click on properties to determine database size, collation, disk file name and size of database files and "recovery mode", as shown.
 
 [![this](./images/Challenge_1_db_properties.png)](./images/Challenge_1_db_properties.png)
 
-6. Note the "page" names displayed when checking on database "properties" section. The "page" list will be different for SQL Managed Instance that we willmigrate to, later.
+6. Note the "page" names displayed when checking on database "properties" section. The "page" list will be different for SQL Managed Instance that we will migrate to, later.
 7. From the "Files" section, note down the data files and transaction log file name.
 8. You connected to the SQL server using SQL authentication. What are other ways to authenticate to a SQL server?
 9. (Research on this) What is a logical and physical backup of SQL database ?
@@ -89,7 +89,7 @@ DBCC CHECKDB (N'eShop') ;
 
 * SSMS connects to the source instance.
 * The student records the source version, edition, size etc.
-* You can explain at least four different authentication mechanisms and show at least two ways to connnect.
+* You can explain at least four different authentication mechanisms and show at least two ways to connect.
 * You understand that logical backup (.bacpac) is an export of data structure and data that can be moved across OS/versions of SQL.It is also a point-in-time backup. Under the hood, a .bacpac file is simply a compressed ZIP package containing JSON/XML metadata definition files and data
 * A physical backup (.bak) by contrast is page-by-page physical copy of files. Along with transaction log backups, a physical backup can be used to restore database with minimal data loss - as you will do in this lab later.
 * You can explain recovery model and different types of backups.
@@ -105,11 +105,12 @@ SSMS 22 is the latest version of Microsoft’s SQL Server Management Studio, a 6
 
 1. Using SSMS, connect to the SQL Server 2016  that resides on a VM in this lab environment. The connection to "on-premises" SQL server is preconfigured in the lab. Right click on the server and choose "Migrate SQL Server".
 
- ![SSMS](./images/Challenge_2_assessment_launch_1.png)
+ ![SSMS2](./images/Challenge_2_assessment_launch_1.png)
 
-2. #### <u>Do not Migrate or Upgrade the database</u>.
 
-Run a "Migration rediness assessment". An html file will open in your browser once the assessment completes. This is the report.
+2. > [!Note] Do not Migrate or Upgrade the database.
+
+Run a "Migration readiness assessment". An html file will open in your browser once the assessment completes. This is the report.
 
  ![SSMS](./images/Challenge_2_assessment_launch_2.png)
 
@@ -123,28 +124,37 @@ The Azure SQL Managed Instance configured in this lab is configured to authentic
 
 Notice that there are several ways you can authenticate to SQL server using Entra. In this lab, you must select authentication method <b>Entra with Password.</b>  The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used. 
 
-#### Validate firewall access to SQL MI before begining.
+#### Validate NSG inbound rules for SQL MI's subnet NSG before begining.
 
- Validate from the portal, that the NSG for the VNet that Azure SQL Managed Instance is allowing inbound access to port 3342.  If not, add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
+ Validate from the portal, that the NSG for the subnet that Azure SQL Managed Instance is configured with, is allowing inbound access to port 3342.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04mi@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
+ 
+ ![NSG2](./images/NSG2.png)
+ 
+ Click on *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. Navigate to the Inbound rules:
+
+ ![NSG3](./images/NSG3.png)
+ 
+ Add an inbound port rule like this:
 
  ![NSG1](./images/NSG1.png)
 
 5. Select the right user login to connect to SQL MI. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left under Security. 
+
 *Note* This will be the same user as your <b>azure login </b>. 
 
-![SQLMI_ENTRA](./images/sqlmi_entra.png)
+![SQLMI_ENTRA](./images/sqlmi_entra2.png)
 
 6. To retrieve the public endpoint FQDN and port number to use as part of the connection information, navigate to the Azure SQL Managed Instance in the portal.  Go to *Connection strings* under *settings* and lookup the public endpoint examples. You need to copy only the servername and the port, as shown here.
 
 ![AZSQLMIPE](./images/AzSQLMIPE.png)
 
-Use that Entra ID and password to login using SSMS. This is same as your azure login. 
+Use that Entra ID and password to login using SSMS. This is same as your azure login. Be sure to change the Authentication to <b>Microsoft Entra Password</b>
 
 
 ![SSMS_LOGIN](./images/ssms_login.png)
 
 
-7. Connect to the target SQL MI using SSMS. Notice that there are no databaes there yet. 
+7. Connect to the target SQL MI using SSMS. Notice that there are no databases there yet. 
 
 As part of data migration you will restore the database in this managed instance.
 
@@ -152,7 +162,7 @@ As part of data migration you will restore the database in this managed instance
 ## Success criteria
 
 * You learn how to run an assessment using SSMS 22.
-* Understand the assessment report and the comptatibility issues.
+* Understand the assessment report and the compatibility issues.
 * You are able to connect to the SQL MI from the lab VM using Entra ID.
 
 ## Challenge 3 — Create the required azure resources
@@ -170,7 +180,7 @@ In this part of the lab you will create the necesary Azure resources to perform 
 
 #### 1. Resource provider
 
-From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Ressource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
+From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Resource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
 
 ![ResourceProvider](./images/dms_resource_provider.png)
 
@@ -182,32 +192,39 @@ Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go 
 
 #### 3. Storage Account
 
-Provision an Azure Storage Account caldovalab05st@lab.LabInstance.Id <b>in the same region as the Azure SQL Managed Instance </b>and create a Blob container sqlmi-backups-@lab.LabInstance.Id in it to store source database backup. 
+<b>3a.</b> Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region as the Azure SQL Managed Instance </b>and create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store source database backup. 
 
 ![Storage1](./images/Storage_1.png)
 ![Storage3](./images/Storage_3.png)
 
-Once the storage account is created, you will need to grant to your current Azure user the permission to manage Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
+<b>3b.</b> Once the storage account is created, you will need to grant to your current Azure user the permission to manage Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
 
 ![Storage5](./images/Storage_5.png)
 ![Storage6](./images/Storage_6.png)
 ![Storage7](./images/Storage_7.png)
 ![Storage8](./images/Storage_8.png)
 
-Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Bolb Data Reader" role assigned. The identity has the same name as the SQL MI instance your lab subscription.
+<b>3c.</b> Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Bolb Data Reader" role assigned. The identity has the same name as the SQL MI instance your lab subscription.
 
 ![Storage10](./images/Storage_10.png)
 
-Create a Blob container sqlmi-backups-@lab.LabInstance.Id in the storage account and a folder eshop-@lab.LabInstance.Id within the container.
+<b>3d.</b> Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in the storage account and a folder `eshop-@lab.LabInstance.Id` within the container. Note that the container name and folder name are unique to your lab environment and are not reflected in the images below.  Use the images as an example of what the outcome should be.
 
 ![Storage11](./images/Storage_11.png)
-![Storage12](./images/Storage_12.png)
+![Storage12](./images/Storage_12_2.png)
 
 #### 4. Database Migration Service (DMS)
 
-<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS) caldova-lab05-sqlmig-@lab.LabInstance.Id.
+<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS) `caldova-lab05-sqlmig-@lab.LabInstance.Id`. Change the Target server type to Azure SQL Managed Instance.
+
+![DMS1_1](./images/DMS_1_1.png)
 
 ![DMS1](./images/DMS_1.png)
+
+![DMS1_2](./images/DMS_1_2.png)
+
+![DMS1_3](./images/DMS_1_3.png)
+
 
 ## Success criteria
 
@@ -217,23 +234,23 @@ Create a Blob container sqlmi-backups-@lab.LabInstance.Id in the storage account
 - DMS is deployed in the same region as SQL MI.
 
 
-## Challenge 4 — Online Migraton to SQL Managed Instance
+## Challenge 4 — Online Migration to SQL Managed Instance
 
-In this challenge you will perform database backups to the Azure Storage account provisioned earlier.  You will then use DMS to perform an *Online* migration. To perform and online migration, DMS restores backups then takes advantage of the *Log Replay Service* (LRS) to replay transaction logs and complete the migration. 
+In this challenge you will perform database backups to the Azure Storage account provisioned earlier.  You will then use DMS to perform an *Online* migration. To perform and online migration, DMS restores the full and any differntial backups before restoring and playing transaction logs to complete the migration. 
 
 ### Student tasks
 
 #### 1. Backup the database to Azure Storage using SSMS 22
 
-Launch SSMS from the desktop:
+<b>1a.</b> Launch SSMS from the desktop:
 
  ![SSMS22](./images/ssms_22.png)
 
-Connect to the source database that resides in the VM. Expand the tree and Database folder and locate the *eShop* database. Right click and select Tasks->Backup.
+<b>1b.</b> Connect to the source database that resides in the VM. Expand the tree and Database folder and locate the *eShop* database. Right click and select Tasks->Backup.
 
 ![SSMS22_1](./images/SSMS22_1.png)
 
-Select *Full* for backup type and *URL* for *Back up to*. Click on *Add* to select the Azure Storage account and Blob container.
+<b>1c.</b> Select *Full* for backup type and *URL* for *Back up to*. Click on *Add* to select the Azure Storage account and Blob container.
 
 ![SSMS22_2](./images/SSMS22_2.png)
 
@@ -241,84 +258,82 @@ Click on *New Container*.
 
 ![SSMS22_3](./images/SSMS22_3.png)
 
-Login to the lab's subscription and select the storage account and container created earlier. Generate SAS credentials and save them in notepad. Click OK.
+<b>1d.</b> Login to the lab's subscription and select the storage account and container created earlier. Generate SAS credentials and save them in notepad. Click OK.
 
 ![SSMS22_4](./images/SSMS22_4.png)
 
 <b>Note:</b>
 
- DMS can restore a backup stored either in the root level of a container or inside a container - not any level further below it. 
- 
- Complete the backup, prefix the file with "full_" so you can identify the file easily in the azure portal for the storage container. The backup should take less than a minute. 
+ Complete the backup, prefix the file with the blob container folder name `eshop-@lab.LabInstance.Id` and "full_" so you can identify the file easily in the azure portal in the storage container. 
 
-![SSMS22_5](./images/SSMS22_5.png)
+![SSMS22_5_2](./images/SSMS22_5_2.png)
 
-Repeat the task this time taking a differential backup - with a name prefix line "diff_" .
+<b>1e.</b> Repeat the task this time taking a differential backup - with a name prefix of the blob folder eshop-@lab.LabInstance.Id and "diff_" .
 
 ![SSMS22_6](./images/SSMS22_6.png)
 
-The backups should be listed in the Blob container in the storage account.
+<b>1f.</b> The backups should be listed in the Blob container in the storage account.
+
 Notice the size of the full and the differential backups. 
 
-Do you think it is ever possible to have a differential backup larger than full backup ?
 
-![SSMS22_7](./images/SSMS22_7.png)
+![SSMS22_7_2](./images/SSMS22_7_2.png)
 
 ### 2. Migrate the database online using DMS
 
-Navigate to the Azure portal to the DMS service created earlier.  Select "New Migration".
+<b>2a.</b> Navigate to the Azure portal to the DMS service created earlier.  Select "New Migration".
 
-![DMS_6](./images/DMS_1.png)
+![DMS_6](./images/DMS_6.png)
 
-Next, choose the migration scenario - from Sql Server to Azure SQL MI.
+<b>2b.</b> Next, choose the migration scenario - from Sql Server to Azure SQL MI.
 Choose <b>Blob</b> as backup location and <b>online</b> as backup mode.
 
 ![DMS_7](./images/DMS_7.png)
 
-On the next page, configure details as shown. 
+<b>2c.</b> On the next page, configure details as shown. 
 
-<b>Note: </b>
+> [!Note]
+> 
+> DMS needs to configure a SQL Instance `caldovalab05sql@lab.LabInstance.Id` to > track progress of migration for restartability. 
+> 
+> What you are entering here is information for that tracking database - not  your source or target database. You need not manage this instance for this lab. 
 
- DMS needs to configure a SQL Instance caldovalab05sql@lab.LabInstance.Id to track progress of migration for restartability. 
- 
- What you are entering here is information for that tracking database - not your source or target database. You need not manage this instance for this lab. 
-
-**Also note**
-
-- This tracking database can be in a different region also. 
-- Furthermore, if for some reason you want to try the migration again, you would need to provide a new tracking database name.
+> [!Note]
+> 
+> - This tracking database can be in a different region also. 
+> - Furthermore, if for some reason you want to try the migration again, you would need to provide a new tracking SQL instance.
 
 
 ![DMS_8](./images/DMS_8.png)
 
-Select the Azure SQL managed Instance that already exists as a target.
+<b>2d.</b> Select the Azure SQL managed Instance that already exists as a target.
 
 ![DMS_9](./images/DMS_9.png)
 
-Specify the location of the backup files ( full backup only is fine in this case ) in the Azure storage account as well as the target database name you eShop. Notice that the DMS restore creates the eShop database, in other words the database should not exist already there.
+<b>2e.</b> Specify the location of the backup files in the Azure storage account as well as the target database name `eShop`. 
 
 ![DMS_10](./images/DMS_10.png)
 
-Start the migration. 
+<b>2f.</b> Start the migration. 
 
 ![DMS_11](./images/DMS_11.png)
 
-Follow the migration progress. Notice the migration details.
+<b>2g.</b> Follow the migration progress. Notice the migration details.
 
 ![DMS_12](./images/DMS_12.png)
 
-If all is well,  the full backups would have been restored.
+<b>2e.</b> If all is well,  the full backups would have been restored.
 
 ![DMS_13](./images/DMS_13.png)
 
-The migration is not complete yet.  
+<b>2f.</b> The migration is not complete yet.  
 
 Since this is an online migration with minimal outage, we need to apply any incremental data that was added since the migration started. This means backup of transaction logs need to be restored. 
 
 
 In this lab, we will add some data to simulate that.
 
-Go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command. 
+<b>2g.</b> Go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command. 
 
 You can enter a few more rows if you want.
 
@@ -329,25 +344,25 @@ VALUES
  ( 'Test', 'Test', 'Test', 'Test' ) ;
 ```
 
-Next we need to backup the transaction logs to the storage account, in the same folder/location as the database backups.  Use SSMS to do this as well. Opt for *Transactions Logs* as the back up type.
+<b>2h.</b> Next we need to backup the transaction logs to the storage account, in the same folder/location as the database backups.  Use SSMS to do this as well. Opt for *Transactions Logs* as the back up type.
 
-<b>Mote: </b> 
+> [!NOTE]
+>
+> Prefix the file name with the blob folder `eshop-@lab.LabInstance.Id` and "log_" so you can identify the file easily.
 
-Prefix the file name with "log_" so you can identify the file easily.
+![DMS_15_2](./images/DMS_15_2.png)
 
-![DMS_15](./images/DMS_15.png)
+<b>2i.</b> You can follow the progress of the log replay from the portal, same place as where the progress of the migration was being followed.
 
-You can follow the progress of the log replay from the portal, same place as where the progress of the migration was being followed.
-
-<b>Note: </b> 
-
-- When you take a backup of the source database, DMS may take a minute or two to see the backup.
-
-- Notice the order of restore operaion of DMS - first full, then differential, then logs - in the same order that the backup was taken. 
+> [!NOTE]
+>
+> - When you take a backup of the source database, DMS may take a minute or two to see the backup.
+>
+> - Notice the order of restore operaion of DMS - first full, then differential, then logs - in the same order that the backup was taken. 
 
 ![DMS_17](./images/DMS_17.png)
 
-Wait till all transaction logs have all been restored and no files left ( as seen in azure storage ) to restore.
+<b>2j.</b> Wait until all transaction logs have all been restored and no files are left ( as seen in azure storage ) to restore.
 
 Perform the cutover. Wait for it to complete.
 
@@ -357,11 +372,11 @@ Perform the cutover. Wait for it to complete.
 
 ![DMS_18](./images/DMS_18.png)
 
-Navigate to the Azure SQL Managed instance and confirm the database is there and in good state. Click on *Databases* in the left to list all databases on this managed instance.
+<b>2k.</b> Navigate to the Azure SQL Managed instance and confirm the database is there and in good state. Click on *Databases* in the left to list all databases on this managed instance.
 
 ![DMS_19](./images/DMS_19.png)
 
-Go back to SSMS 22.  Connect to the Azure SQL Managed Instance and eShop database using Entra. Explore the tables and make sure they are all there.  Confirm the row you added above is also present. 
+<b>2l.</b> Go back to SSMS 22.  Connect to the Azure SQL Managed Instance and eShop database using Entra. Explore the tables and make sure they are all there.  Confirm the row you added above is also present. 
 
 Run this following query to confirm the new row(s) you added
 
@@ -374,11 +389,13 @@ WHERE
  name like 'Test%' ;
 ```
 
-#### Congratulations - you have migrated to Azure SQL
+<b>Congratulations - you have migrated to Azure SQL</b>
 
-## Challenge 5 - Perform online migration using CLI
+## Challenge 5 - Perform online migration using CLI (Optional)
 
-### VM SQL Server to Azure SQL Managed Instance with Azure DMS Via CLI
+If you completed challenges 1- 4 in under 2.5 hours, you can proceed with challenge 5.  Otherwise click on *Next* in the set of instructions and move on to the apps portion of day 2.  You can always navigate back to this page and complete challenge 5 if you have time.
+
+### VM SQL Server to Azure SQL Managed Instance with Azure DMS Via CLI 
 
 ### Objective
 
@@ -407,7 +424,7 @@ Validate
 For simplicity, the exercise will use the same Database Migration Service (DMS) and the same storage account 
 and backups as the previous exercise.
 
-The challenge uses Azure CLI from PowerShell. The `az datamigration` command group is an Azure CLI extension and requires Azure CLI 2.75.0 or later.
+The challenge uses Azure CLI from PowerShell. The <b>az datamigration</b> command group is an Azure CLI extension and requires Azure CLI 2.75.0 or later.
 
 ### 1. The Migration Mode
 
@@ -445,22 +462,22 @@ az provider show `
     --output tsv
 ```
 
-The expected provider registration state is `Registered`.
+The expected provider registration state is <b>Registered</b>.
 
 ### 4. Run the Migration Assessment
 
 The assessment runs locally and does not require a DMS resource.
 
-Using SSMS 22, connect to the *master* database in a query window and create a sysadmin user.
+<b>4a.</b> Using SSMS 22, connect to the *master* database in a query window and create a sysadmin user.
 Avoid using special characters in the user and password in these exercises as to not spend time escaping characters
 in the commands that need to run from command line.  Use this account to perform the assessment.
 
-```
+```sql
 USE [master]
 GO
 -- Step 1: Create a SQL Server Login
 CREATE LOGIN [AdminUser]
-WITH PASSWORD = 'Test123';
+WITH PASSWORD = '<put a password of your choosing here>';
 
 -- Step 2: Add the Login to the Sysadmin Role
 ALTER SERVER ROLE [sysadmin]
@@ -468,9 +485,9 @@ ADD MEMBER [AdminUser];
 GO
 ```
 
-Create a folder locally on the machine where the output will be generated ex. *C:\Migration\Assessment*.
+<b>4b.</b> Create a folder locally on the machine where the output will be generated ex. *C:\Migration\Assessment*.
 Connectivity to the SQL server will use SQL Server authentication.  The *AdminUser* account created above will be used.  
-Run the cmdlet below, replace all values with those of your lab environment. You will be prompted for the password.
+Run the cmdlet below, replace all values with those of your lab environment.
 
 #### SQL Server Authentication
 
@@ -487,21 +504,21 @@ az datamigration get-assessment `
 
 ![cli_assess](./images/cli_assessment.png)
 
-Review the resulting HTML or JSON for:
+<b>4c.</b> Review the resulting HTML or JSON for:
 
 - Server-level assessment issues
 - Database-level assessment issues
-- `TargetReadinesses.AzureSqlManagedInstance`
+- TargetReadinesses.AzureSqlManagedInstance
 - Warnings and errors
-- `DatabaseRestoreFails`
+- DatabaseRestoreFails
 - Impacted objects
 - Recommended remediation
 
 ![cli_report](./images/cli_report.png)
 
-Pay particular attention to unsupported features, cross-database dependencies, CLR, linked servers, SQL Agent dependencies, Windows authentication dependencies, file layouts, database sizes, and encryption.
+<b>4d.</b> Pay particular attention to unsupported features, cross-database dependencies, CLR, linked servers, SQL Agent dependencies, Windows authentication dependencies, file layouts, database sizes, and encryption.
 
-Resolve blocking issues and rerun the assessment. Retain the before-and-after reports as migration evidence.
+<b>4e.</b> Resolve blocking issues and rerun the assessment. Retain the before-and-after reports as migration evidence.
 
 ## 5. Collect Performance Data and Obtain SKU Recommendations (optional)
 
@@ -542,17 +559,17 @@ Unlike backing up the database files into a folder in an Azure Storage Account B
 
 ![cli_backups](./images/cli_backups.png)
  
-## 9. Start an Online Migration
+## 7. Start an Online Migration
 
 Get the environment information.  Fill in all information for the variables according to your environment. Start the migration.
 
 ```powershell
-$StorageAccount = "<storage account name>"
+$StorageAccount = "caldovalab05st@lab.LabInstance.Id"
 $StorageResourceGroup = "<storage account resource group>"
 $MiResourceGroup = "<Azure SQL Managed Instance resource group>"
 $ManagedInstance = "<Azure SQL Managed Instance name>" 
 $MigrationResourceGroup = "<Database Migration Service Resource Group>"
-$MigrationService = "<Database Migration Service Name>"
+$MigrationService = "caldova-lab05-sqlmig-@lab.LabInstance.Id"
 
 $StorageAccountId = az storage account show `
     --resource-group $StorageResourceGroup `
@@ -612,7 +629,7 @@ az datamigration sql-managed-instance create `
     --source-database-name $SourceDatabase `
     --source-location $SourceLocation
 ```
-### 10. Monitor the Migration
+### 8. Monitor the Migration
 
 The same information retrieved from the CLI can also be viewed in the portal.
 
@@ -623,7 +640,7 @@ az datamigration sql-managed-instance show `
     --target-db-name $TargetDatabase `
     --expand MigrationStatusDetails
 ```
-### 11. Cutover
+### 9. Cutover
 
 During the controlled change window, these are the typical steps:
 
@@ -661,6 +678,6 @@ az datamigration sql-managed-instance cutover `
 ```
 
 
-### 12. Post-Migration Validation
+### 10. Post-Migration Validation
 
 Use SSMS 22 to connect to the eShopCLI database.  Explore the migrated objects.
