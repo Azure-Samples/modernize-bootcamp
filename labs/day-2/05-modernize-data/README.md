@@ -103,30 +103,26 @@ SSMS 22 is the latest version of Microsoft’s SQL Server Management Studio, a 6
 ### Student tasks
 
 
-1. Using SSMS, connect to the SQL Server 2016  that resides on a VM in this lab environment. The connection to "on-premises" SQL server is preconfigured in the lab. Right click on the server and choose "Migrate SQL Server".
+1. ### Using SSMS, connect to the SQL Server 2016  that resides on a VM in this lab environment. The connection to "on-premises" SQL server is preconfigured in the lab. Right click on the server and choose "Migrate SQL Server".
 
  ![SSMS2](./images/Challenge_2_assessment_launch_1.png)
 
 
-2. > [!Note] Do not Migrate or Upgrade the database.
+2. #### Do not Migrate or Upgrade the database.
 
 Run a "Migration readiness assessment". An html file will open in your browser once the assessment completes. This is the report.
 
  ![SSMS](./images/Challenge_2_assessment_launch_2.png)
 
-3. Investigate the report. Find out compatibility issues with different SQL targets. 
+3. ### Investigate the report. Find out compatibility issues with different SQL targets. 
 
 ![Assessment](./images/Challenge_2_assessment_full_report.png)
 
-4. Prepare to connect to the target SQL Managed Instance
-
-The Azure SQL Managed Instance configured in this lab is configured to authenticate using <u>Entra only.</u>
-
-Notice that there are several ways you can authenticate to SQL server using Entra. In this lab, you must select authentication method <b>Entra with Password.</b>  The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used. 
+4. ### Prepare to connect to the target SQL Managed Instance. Before you can connect to it, you need to open up the firewall to allow connection to the SQL MI first.
 
 #### Validate NSG inbound rules for SQL MI's subnet NSG before begining.
 
- Validate from the portal, that the NSG for the subnet that Azure SQL Managed Instance is configured with, is allowing inbound access to port 3342.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04mi@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
+From the portal, find out the NSG for the subnet that Azure SQL Managed Instance is configured with.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04mi@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
  
  ![NSG2](./images/NSG2.png)
  
@@ -134,17 +130,23 @@ Notice that there are several ways you can authenticate to SQL server using Entr
 
  ![NSG3](./images/NSG3.png)
  
- Add an inbound port rule like this:
+ Add an inbound port rule like this to allow inbound connections on port 3342:
 
  ![NSG1](./images/NSG1.png)
 
-5. Select the right user login to connect to SQL MI. To find out the Entra ID to use for login, navigate from the portal to the deployed Azure SQL Managed Instance and go to Microsoft Entra ID on the left under Security. 
+Now you are able to connect to SQL MI from your SQL Server Management Studio tool.
 
-*Note* This will be the same user as your <b>azure login </b>. 
+5. ### The Azure SQL Managed Instance configured in this lab is configured to **authenticate** using **<u>Entra only.</u>**
 
-![SQLMI_ENTRA](./images/sqlmi_entra2.png)
+Notice that there are several ways you can authenticate to SQL server using Entra. In this lab, you must select authentication method <b>Entra with Password.</b>  
 
-6. To retrieve the public endpoint FQDN and port number to use as part of the connection information, navigate to the Azure SQL Managed Instance in the portal.  Go to *Connection strings* under *settings* and lookup the public endpoint examples. You need to copy only the servername and the port, as shown here.
+The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used.  
+
+*Note* Ypur SQL entra login will be the same user as your <b>azure login </b>. 
+
+6. ### Retrieve the public endpoint FQDN and port number (3342) to use as part of the connection information
+
+ Navigate to the Azure SQL Managed Instance in the portal.  Go to *Connection strings* under *settings* and lookup the public endpoint examples. You need to copy only the servername and the port, as shown here.
 
 ![AZSQLMIPE](./images/AzSQLMIPE.png)
 
@@ -154,7 +156,7 @@ Use that Entra ID and password to login using SSMS. This is same as your azure l
 ![SSMS_LOGIN](./images/ssms_login.png)
 
 
-7. Connect to the target SQL MI using SSMS. Notice that there are no databases there yet. 
+7. ### Connect to the target SQL MI using SSMS. Notice that there are no databases there yet. 
 
 As part of data migration you will restore the database in this managed instance.
 
@@ -165,9 +167,7 @@ As part of data migration you will restore the database in this managed instance
 * Understand the assessment report and the compatibility issues.
 * You are able to connect to the SQL MI from the lab VM using Entra ID.
 
-## Challenge 3 — Create the required azure resources
-
-Azure SQL Managed Instance, the target database service, is already provisioned on your lab subscription to save time. You will need to validate that *System Assigned Managed Identity* is enabled for the server.  
+## Challenge 3 — Create the required azure resources - DMS and Storage account
 
 In this part of the lab you will create the necesary Azure resources to perform the migration. Deploy the resources in the same region that Azure SQL MI is deployed.  You will:
 
@@ -186,6 +186,8 @@ From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Res
 
 #### 2. Azure SQL MI System Assigned Managed Identity
 
+You will need to validate that *System Assigned Managed Identity* is enabled for the server.  
+
 Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go to the *Identity* blade under Security and confirm that *System Assigned Managed Identity* is enabled.  If it is not then enable it.
 
 ![SQLMI_SAMI](./images/SQLMI_SAMI.png)
@@ -197,7 +199,7 @@ Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go 
 ![Storage1](./images/Storage_1.png)
 ![Storage3](./images/Storage_3.png)
 
-<b>3b.</b> Once the storage account is created, you will need to grant to your current Azure user the permission to manage Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
+<b>3b.</b> Once the storage account is created, you will need to allow yourself the permission to manage Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
 
 ![Storage5](./images/Storage_5.png)
 ![Storage6](./images/Storage_6.png)
@@ -215,11 +217,15 @@ Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go 
 
 #### 4. Database Migration Service (DMS)
 
-<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS) `caldova-lab05-sqlmig-@lab.LabInstance.Id`. Change the Target server type to Azure SQL Managed Instance.
+<b>In the same region where Azure SQL MI</b> is deployed in the lab subscription, deploy Azure Database Migration Services (DMS) `caldova-lab05-sqlmig-@lab.LabInstance.Id`. 
+
+Search for **"dms" in "Azure Services only".** 
 
 ![DMS1_1](./images/DMS_1_1.png)
 
 ![DMS1](./images/DMS_1.png)
+
+***Make sure to choose the migration scenario as from SQL server to Azure SQL Managed Instance.*** 
 
 ![DMS1_2](./images/DMS_1_2.png)
 
@@ -234,7 +240,7 @@ Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go 
 - DMS is deployed in the same region as SQL MI.
 
 
-## Challenge 4 — Online Migration to SQL Managed Instance
+## Challenge 4 — Online Migration from on-premises SQL Server to SQL Managed Instance
 
 In this challenge you will perform database backups to the Azure Storage account provisioned earlier.  You will then use DMS to perform an *Online* migration. To perform and online migration, DMS restores the full and any differntial backups before restoring and playing transaction logs to complete the migration. 
 
@@ -328,10 +334,10 @@ Choose <b>Blob</b> as backup location and <b>online</b> as backup mode.
 
 <b>2f.</b> The migration is not complete yet.  
 
-Since this is an online migration with minimal outage, we need to apply any incremental data that was added since the migration started. This means backup of transaction logs need to be restored. 
+Since this is an online migration with minimal outage, the migration will move any incremental data that was added since the migration started. In this lab, you will add some data to source and use backup of transaction logs to move that new data across. 
 
 
-In this lab, we will add some data to simulate that.
+First, you will add some data on the source SQL server
 
 <b>2g.</b> Go to the source database and add a new row to a table. Use SSMS 22 to launch a query window and run the command. 
 
@@ -364,7 +370,7 @@ VALUES
 
 <b>2j.</b> Wait until all transaction logs have all been restored and no files are left ( as seen in azure storage ) to restore.
 
-Perform the cutover. Wait for it to complete.
+***Perform the cutover. Wait for it to complete.***
 
 ![DMS_122](./images/DMS_12.png)
 

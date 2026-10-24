@@ -162,8 +162,10 @@ To make sure the setup was completed correctly, ask Copilot Chat to build and la
 
 In Copilot Chat, which you opened and signed in to in the Setup section, submit this prompt:
 
-```plaintext
-This is a .NET Framework 4.8 ASP.NET MVC app using packages.config. Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express. Tell me the URL when it is running.
+```text
+This is a .NET Framework 4.8 ASP.NET MVC app using packages.config.
+Restore its packages with nuget.exe, build the solution with MSBuild, and launch it locally with IIS Express.
+Tell me the URL when it is running.
 ```
 
 Watch Copilot Chat while it works. VS Code may ask you to approve a tool call before Copilot can run a command. Approve any tool calls, like downloading NuGet packages (libraries the app depends on) needed to build and run the solution.
@@ -288,11 +290,17 @@ The rest of this module is the upgrade itself, in five steps.
    > 1. **You get an error instead of the pop-up, or you don't see this step or anything about the dotnet-version-upgrade scenario.** The skill may be temporarily unable to bind. Select **Stop**, then send `Try again`.
    > 2. **It is still stuck.** Point it at the scenario files. They live in the extension's folder, and the version number in the folder name can differ, so ask it to find the folder:
    >
-   >    ```plaintext
-   >    Look in C:\Users\Admin\.vscode\extensions for the folder that starts with ms-dotnettools.upgrade-agent. Under it, find the dotnet-version-upgrade scenario in upgrade\dotnet\skills\scenarios and use it.
+   >    ```text
+   >    Look in C:\Users\Admin\.vscode\extensions for the folder that starts with ms-dotnettools.upgrade-agent.
+   >    Under it, find the dotnet-version-upgrade scenario in upgrade\dotnet\skills\scenarios and use it.
    >    ```
    >
    > 3. **The error mentions Microsoft.WebApplication.targets.** The .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
+   > 4. **If none of this is working,** GitHub Copilot can still do the upgrade by hand. In the agent picker, switch from the **Upgrade** agent to **Agent** mode, then prompt it in the chat:
+   >
+   >    ```plaintext
+   >    Upgrade this app to .NET 10.
+   >    ```
 
    Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
 
@@ -459,16 +467,16 @@ What should hold steady is the **shape**: establish prerequisites, convert the p
 
 Once you approve the plan, the agent begins upgrading the application.
 
-> ⏱️ **WORKSHOP NOTE: AGENTIC PACING**
+> ‼️ ⏱️ **IMPORTANT: WORKSHOP NOTE ON PACING. YOU DON'T NEED TO WAIT FOR THE UPGRADE TO FINISH**
 >
 > An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, you will watch the agent work through its first task and then move on to a pre-upgraded repository.
 >
-> **When can you move on?** You don't need to wait for the upgrade to finish. You can stop and go to Step 5️⃣ once both of these are true:
+> **You can stop and go to Step 5️⃣ once both of these are true:**
 >
 > 1. **The first task has finished.** It is checked off in the **dashboard** or **tasks.md** (in the same folder as **plan.md**, if the agent created one), or the chat says so. Usually the agent posts that the task is done and committed, because you chose to commit after each task.
 > 2. **You've tried the features below:** the dashboard, the Activity tab, and a steering message.
 >
-> If no task has finished after about 10 minutes, that's okay. Stop anyway and move on.
+> **If no task has finished after about 10 minutes, that's okay.** Stop anyway and move on.
 >
 > While you wait, **read through this section and try things out.**
 
@@ -520,7 +528,7 @@ Check the **Activity** tab of the dashboard. It records the timeline, log, and c
 The agent decides each next step based on what it just observed, so it does not always move in a straight line. It can occasionally stall, drift, or pause on errors. You stay in control the whole time:
 
 - **It seems slow or stalled.** If nothing new appears in the chat for 3–5 minutes, select **Stop** to stop the run, then send `continue`.
-- **It says "1 confirmation pending" but no confirmation pop-up appears.** This is a tool problem, not something you did. Select **Stop**, then send `continue` to get it unstuck.
+- **It says "1 confirmation pending" but shows nothing to approve or deny.** This is a tool problem, not something you did. Ask it to `continue`. If it stays stuck, select **Stop**, then send `continue`.
 
   ![The chat shows 1 confirmation pending](./images/confirmation-pending.png)
 
