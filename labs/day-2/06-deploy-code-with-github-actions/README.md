@@ -301,7 +301,7 @@ Check the result against the contract before you build it:
 > changes only the image. If Copilot bakes configuration into the image or
 > rewrites environment variables during release, that is the failure to catch.
 
-Build the application before building its image:
+<!-- Build the application before building its image:
 
 > 💻 **Run this in the terminal.**
 
@@ -313,9 +313,9 @@ dotnet restore .\eShopLiteFx.sln
 dotnet build .\eShopLiteFx.sln `
   --configuration Release `
   --no-restore
-```
+``` -->
 
-Then build and test the container locally:
+<!-- Then build and test the container locally:
 
 > 💻 **Run this in the terminal.**
 
@@ -346,13 +346,13 @@ docker run --detach --rm `
 
 ```powershell
 Invoke-WebRequest http://localhost:8080/health
-```
+``` -->
 
 <!-- ```powershell
 docker stop caldova-retail-lab06
 ``` -->
 
-The dummy connection string permits startup but is never used by the health endpoint. It is only for a local container smoke test.
+<!-- The dummy connection string permits startup but is never used by the health endpoint. It is only for a local container smoke test. -->
 
 ## Challenge 2: Design the Workflow
 
@@ -523,6 +523,9 @@ Push a branch and open a pull request. From the repository root:
 
 ```powershell
 git config --global user.email "your.email@example.com"
+```
+
+```powershell
 git config --global user.name "Your Name"
 ```
 
