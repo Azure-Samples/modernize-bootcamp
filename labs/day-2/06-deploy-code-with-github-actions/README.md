@@ -451,7 +451,7 @@ This job must **not** include Azure login. Forked pull requests must be able to 
 
 Confirm that, for pushes to main, a job uses the lab06 GitHub environment and only these job permissions:
 
-```yaml
+```yaml-nocode
 permissions:
   contents: read
   id-token: write
@@ -528,14 +528,6 @@ git config --global user.email "your.email@example.com"
 ```powershell
 git config --global user.name "Your Name"
 ```
-
-<!-- ```powershell
-git switch -c lab06-cicd
-git add .\.github\workflows\lab06-retail-cicd.yml
-git commit -m "Add Lab 06 retail CI/CD workflow"
-git push -u origin lab06-cicd
-gh pr create --fill
-``` -->
 
 ```powershell
 git switch -c lab06-cicd
