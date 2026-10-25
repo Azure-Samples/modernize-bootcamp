@@ -346,13 +346,13 @@ docker run --detach --rm `
 
 ```powershell
 Invoke-WebRequest http://localhost:8080/health
-``` -->
+``` 
 
-<!-- ```powershell
+ ```powershell
 docker stop caldova-retail-lab06
-``` -->
+``` 
 
-<!-- The dummy connection string permits startup but is never used by the health endpoint. It is only for a local container smoke test. -->
+The dummy connection string permits startup but is never used by the health endpoint. It is only for a local container smoke test. -->
 
 ## Challenge 2: Design the Workflow
 
@@ -459,14 +459,14 @@ permissions:
 
 Confirm this job authenticates with azure/login, then signs in and pushes with:
 
-```bash
+```PowerShell-nocode
 az acr login --name "$ACR_NAME"
 docker push "$IMAGE_REFERENCE"
 ```
 
 Confirm the tag is:
 
-```text
+```PowerShell-nocode
 sha-${GITHUB_SHA}
 ```
 
