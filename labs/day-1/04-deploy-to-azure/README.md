@@ -1,6 +1,6 @@
 # ☁️ Lab 04: Design the Azure Foundation with GitHub Copilot
 
-In Module 3, you set up the app's code to use Azure services, such as reading its database password from Key Vault. Those services do not exist yet. In this module, you use GitHub Copilot to write the infrastructure as code (Bicep files) for them, and to build the secure cloud foundation the app will be deployed into.
+In Module 3, you set up the app's code to use Azure services, such as reading its secrets from Key Vault. Those services do not exist yet. In this module, you use GitHub Copilot to write the infrastructure as code (Bicep files) for them, and to build the secure cloud foundation the app will be deployed into.
 
 > 🎯 **This module: build the cloud foundation the app will run on.** Module 3 changed the **app's code**. This module designs the **Azure resources** around it: the networks, databases, Key Vault, and container hosting the app needs. You will work with GitHub Copilot in agent mode to write them as Bicep files.
 
@@ -14,7 +14,8 @@ If you have not designed Azure infrastructure before, here is the whole process 
 
 - **Infrastructure as code (IaC)** means describing Azure resources (networks, databases, Key Vaults, container hosting) in files instead of clicking through the Azure portal. The files can be reviewed, versioned, and redeployed the same way every time.
 - **Bicep** is Azure's IaC language. Each `.bicep` file declares the resources to create and how they connect.
-- **The app tells you what to build.** In Module 3, Copilot wired the app to use Azure services through configuration, for example reading its database password from **Key Vault**. Each of those settings needs a real Azure resource behind it. If the app expects a Key Vault, the foundation must include one. If the app stores shopping carts in **Redis** so they survive across multiple app instances, the foundation must include a Redis cache.
+- **The app tells you what to build.** In Module 3, Copilot wired the app to read whichever Azure services the assessment found it needed, through configuration instead of hardcoding them. Each setting the app actually reads needs a real Azure resource behind it: if it expects a **Key Vault** for secrets, the foundation must include one; if it stores shopping carts in **Redis** so they survive across multiple app instances, the foundation must include a Redis cache.
+- **The database is the one exception, and that's deliberate.** Module 3 left the app's database connection string untouched on purpose. This module's job is to design the real target it will eventually point to: an Azure SQL MI Database with Entra-only authentication, reachable only over a private endpoint. Swapping the connection string over happens later, in Module 6 — and it needs no app code changes, because the driver the app already uses reads the authentication mode straight from the connection string.
 - **The requirements tell you how to build it.** The required architecture and non-negotiable rules below cover security, networking, and resilience: private networking, no public IPs on VMs, no stored passwords, and at least two app replicas.
 
 You will work through four steps with GitHub Copilot, and you approve each one before moving on:
