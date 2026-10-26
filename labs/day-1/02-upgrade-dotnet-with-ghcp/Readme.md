@@ -289,7 +289,7 @@ The rest of this module is the upgrade itself, in five steps.
    >
    > 1. **You get an error instead of the pop-up, or you don't see this step or anything about the dotnet-version-upgrade scenario.** The skill may be temporarily unable to bind. Select **Stop**, then send `Try again`.
    > 2. **Update the extension.** Open the **Extensions** tab, find **GitHub Copilot upgrade**, and select **Update** if the button is shown. **Update VS Code.** If the top banner shows an update, select it. Then, regardless if the Update option was available, close every VS Code window, reopen VS Code and select this folder, go back to the chat session, and send `Try again`.
-   > 4. **Last resort: do the upgrade without the Upgrade agent.** GitHub Copilot can still do the upgrade by hand, but you won't get the official upgrade tooling. In the agent picker, switch from the **Upgrade** agent to **Agent** mode, then prompt it in the chat:
+   > 3. **Last resort: do the upgrade without the Upgrade agent.** GitHub Copilot can still do the upgrade by hand, but you won't get the official upgrade tooling. In the agent picker, switch from the **Upgrade** agent to **Agent** mode, then prompt it in the chat:
    >
    >    ```plaintext
    >    Upgrade this app to .NET 10.
