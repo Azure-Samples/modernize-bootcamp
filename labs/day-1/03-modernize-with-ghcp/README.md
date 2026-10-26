@@ -286,23 +286,23 @@ You'll do this directly in Copilot Chat by switching modes, the same way you did
 
    - **The switch:** the **if (redisEnabled)** check means the Redis code only runs when a Redis setting is filled in. This shows the switch constraint we put in the plan was upheld.
 
-7. **Add the database password back, if needed.** Open **src\eShopLite.StoreFx\appsettings.json** and check the **StoreDbContext** connection string. If the plan's pass over **appsettings.json** reset it to **REPLACE_ME**, paste the **W11-Workstation** password from the **Resources** tab (+++Pa$$w0rd+++) of your lab instructions back in, the same way you did during setup.
+**7. Add the database password back, if needed.** Open **src\eShopLite.StoreFx\appsettings.json** and check the **StoreDbContext** connection string. If the plan's pass over **appsettings.json** reset it to **REPLACE_ME**, paste the **W11-Workstation** password from the **Resources** tab (+++Pa$$w0rd+++) of your lab instructions back in, the same way you did during setup.
 
-8. **Check it still runs.** Ask Copilot:
+**8. Check it still runs.** Ask Copilot:
 
-   ```text
-   Build and run the app, then give me the local URL so I can open it in a browser.
-   ```
+```text
+Build and run the app, then give me the local URL so I can open it in a browser.
+```
 
-   With the Azure settings empty, the app should still load, including the pages that use the database — its connection string hasn't moved. If Copilot doesn't show the link, ask it again: **What's the local URL I should open in a browser?**
+With the Azure settings empty, the app should still load, including the pages that use the database — its connection string hasn't moved. If Copilot doesn't show the link, ask it again: **What's the local URL I should open in a browser?**
 
-   Once it's open, check that sign-in still works and the cart still holds its contents, the same way you did for the Blazor conversion: sign in as `alice` or `bob` (password `Password1!`) and add something to the cart. If anything looks off, ask Copilot to fix it.
+Once it's open, check that sign-in still works and the cart still holds its contents, the same way you did for the Blazor conversion: sign in as `alice` or `bob` (password `Password1!`) and add something to the cart. If anything looks off, ask Copilot to fix it.
 
-9. **Commit any outstanding changes.** The agent should have committed as it went, but in case it did not, ask Copilot Chat:
+**9. Commit any outstanding changes.** The agent should have committed as it went, but in case it did not, ask Copilot Chat:
 
-   ```plaintext
-   Check for any uncommitted changes on the azure-code-prep branch, and commit them with a clear message if there are any. Exclude the database password.
-   ```
+```plaintext
+Check for any uncommitted changes on the azure-code-prep branch, and commit them with a clear message if there are any. Exclude the database password.
+```
 
 > 🎉 **That's it — the app's code now supports the Azure services Copilot recommended.**
 >
