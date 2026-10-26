@@ -172,11 +172,11 @@ If you don't see the banner, choose the **blazor-ui-refresh** branch from the br
 
 ## 2️⃣ Prepare the app code for Azure
 
-> 🎯 **Goal: stop the app from doing everything itself, and let Azure's managed services handle the parts it's better at** — things like secrets management, distributed caching, and observability — instead of the app quietly reinventing them on its own. This is the modernization step: not just moving the app to the cloud unchanged, but changing how it behaves to take advantage of being there. None of those Azure services exist yet, so nothing here depends on them; the code just needs to be ready to use them the moment they do.
+> 🎯 **Goal: let Azure's managed services handle the parts the app currently has to handle itself** — things like secrets management, distributed caching, and observability. This is the modernization step: not just moving the app to the cloud unchanged, but changing how it behaves to take advantage of being there. None of those Azure services exist yet, so nothing here depends on them; the code just needs to be ready to use them the moment they do.
 
 Creating an Azure service doesn't make your app use it automatically — the two are separate. The app can't read secrets from Key Vault just because a Key Vault exists somewhere in Azure; it needs code that calls Key Vault to fetch them. In this step, you add that calling code. This is **code changes only**: nothing is created or deployed in Azure, and the database is deliberately left untouched (more on why in the prompt below).
 
-Think of each Azure service as a switch, and the switch is just a setting in `appsettings.json`. Every switch starts out missing or empty, so the app runs the way it always has. You're adding the wiring and leaving the switches off: the code to call each new service will exist, but it never runs until a real setting value shows up. When the app is deployed to Azure in Module 6, those settings get filled in and the switches turn on — without touching the app's code again.
+Think of each Azure service as a switch, and the switch is just a setting in a config file like **appsettings.json**. Every switch starts out missing or empty, so the app runs the way it always has. You're adding the wiring and leaving the switches off: the code to call each new service will exist, but it never runs until a real setting value shows up. When the app is deployed to Azure in Module 6, those settings get filled in and the switches turn on — without touching the app's code again.
 
 You'll do this directly in Copilot Chat by switching modes, the same way you did for the Blazor conversion: **Plan** mode to analyze the app and propose the changes, then **Agent** mode to build them. Expect about 20-30 minutes.
 
