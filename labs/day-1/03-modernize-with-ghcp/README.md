@@ -266,6 +266,14 @@ You'll do this directly in Copilot Chat by switching modes, the same way you did
 
    Also look for any outstanding issues the summary notes. In a real engagement, you would work through these with the agent until the app reaches a satisfactory state. We're showing you that this can happen, but we'll move on. It won't block the rest of the labs.
 
+   > 💡 **NOTE**
+   >
+   > If the summary doesn't show up in the chat, send this message:
+   >
+   > ```text
+   > Summarize changes
+   > ```
+
 6. **Peek at the code.** Check where the Azure setup lives — for example **Program.cs**, or a new file like **AzureSetup.cs**. If you aren't sure, ask Copilot:
 
    ```text

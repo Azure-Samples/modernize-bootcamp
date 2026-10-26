@@ -288,19 +288,14 @@ The rest of this module is the upgrade itself, in five steps.
    > ![The DotnetVersionScenarioInitializer step in the chat](./images/scenario-initializer.png)
    >
    > 1. **You get an error instead of the pop-up, or you don't see this step or anything about the dotnet-version-upgrade scenario.** The skill may be temporarily unable to bind. Select **Stop**, then send `Try again`.
-   > 2. **It is still stuck.** Point it at the scenario files. They live in the extension's folder, and the version number in the folder name can differ, so ask it to find the folder:
-   >
-   >    ```text
-   >    Look in C:\Users\Admin\.vscode\extensions for the folder that starts with ms-dotnettools.upgrade-agent.
-   >    Under it, find the dotnet-version-upgrade scenario in upgrade\dotnet\skills\scenarios and use it.
-   >    ```
-   >
-   > 3. **The error mentions Microsoft.WebApplication.targets.** The .NET SDK couldn't find the web build targets. Go back to Setup step **3. Set the build tools path (one time)** and run it. Then close every VS Code window, reopen the folder (run **code .** from the **caldova-retail** folder in PowerShell), and start the upgrade again.
-   > 4. **If none of this is working,** GitHub Copilot can still do the upgrade by hand. In the agent picker, switch from the **Upgrade** agent to **Agent** mode, then prompt it in the chat:
+   > 2. **Update the extension.** Open the **Extensions** tab, find **GitHub Copilot upgrade**, and select **Update** if the button is shown. **Update VS Code.** If the top banner shows an update, select it. Then, regardless if the Update option was available, close every VS Code window, reopen VS Code and select this folder, go back to the chat session, and send `Try again`.
+   > 3. **Last resort: do the upgrade without the Upgrade agent.** GitHub Copilot can still do the upgrade by hand, but you won't get the official upgrade tooling. In the agent picker, switch from the **Upgrade** agent to **Agent** mode, then prompt it in the chat:
    >
    >    ```plaintext
    >    Upgrade this app to .NET 10.
    >    ```
+   >
+   >    The agent should still assess, plan, and execute the upgrade, but its planning and assessment steps will look different. It won't create the dashboard or the files in the **.github\upgrades\scenarios\dotnet-version-upgrade** folder in the format the following steps expect, so use what it shows in the chat instead.
 
    Select the following options. This is an agentic flow, so variation is normal; **if any options are missing, extra, or appear different, keep the defaults:**
 
@@ -350,6 +345,8 @@ You can see the dashboard is on the "Assess" phase. Observe the other aspects of
 
 ### What the agent examines
 
+In Copilot Chat, you can click into a larger task, such as **Assessor · Assess solution for .NET 10**, to see its smaller tasks and individual tool calls. Expand these entries to read through the agent's detailed process, including which files it reads and which actions it takes during the assessment.
+
 - **Project structure** — How the code is organized, which project file format it uses, and which .NET version it targets
 - **NuGet packages** — The third-party code libraries the app uses, and whether each one has a version that works on .NET 10
 - **API usage patterns** — Deprecated .NET Framework APIs, categorized as binary incompatible, source incompatible, or behavioral change
@@ -369,11 +366,15 @@ You may also see an "Assessment complete" pop-up with a link to it:
 
 ![Assessment complete modal](./images/assessment-complete-modal.png)
 
-You can also find the files yourself in the **Explorer** view. Expand **.github** → **upgrades\scenarios\dotnet-version-upgrade** to see **assessment.md** alongside the other files the agent created for this upgrade, such as **scenario-instructions.md** (the preferences you just select like target framework, flow mode, etc.). You can open any of these files at any point to see what the agent is working from.
+You can also find the files yourself in the **Explorer** view. Expand **.github** → **upgrades\scenarios\dotnet-version-upgrade** to see **assessment.md** alongside the other files the agent created for this upgrade, such as **scenario-instructions.md** (the preferences you just selected, like target framework, flow mode, etc.). You can open any of these files at any point to see what the agent is working from.
 
 ![Upgrade scenario files in the VS Code Explorer](./images/assessment-files-explorer.png)
 
-Open **assessment.md** and read it. The report is long, so focus on these four sections. They are the most important ones to look at.
+> 💡 **NOTE**
+>
+> If Copilot Chat mentions planning or appears to have moved on to creating a plan, the agent may have advanced to the planning stage without pausing for your review. Check **.github** → **upgrades\scenarios\dotnet-version-upgrade** in the **Explorer** view and open **assessment.md** first. Read the assessment before reviewing the plan or approving any code changes, even if the chat has already moved ahead.
+
+Open **assessment.md** and read it. The report can be long, so start with the common sections below. Your report's sections may differ.
 
 | Section | What to look for | Why it matters |
 |---|---|---|
@@ -386,7 +387,7 @@ Open **assessment.md** and read it. The report is long, so focus on these four s
 >
 > The figures quoted here and below — issue counts, percentages, estimated lines of code — are examples from one run against this storefront. **Your numbers could differ.** The assessment is produced by an agent analyzing your workspace at that moment, so counts can shift with package versions, SDK versions, and the tool's own updates. Read them as an indication of shape and scale, not as values to match.
 
-The layout is the same for every .NET upgrade assessment, but sections only appear when there is something to report. In your own projects, a missing section means nothing was found — not that something went wrong.
+The layout and section names can vary between .NET upgrade assessments, and some sections only appear when there is something to report. If your report looks different, look for equivalent findings rather than expecting these exact headings.
 
 ## 3️⃣ Review and Shape the Plan
 
@@ -421,12 +422,12 @@ Once you confirm, the agent writes the plan.
 > 💡 **NOTE**
 >
 > While the agent prepares the plan, VS Code may ask to **Allow reading external files?** The request may name a **SKILL.md** file in the installed **.NET Upgrade Agent** extension. These skill files contain instructions that tell the agent how to carry out the upgrade; they are not files from your app. If the prompt identifies the Upgrade Agent extension and a skill file, select **Allow Once** so the agent can read that guidance. Review the file path in the prompt; if it is from an unexpected location, select **Skip** and ask your instructor.
-
-![Allow reading the Upgrade Agent's SKILL.md file](./images/approve-upgrade-skill-file.png)
-
-These instruction files live inside the extension itself, in the **.vscode\extensions** folder in your user profile on the VM. There is a file for each stage of the workflow: **assessment.md**, **planning.md**, and **execution.md**. The folder name includes the extension's version number, so yours may differ.
-
-![The Upgrade Agent extension's skill files, including assessment.md, planning.md, and execution.md](./images/upgrade-agent-skill-files.png)
+>
+> ![Allow reading the Upgrade Agent's SKILL.md file](./images/approve-upgrade-skill-file.png)
+>
+> These instruction files live inside the extension itself, in the **.vscode\extensions** folder in your user profile on the VM. There is a file for each stage of the workflow: **assessment.md**, **planning.md**, and **execution.md**. The folder name includes the extension's version number, so yours may differ.
+>
+> ![The Upgrade Agent extension's skill files, including assessment.md, planning.md, and execution.md](./images/upgrade-agent-skill-files.png)
 
 ### Review the Generated Plan
 
@@ -479,6 +480,25 @@ Once you approve the plan, the agent begins upgrading the application.
 > **If no task has finished after about 10 minutes, that's okay.** Stop anyway and move on.
 >
 > While you wait, **read through this section and try things out.**
+
+> ⚠️ **TROUBLESHOOTING: "The required SDK-style conversion tool isn't available in this environment"**
+>
+> When the first task starts, the agent may ask a question like the one below. This means it is having trouble connecting to the Upgrade MCP server, so it cannot find the official upgrade tools.
+>
+> ![The agent reports that the required SDK-style conversion tool isn't available](./images/upgrade-tool-unavailable.png)
+>
+> Try these steps, in order, to fix the connection:
+>
+> 1. **Update the extension.** Open the **Extensions** tab, search for **GitHub Copilot upgrade**, and select **Update** if the button is shown.
+> 2. **Update VS Code.** Check the top bar for an **Update** button. If you see one, select it.
+> 3. **Restart VS Code.** Close VS Code completely and reopen it.
+> 4. **Return to the session.** Go back into the same Copilot Chat session (even if it looks stopped) and send:
+>
+>    ```plaintext
+>    Try to find the upgrade tool again.
+>    ```
+>
+> The agent can also continue by hand-writing the project file, but we prefer the official tooling, so only choose that if the steps above don't work.
 
 During this phase:
 
