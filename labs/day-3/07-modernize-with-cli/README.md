@@ -47,11 +47,11 @@ The hub repository is [Skillable-Events/modernize_sample_demo](https://github.co
 
 | Repository | Legacy technology | Responsibility | Example modernization direction |
 | --- | --- | --- | --- |
-| `contoso-legacy-bank-portal` | .NET Framework 4.8, WinForms, WCF client | Customer search, account views, transactions, and statement requests | Blazor and asynchronous service clients |
-| `contoso-legacy-bank-accounts` | .NET Framework 4.8, WCF, EF6, SQL LocalDB | Customers, accounts, balances, and transactions | ASP.NET Core API, EF Core, and Azure SQL |
-| `contoso-legacy-bank-statements` | ASP.NET Web API 2 | Statement orchestration and status | ASP.NET Core API with resilient clients |
-| `contoso-legacy-bank-documents` | Console/Windows Service worker, file queue, PDFsharp | PDF statement generation | Modern .NET worker, managed messaging, and Blob Storage |
-| `contoso-legacy-bank-batch` | Scheduled console app and CSV files | Nightly transaction import and reconciliation | Azure Functions or Azure Container Apps Jobs |
+| contoso-legacy-bank-portal | .NET Framework 4.8, WinForms, WCF client | Customer search, account views, transactions, and statement requests | Blazor and asynchronous service clients |
+| contoso-legacy-bank-accounts | .NET Framework 4.8, WCF, EF6, SQL LocalDB | Customers, accounts, balances, and transactions | ASP.NET Core API, EF Core, and Azure SQL |
+| contoso-legacy-bank-statements | ASP.NET Web API 2 | Statement orchestration and status | ASP.NET Core API with resilient clients |
+| contoso-legacy-bank-documents | Console/Windows Service worker, file queue, PDFsharp | PDF statement generation | Modern .NET worker, managed messaging, and Blob Storage |
+| contoso-legacy-bank-batch | Scheduled console app and CSV files | Nightly transaction import and reconciliation | Azure Functions or Azure Container Apps Jobs |
 
 The hub is the system of record for application-wide architecture and sequencing. Each component repository remains the owner of its code and any future implementation work.
 
@@ -73,7 +73,7 @@ Neither output is automatically authoritative. Repository code, build results, t
 
 This lab assumes a Skillable Windows workstation. Git, GitHub CLI, VS Code, GitHub Copilot, Visual Studio build tools, and the modernization tools should already be installed.
 
-> 📂 **Where to run commands:** This lab mixes two kinds of code blocks. Blocks marked **💻 Run this in the terminal** are commands you run yourself in a PowerShell terminal — after you clone the hub in step 2️⃣, run them from the hub root (`modernize_sample_demo`) unless a step says otherwise. Blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to GitHub Copilot in VS Code, not terminal commands.
+> 📂 **Where to run commands:** This lab mixes two kinds of code blocks. Blocks marked **💻 Run this in the terminal** are commands you run yourself in a PowerShell terminal — after you clone the hub in step 2️⃣, run them from the hub root (modernize_sample_demo) unless a step says otherwise. Blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to GitHub Copilot in VS Code, not terminal commands.
 
 ### 1. Open PowerShell
 
@@ -90,36 +90,80 @@ code --version
 modernize --help
 ```
 
-Each command should print version or help information.
+## 🛠️ Setup
 
-If `modernize` is not recognized, install the current Windows package:
+> Run this module against **your own fork** rather than the workshop repository.
 
-> 💻 **Run this in the terminal.**
+**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser `https://github.com/Skillable-Events/modernize_sample_demo`
 
-```powershell
-winget install GitHub.Copilot.modernization.agent
+1. On the Skillable Events single sign-on page, select **Continue**.
+
+   ![Skillable Events single sign-on](./images/sso-skillable.png)
+
+   > 💡 If the sign-in keeps returning to the same page or shows an error, wait a few minutes and try again; this is a transient error. If it takes you to the Skillable GH Enterprise main page [Skillable-Events GH](https://github.com/enterprises/Skillable-Events) search for "modernize_sample_demo" in the search bar and access the repository that way.
+
+2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
+3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead. If it prompts you to stay signed in, hit **Yes**.
+
+**2. Fork and clone the repository.**
+
+1. On the repository page, select **Fork**, then **Create fork** with the defaults left alone.
+
+   ![Fork button](./images/fork-button.png)
+
+   ![Create fork](./images/fork-creation.png)
+
+2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/modernize_sample_demo.git`.
+
+   ![Code button](./images/code-button.png)
+
+   ![Copy HTTPS URL](./images/copy-https.png)
+
+
+
+4. Open PowerShell from your applications and clone your fork, pasting the URL you copied into it (run this from the default location -- C:\Users\Admin):
+
+  ```powershell
+git clone --recurse-submodules <your-fork-url>
+Set-Location .\modernize_sample_demo
 ```
 
-After installation, close PowerShell, open a new PowerShell terminal, and run:
+   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in.
+   > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, `https://github.com/Skillable-Events/modernize_sample_demo`, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
-> 💻 **Run this in the terminal.**
-
-```powershell
-modernize --help
-```
-
-> [!NOTE]
-> The installer adds `modernize` to your user `PATH`. An already-open terminal does not see that change.
-
-### 3. Authenticate to GitHub
-
-Check whether GitHub CLI is already authenticated:
-
-> 💻 **Run this in the terminal.**
+**3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
 
 ```powershell
-gh auth status
+cd modernize_sample_demo
+code .
 ```
+
+If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the **modernize_sample_demo**. If VSCode asks you to sign into GitHub again, authorize access there as well.
+
+If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
+
+![Restricted Mode banner](./images/restricted-mode-banner.png)
+
+![VS Code showing the folder is trusted](./images/trusted-folder.png)
+
+You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
+
+> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **modernize_sample_demo** folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd modernize_sample_demo` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
+
+## 🔑 Authorize VS CODE
+
+In VSCODE select the agent in the bottom right, and click the "Use AI Features" button.
+![Select Agent Icon](./images/vscode_auth.1.png)
+
+The **Sign in to use GitHub Copilot** prompt opens and select Continue with GitHub
+
+![Select Agent Icon](./images/vscode_auth.2.png)
+
+The browser opens displaying an "Authorize with Visual Stusio Code" prompt. Select Continue
+![Select Agent Icon](./images/vscode_auth.3.png)
+
+Finally select **Authorize Visual Stusio Code** on the next prompt.
+![Select Agent Icon](./images/vscode_auth.4.png)
 
 If it is not authenticated, run:
 
@@ -145,38 +189,8 @@ gh auth status
 
 The signed-in account must have GitHub Copilot access and read access to the hub and all five component repositories.
 
-### 4. Verify VS Code extensions
 
-Open VS Code, select **Extensions** in the Activity Bar, and confirm these extensions are installed and enabled:
-
-- **GitHub Copilot**
-- **GitHub Copilot Chat**
-- **GitHub Copilot modernization**
-
-If an extension is missing, search for its exact name and install the verified publisher's extension. Reload VS Code if prompted, then sign in to GitHub when requested.
-
----
-
-## 2️⃣ Clone and initialize the application estate
-
-### 1. Clone the hub and all submodules
-
-In PowerShell, choose a working folder and run:
-
-> 💻 **Run this in the terminal.**
-
-```powershell
-git clone --recurse-submodules https://github.com/Skillable-Events/modernize_sample_demo.git
-Set-Location .\modernize_sample_demo
-```
-
-If you already cloned the hub without its submodules, run this instead from the hub root:
-
-> 💻 **Run this in the terminal.**
-
-```powershell
-git submodule update --init --recursive
-```
+## 2️⃣ initialize the application estate
 
 ### 2. Initialize the demo
 
@@ -190,54 +204,7 @@ The script prepares the local integration folders and data used by the applicati
 
 ### 3. Check prerequisites
 
-> 💻 **Run this in the terminal.**
-
-```powershell
-.\scripts\Test-Prerequisites.ps1
-```
-
-The check covers:
-
-- Visual Studio MSBuild
-- .NET Framework 4.8 targeting pack
-- IIS Express
-- SQL Server Express LocalDB
-- Git
-- initialized submodules
-
-Do not treat missing build prerequisites as modernization findings. Fix the workstation or record the lab limitation before assessing the code.
-
-### 4. Establish a build baseline
-
-> 💻 **Run this in the terminal.**
-
-```powershell
-.\scripts\Build-All.ps1
-```
-
-An assessment from a broken or incomplete baseline can confuse environmental failures with application modernization work. Record the build result, including any known pre-existing failure.
-
-Running the complete application is not required for this assessment lab. If your instructor asks you to demonstrate it, use the hub scripts:
-
-> 💻 **Run this in the terminal.**
-
-```powershell
-.\scripts\Start-Demo.ps1
-.\scripts\Invoke-BatchSample.ps1
-.\scripts\Stop-Demo.ps1
-```
-
-### 5. Record the assessed revisions
-
-Record the hub SHA:
-
-> 💻 **Run this in the terminal.**
-
-```powershell
-git rev-parse HEAD
-```
-
-Record each pinned component SHA:
+Running the complete application is not required for this assessment lab. 
 
 > 💻 **Run this in the terminal.**
 
@@ -245,7 +212,7 @@ Record each pinned component SHA:
 git submodule status
 ```
 
-Keep this output with your final handoff. A branch name such as `main` can move; a commit SHA identifies the code that produced the assessment.
+Keep this output with your final handoff. A branch name such as `main`
 
 ---
 
