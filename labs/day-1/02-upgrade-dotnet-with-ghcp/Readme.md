@@ -391,7 +391,9 @@ Open **assessment.md** and read it. The report can be long, so start with the co
 >
 > The figures quoted here and below — issue counts, percentages, estimated lines of code — are examples from one run against this storefront. **Your numbers could differ.** The assessment is produced by an agent analyzing your workspace at that moment, so counts can shift with package versions, SDK versions, and the tool's own updates. Read them as an indication of shape and scale, not as values to match.
 
-The layout and section names can vary between .NET upgrade assessments, and some sections only appear when there is something to report. If your report looks different, look for equivalent findings rather than expecting these exact headings.## 3️⃣ Review and Shape the Plan
+The layout and section names can vary between .NET upgrade assessments, and some sections only appear when there is something to report. If your report looks different, look for equivalent findings rather than expecting these exact headings.
+
+## 3️⃣ Review and Shape the Plan
 
 ### Confirm Upgrade Options
 
