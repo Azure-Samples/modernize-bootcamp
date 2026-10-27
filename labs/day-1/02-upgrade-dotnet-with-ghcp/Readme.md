@@ -239,6 +239,10 @@ You'll also see a **Security** option, which identifies security issues using IS
 
 ![Assessment](./images/full-assessment.png)
 
+> ⚠️ **TROUBLESHOOTING: Assessment appearing blank?**
+>
+> Reinstall the **GitHub Copilot modernization** extension, then close and reopen VS Code. Re-run the assessment if it is still not appearing.
+
 Expand any issue to see what the extension found and the guidance it recommends — the affected code, why it matters for the target service, and what a fix would involve. This is the most useful part of the assessment: the number of **Mandatory**, **Potential**, and **Optional** issues and the effort size show how big the job is, and the details are what you would walk a customer through.
 
 ![Expanded Issue](./images/expanded-issue.png)
