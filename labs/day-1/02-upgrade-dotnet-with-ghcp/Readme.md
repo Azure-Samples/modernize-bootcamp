@@ -239,6 +239,10 @@ You'll also see a **Security** option, which identifies security issues using IS
 
 ![Assessment](./images/full-assessment.png)
 
+> ⚠️ **TROUBLESHOOTING: Assessment appearing blank?**
+>
+> Reinstall the **GitHub Copilot modernization** extension, then close and reopen VS Code. Re-run the assessment if it is still not appearing.
+
 Expand any issue to see what the extension found and the guidance it recommends — the affected code, why it matters for the target service, and what a fix would involve. This is the most useful part of the assessment: the number of **Mandatory**, **Potential**, and **Optional** issues and the effort size show how big the job is, and the details are what you would walk a customer through.
 
 ![Expanded Issue](./images/expanded-issue.png)
@@ -387,9 +391,7 @@ Open **assessment.md** and read it. The report can be long, so start with the co
 >
 > The figures quoted here and below — issue counts, percentages, estimated lines of code — are examples from one run against this storefront. **Your numbers could differ.** The assessment is produced by an agent analyzing your workspace at that moment, so counts can shift with package versions, SDK versions, and the tool's own updates. Read them as an indication of shape and scale, not as values to match.
 
-The layout and section names can vary between .NET upgrade assessments, and some sections only appear when there is something to report. If your report looks different, look for equivalent findings rather than expecting these exact headings.
-
-## 3️⃣ Review and Shape the Plan
+The layout and section names can vary between .NET upgrade assessments, and some sections only appear when there is something to report. If your report looks different, look for equivalent findings rather than expecting these exact headings.## 3️⃣ Review and Shape the Plan
 
 ### Confirm Upgrade Options
 
