@@ -8,6 +8,20 @@ The same foundation also supports the database migration in later modules, so it
 
 Your instructor has already set up the real Azure environment used by the later labs, so **you will not deploy the Bicep you write**. The goal is to practice designing infrastructure with GitHub Copilot while you stay in charge of the decisions. A tested, finished version of the Bicep is included so you can compare your work. Expect some differences: Copilot does not produce the exact same output every time, so your files will not match the finished version line for line.
 
+## 💡 Why Design Infrastructure with GitHub Copilot?
+
+The purpose of this lab is not just to produce Bicep files. It is to learn how to use GitHub Copilot to turn an application's needs and your deployment requirements into infrastructure you can explain, review, and maintain. Copilot can help explore the repository, compare Azure services, draft reusable infrastructure code, and identify gaps between the design and your requirements. You provide the context, challenge its assumptions, and approve the result.
+
+The same approach is useful at different stages:
+
+- **Build a quick proof of concept (POC).** Ask Copilot to propose the smallest practical environment for testing an idea, explain the cost and security trade-offs, and generate repeatable deployment and cleanup steps. A POC can use a simpler design, but it should not put credentials in code or expose sensitive data.
+- **Prepare an application for an existing secure landing zone.** Give Copilot your organization's approved Bicep modules, naming rules, identity model, network boundaries, and Azure Policy requirements. Ask it to reuse existing shared services and generate the application resources that fit those guardrails, rather than inventing a separate foundation.
+- **Propose changes to an established foundation.** Ask Copilot to read the existing IaC, explain dependencies, and suggest a focused change, such as adding private connectivity or replacing stored credentials with managed identity. Review the proposed changes with the platform owners; do not let an application task silently redesign shared networking or governance.
+
+An **Azure landing zone** is more than a collection of resources for one app: it establishes the identity, connectivity, governance, and management boundaries that workloads must follow. This lab practices part of that design process; it does not create or certify a complete enterprise landing zone.
+
+> **Use Copilot to accelerate the work, not to skip the checks.** Generated infrastructure is a draft, not proof of security or compliance. Before a real deployment, build and lint the Bicep, review an Azure what-if preview, check policy and access requirements, and have the appropriate owners review cost, resilience, and operational impact. In this lab, you practice planning, generation, and review without deploying your generated files.
+
 ## 🗺️ How This Lab Works
 
 If you have not designed Azure infrastructure before, here is the whole process in plain terms:
@@ -267,6 +281,9 @@ You do **not** deploy the Bicep you write, run the setup scripts, or delete anyt
 At the start of Lab 06, GitHub is given permission to deploy the app to this environment. It uses **OIDC**, which lets GitHub prove who it is to Azure each time it runs, so no password ever has to be stored in GitHub. That permission only covers releasing the app; it is not used to deploy your Lab 04 Bicep. The identity GitHub uses can only do three things: push app images to the container registry, update the storefront's Container App, and read the Front Door settings to test the result.
 
 ## ✅ Review Checklist
+
+> [!NOTE]
+> **This is a sample checklist, not a requirement to deploy in this lab.** Use it as a reference for what a deployment validation checklist might look like. You can check some items by building and reviewing the Bicep, such as resource configuration, network address ranges, replica limits, and role-assignment scopes. Others, such as confirming Front Door connectivity or database access, require a deployed environment and runtime tests. Because you do not deploy your generated Bicep in this lab, record those items as requiring post-deployment validation rather than marking them complete based on code review alone.
 
 - [ ] Every generated Bicep file builds without errors.
 - [ ] The Bicep matches the approved plan, or any difference is written down and approved.
