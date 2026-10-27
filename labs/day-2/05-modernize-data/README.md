@@ -156,9 +156,15 @@ Use that Entra ID and password to login using SSMS. This is same as your azure l
 ![SSMS_LOGIN](./images/ssms_login.png)
 
 
-7. ### Connect to the target SQL MI using SSMS. Notice that there are no databases there yet. 
+7. ### Connect to the target SQL MI using SSMS. 
 
-As part of data migration you will restore the database in this managed instance.
+<b>Explore SQL MI:</b> 
+
+- Click on SQL Managed Instance and then expand --> "Data anagement" --> "Databases".
+
+- Notice that there is a database called eshop_ai there. We will not use this in this lab.
+
+- You will restore the on=premises database to a new "eshop" database in this managed instance.
 
 
 ## Success criteria
@@ -167,7 +173,7 @@ As part of data migration you will restore the database in this managed instance
 * Understand the assessment report and the compatibility issues.
 * You are able to connect to the SQL MI from the lab VM using Entra ID.
 
-## Challenge 3 — Create the required azure resources - DMS and Storage account
+## Challenge 3 — Create the required azure resources - Storage account and DMS
 
 In this part of the lab you will create the necesary Azure resources to perform the migration. Deploy the resources in the same region that Azure SQL MI is deployed.  You will:
 
