@@ -235,13 +235,13 @@ You'll also see a **Security** option, which identifies security issues using IS
 
 **5. Read the results.** Cloud readiness issues are grouped into **Mandatory**, **Potential**, and **Optional**. The summary estimates the effort to reach the highlighted target Azure service (Azure App Service, Azure Container Apps, or Azure Kubernetes Service) by grouping it into T-shirt sizes, and correctly identifies the app as running on .NET Framework 4.8. Try changing the Target Service dropdown from Azure App Service to Azure Container Apps. Note how issues may disappear/appear/change criticality since this is a different hosting service.
 
-![Target Service options, including Azure Container Apps](./images/target-service-options.png)
-
-![Assessment](./images/full-assessment.png)
-
 > ⚠️ **TROUBLESHOOTING: Assessment appearing blank?**
 >
 > Reinstall the **GitHub Copilot modernization** extension, then close and reopen VS Code. Re-run the assessment if it is still not appearing.
+
+![Target Service options, including Azure Container Apps](./images/target-service-options.png)
+
+![Assessment](./images/full-assessment.png)
 
 Expand any issue to see what the extension found and the guidance it recommends — the affected code, why it matters for the target service, and what a fix would involve. This is the most useful part of the assessment: the number of **Mandatory**, **Potential**, and **Optional** issues and the effort size show how big the job is, and the details are what you would walk a customer through.
 
