@@ -180,7 +180,7 @@ Think of each Azure service as a switch, and the switch is just a setting in a c
 
 You'll do this directly in Copilot Chat by switching modes, the same way you did for the Blazor conversion: **Plan** mode to analyze the app and propose the changes, then **Agent** mode to build them. Expect about 20-30 minutes.
 
-1. **Check the model, switch to Plan mode, and send this prompt.** First, check the model picker, the dropdown under the chat box that shows the current model. If it isn't set to **Claude Opus 5.5** (a new chat can reset it), scroll down to **Other Models** and select it again. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default.
+1. **Check the model, switch to Plan mode, and send this prompt.** First, check the model picker, the dropdown under the chat box that shows the current model. If it isn't set to **Claude Sonnet 5.5** (a new chat can reset it), select it again from the model picker list (look under **Other Models** if you don't see it). We use it to keep results more consistent, and because it balances strong code analysis with speed and cost. The default works too, so if it isn't available, keep the default.
 
    Open the mode dropdown and choose **Plan**. Plan mode reads the repository and proposes an approach, but it does **not** change any files yet.
 

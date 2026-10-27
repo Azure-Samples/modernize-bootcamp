@@ -44,7 +44,7 @@ Model decides how much thinking you are paying for. The list in the picker chang
 
 Four practical notes:
 
-- **In this bootcamp we use Claude Opus 5.5** to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too. You set it once in Module 2, and you may need to set it again in Module 3 if a new chat resets it.
+- **In this bootcamp we use Claude Sonnet 5.5** to keep results more consistent, and because it balances strong code analysis with speed and cost. The default works too. You set it once in Module 2, and you may need to set it again in Module 3 if a new chat resets it.
 - **Hover a model in the picker** to see its cost tier — Low, Medium, or High. An assessment across a whole solution is worth the high tier. Renaming a file is not.
 - **When the agent stalls or loops, switch to a stronger model rather than rephrasing the prompt a fourth time.** The conversation context carries over when you change models.
 - **Do not switch mid-task** while the agent is actively executing. Let it finish or stop it first.
