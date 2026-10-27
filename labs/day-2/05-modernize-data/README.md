@@ -184,42 +184,56 @@ In this part of the lab you will create the necesary Azure resources to perform 
 
 ### Student tasks
 
-#### 1. Resource provider
 
-From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Resource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
+#### 1. Storage Account
 
-![ResourceProvider](./images/dms_resource_provider.png)
+<b>1a.</b> Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region as the Azure SQL Managed Instance </b>
 
-#### 2. Azure SQL MI System Assigned Managed Identity
-
-You will need to validate that *System Assigned Managed Identity* is enabled for the server.  
-
-Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go to the *Identity* blade under Security and confirm that *System Assigned Managed Identity* is enabled.  If it is not then enable it.
-
-![SQLMI_SAMI](./images/SQLMI_SAMI.png)
-
-#### 3. Storage Account
-
-<b>3a.</b> Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region as the Azure SQL Managed Instance </b>and create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store source database backup. 
+Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store source database backup. 
 
 ![Storage1](./images/Storage_1.png)
 ![Storage3](./images/Storage_3.png)
 
-<b>3b.</b> Once the storage account is created, you will need to allow yourself the permission to manage Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
+<b>1b.</b> Once the storage account is created, you will need to allow yourself the permission to manage Blob containers. 
+
+ Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
 
 ![Storage5](./images/Storage_5.png)
 ![Storage6](./images/Storage_6.png)
 ![Storage7](./images/Storage_7.png)
 ![Storage8](./images/Storage_8.png)
 
-<b>3c.</b> Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Bolb Data Reader" role assigned. The identity has the same name as the SQL MI instance your lab subscription.
+<b>1c.</b> Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Bolb Data Reader" role assigned.
+
+ The identity has the same name as the SQL MI instance your lab subscription.
 
 ![Storage10](./images/Storage_10.png)
 
-<b>3d.</b> Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in the storage account and a folder `eshop-@lab.LabInstance.Id` within the container. Note that the container name and folder name are unique to your lab environment and are not reflected in the images below.  Use the images as an example of what the outcome should be.
+<b>1d.</b> Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in the storage account and a folder `eshop-@lab.LabInstance.Id` within the container. 
+
+Note that the container name and folder name are unique to your lab environment and are not reflected in the images below.  
+
+Use the images as an example of what the outcome should be.
 
 ![Storage11](./images/Storage_11.png)
 ![Storage12](./images/Storage_12_2.png)
+
+#### 2. Ensure Azure SQL MI System Assigned Managed Identity
+
+You will need to validate that *System Assigned Managed Identity* is enabled for the SQL Managed Instance.  
+
+Locate the pre-deployed Azure SQL Managed instance in your lab subscription. 
+
+Go to the *Identity* blade under Security and confirm that *System Assigned Managed Identity* is enabled.  If it is not then enable it.
+
+![SQLMI_SAMI](./images/SQLMI_SAMI.png)
+
+#### 3. Resource provider for DMS
+
+From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Resource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
+
+![ResourceProvider](./images/dms_resource_provider.png)
+
 
 #### 4. Database Migration Service (DMS)
 
