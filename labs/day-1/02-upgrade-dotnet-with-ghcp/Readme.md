@@ -142,9 +142,9 @@ Next, open the model picker, the dropdown under the chat box that shows the curr
 
 ![The model picker under the chat box, showing Auto](./images/model-picker.png)
 
-Scroll down to **Other Models** and select **Claude Opus 5.5**. We use it to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too, so if it isn't available, keep the default.
+Select **Claude Sonnet 5.5** from the list (if you don't see it, look under **Other Models**). We use it to keep results more consistent, and because it balances strong code analysis with speed and cost. The default works too, so if it isn't available, keep the default.
 
-![Claude Opus 5.5 selected in the Other Models list](./images/model-picker-opus.png)
+![Claude Sonnet 5.5 in the model picker list](./images/model-picker-sonnet.png)
 
 Then send this message in the chat, replacing the placeholders with your lab details:
 
@@ -279,7 +279,7 @@ The rest of this module is the upgrade itself, in five steps.
 
    > 💡 **PICKING A MODEL**
    >
-   > **We use Claude Opus 5.5 in this bootcamp** to keep results more consistent, and because we prefer the most powerful model for code analysis. The default works too. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
+   > **We use Claude Sonnet 5.5 in this bootcamp** to keep results more consistent, and because it balances strong code analysis with speed and cost. The default works too. Keep in mind different models have different costs, which is worth discussing with the customer when you pick one for their environment.
 
 4. After a minute or two, a pop-up window opens with options for the upgrade. Notice that it has already detected that the app runs on .NET Framework 4.8 and found the solution file (the **.sln** file that ties the app's projects together).
 
