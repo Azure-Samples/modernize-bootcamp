@@ -9,9 +9,9 @@ Now that the database is migrated to Azure, let us use the power of AI for some 
 >
 > They must follow a certain naming convention. All resources you create must end with i.e. have a suffix @lab.LabInstance.Id. Failing to do so, will block you from creating those Azure resources.
 > 
-> - Azure Foundry resource: caldova-lab08-ai-@lab.LabInstance.Id
-> - Foundry project: caldova-lab08-proj-@lab.LabInstance.Id
-> - Model deployment: gpt-5-mini-@lab.LabInstance.Id
+> - Azure Foundry resource: `caldova-lab08-ai-@lab.LabInstance.Id`
+> - Foundry project: `caldova-lab08-proj-@lab.LabInstance.Id`
+> - Model deployment: `gpt-5-mini-@lab.LabInstance.Id`
 
 ## Connect Azure SQL Managed Instance to Microsoft Foundry
 
