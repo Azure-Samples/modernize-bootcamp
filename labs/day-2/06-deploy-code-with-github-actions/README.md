@@ -1,6 +1,6 @@
 # 🚀 Lab 06: Deploy Code with GitHub Actions
 
-In this lab, you will use GitHub Copilot to create a GitHub Actions CI/CD workflow that takes the modernized retail application from source code to a running release on Azure. You will build on the secure platform examined in Lab 04 and supplied by the instructor-preprovisioned environment, along with the `eshop` database migrated in Lab 05. The workflow will validate the application, build and test a container, push an immutable image to the existing Azure Container Registry, and deploy that image to Azure Container Apps, replacing the placeholder image.
+In this lab, you will use GitHub Copilot to create a GitHub Actions CI/CD workflow that takes the modernized retail application from source code to a running release on Azure. You will build on the secure platform examined in Lab 04 and supplied by the instructor-preprovisioned environment, along with the eshop database migrated in Lab 05. The workflow will validate the application, build and test a container, push an immutable image to the existing Azure Container Registry, and deploy that image to Azure Container Apps, replacing the placeholder image.
 
 GitHub Copilot helps you turn the application's requirements and the existing platform's deployment contract into a working workflow rather than starting from a generic YAML template. You will use **Agent** mode to inspect the repository and generate the container files, then **Plan** mode to propose the workflow for your review before returning to **Agent** mode to implement it. This approach reduces repetitive authoring and helps connect application-specific build steps with OIDC authentication, image publishing, and deployment requirements. You remain responsible for reviewing each generated job, asking Copilot to correct gaps, and validating the workflow and deployed application before considering the release complete.
 
@@ -36,7 +36,7 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
 > This lab configures GitHub OIDC on your repository and runs a CI/CD workflow from it, so you need admin rights on your participant-specific fork in **Skillable-Events**. Run this module against **your own fork** rather than the workshop repository.
 
-**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser +++https://github.com/Skillable-Events/caldova-retail-modernized+++
+**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser https://github.com/Skillable-Events/caldova-retail-modernized
 
 1. On the Skillable Events single sign-on page, select **Continue**.
 
@@ -49,7 +49,7 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
 **2. Fork and clone the repository.**
 
-1. On the repository page, select **Fork**. On the **Create a new fork** page, select **Skillable-Events** as the **Owner** and append your **Skillable instance ID** to the **Repository name**, using the format `caldova-retail-modernized-<your-skillable-instance-id>` (for example, `caldova-retail-modernized-12345678`). Confirm both values before selecting **Create fork**.
+1. On the repository page, select **Fork**. On the **Create a new fork** page, select **Skillable-Events** as the **Owner** and append your **Skillable instance ID** to the **Repository name**, using the format **caldova-retail-modernized-<your-skillable-instance-id>** (for example, **caldova-retail-modernized-12345678**). Confirm both values before selecting **Create fork**.
 
    ![Fork button](./images/fork-button.png)
 
@@ -76,7 +76,7 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
    If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in.
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, +++https://github.com/Skillable-Events/caldova-retail-modernized+++, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
-**3. Open the storefront folder in VS Code.** Run these commands in PowerShell, replacing `<your-skillable-instance-id>` with the instance ID you used in the repository name:
+**3. Open the storefront folder in VS Code.** Run these commands in PowerShell, replacing <your-skillable-instance-id> with the instance ID you used in the repository name:
 
 ```powershell
 cd "caldova-retail-modernized-<your-skillable-instance-id>"
@@ -211,7 +211,7 @@ overrides.
 
 ## 🧭 Delivery Flow
 
-```mermaid
+```mermaid-nocode
 flowchart LR
     PR[Pull request] --> VALIDATE[Restore, build, test]
     VALIDATE --> IMAGE[Build container]
@@ -235,8 +235,8 @@ flowchart LR
 The bootstrap script connects your GitHub repository to the existing Lab 04 environment using **passwordless sign-in**. It:
 
 - **Checks existing resources and permissions.** RBAC (*role-based access control*) determines what each identity can do and where. The build identity has **AcrPush** on the registry to publish images. The separate deployment identity has **Container Apps Contributor** on the retail Container App to deploy a revision and **Reader** on Front Door to locate the endpoint for testing. The script verifies these roles; it does not create them or reuse the infrastructure identity.
-- **Sets up GitHub-to-Azure trust.** Federated credentials link the build identity to your repository's `lab06` environment and the deployment identity to `lab06-deploy`. With **OpenID Connect (OIDC)**, Azure checks GitHub's repository and environment claims before issuing a short-lived token. No Azure client secret or registry password is stored in GitHub.
-- **Configures the workflow environments.** The lab command restricts `lab06-deploy` to `main` without requiring manual reviewer approval. The script also publishes and verifies non-secret GitHub variables identifying the Azure resources and the correct identity for each environment.
+- **Sets up GitHub-to-Azure trust.** Federated credentials link the build identity to your repository's lab06 environment and the deployment identity to lab06-deploy. With **OpenID Connect (OIDC)**, Azure checks GitHub's repository and environment claims before issuing a short-lived token. No Azure client secret or registry password is stored in GitHub.
+- **Configures the workflow environments.** The lab command restricts lab06-deploy to main without requiring manual reviewer approval. The script also publishes and verifies non-secret GitHub variables identifying the Azure resources and the correct identity for each environment.
 
 The application's runtime identities remain separate. Their permissions allow the running app to pull images and access services and data; this script does not configure those permissions or grant database access.
 
@@ -352,7 +352,7 @@ The dummy connection string permits startup but is never used by the health endp
 Open GitHub Copilot in **Plan** mode. In Copilot Chat, open the mode dropdown and choose **Plan**. Plan mode proposes an approach and writes a plan for you to review, but it does **not** change any files yet. You will review that plan before Copilot builds anything.
 
 > [!IMPORTANT]
-> **Read the prompt before pasting it.** Notice how it separates pull-request validation from deployment on `main`, defines passwordless authentication, and limits what the workflow can change. It also requires health checks, concurrency controls, and a rollback procedure. Understand these requirements rather than simply copying and pasting; use them to evaluate the agent's plan before approving implementation.
+> **Read the prompt before pasting it.** Notice how it separates pull-request validation from deployment on main, defines passwordless authentication, and limits what the workflow can change. It also requires health checks, concurrency controls, and a rollback procedure. Understand these requirements rather than simply copying and pasting; use them to evaluate the agent's plan before approving implementation.
 
 > 🤖 **Paste this into Copilot Chat.**
 
@@ -409,19 +409,19 @@ Agent mode re-reads your repository and writes **.github/workflows/lab06-retail-
 > [!TIP]
 > **Optional exploration — not an additional required step.** The guide below shows how you could review a GitHub Actions workflow yourself, including validation, image publishing, and deployment. You do not need to understand every YAML setting right now. Explore any area that interests you, or continue to **Challenge 3: Publish and Run** to push your changes and run the workflow. You can return here as a reference.
 
-To explore, use the VS Code Explorer to expand `.github`, then `workflows`, and open `lab06-retail-cicd.yml` in your cloned repository. Your generated file's job names may differ from the examples in this lab.
+To explore, use the VS Code Explorer to expand .github, then workflows, and open lab06-retail-cicd.yml in your cloned repository. Your generated file's job names may differ from the examples in this lab.
 
-A GitHub Actions workflow is a YAML text file that tells GitHub when to run automation and what to do. Indentation groups settings: `on` defines the events that start the workflow, `jobs` groups the work, and each job's `steps` lists its actions or commands. Within steps, `uses` runs a reusable action and `run` executes shell commands. You can use **Ctrl+F** to find settings and follow their indentation to see whether they apply to the whole workflow or a single job.
+A GitHub Actions workflow is a YAML text file that tells GitHub when to run automation and what to do. Indentation groups settings: on defines the events that start the workflow, jobs groups the work, and each job's steps lists its actions or commands. Within steps, uses runs a reusable action and run executes shell commands. You can use **Ctrl+F** to find settings and follow their indentation to see whether they apply to the whole workflow or a single job.
 
 These are examples of what to look for during a **manual review**, not another prompt to paste into Copilot. You can explore one area at a time:
 
-- **Pull-request permissions:** Find `permissions` at the top level and within each job. The pull-request validation job must not receive `id-token: write`, which allows a job to request an OIDC token. Check both levels because a top-level grant can apply to jobs without their own permissions.
-- **Passwordless sign-in:** Find `azure/login` and its `with` settings. It should use `client-id`, `tenant-id`, and `subscription-id` from GitHub variables, not a client secret or a `creds` JSON secret. Registry sign-in should use `az acr login`, not ACR admin usernames and passwords.
-- **Separate build and deployment jobs:** Under `jobs`, identify validation, image publishing, and deployment as separate jobs. The deployment job should reference `environment: lab06-deploy`; its `if` condition should limit deployment to pushes to `main`. Pull requests must not sign in to Azure, push images, or deploy.
-- **An exact image version:** Search for `latest` and inspect the image build, push, and deployment commands. Publish a `sha-<full commit SHA>` tag, then deploy using `registry/repository@sha256:...` so the release points to one exact image rather than a changeable tag.
-- **No SQL password or runtime configuration changes:** Inspect deployment commands and their arguments. They should update the image only, not add a SQL password or replace `ConnectionStrings__StoreDbContext`, `AZURE_CLIENT_ID`, or `ASPNETCORE_ENVIRONMENT`.
-- **No infrastructure or scaling changes:** Inspect `run` commands for infrastructure deployments such as `az deployment` or `azd up`, and Container App arguments that change replicas or scaling. This workflow should release application code, not rebuild or resize the platform.
-- **Tests before deployment:** Find the build, test, container startup, and `/health` checks. Steps run in order within a job, but separate jobs can run in parallel unless linked by `needs`. Follow the deployment job's `needs` chain to confirm successful validation and image publishing are required first.
+- **Pull-request permissions:** Find permissions at the top level and within each job. The pull-request validation job must not receive id-token: write, which allows a job to request an OIDC token. Check both levels because a top-level grant can apply to jobs without their own permissions.
+- **Passwordless sign-in:** Find azure/login and its with settings. It should use client-id, tenant-id, and subscription-id from GitHub variables, not a client secret or a creds JSON secret. Registry sign-in should use az acr login, not ACR admin usernames and passwords.
+- **Separate build and deployment jobs:** Under jobs, identify validation, image publishing, and deployment as separate jobs. The deployment job should reference environment: lab06-deploy; its if condition should limit deployment to pushes to main. Pull requests must not sign in to Azure, push images, or deploy.
+- **An exact image version:** Search for latest and inspect the image build, push, and deployment commands. Publish a `sha-<full commit SHA>` tag, then deploy using registry/repository@sha256:... so the release points to one exact image rather than a changeable tag.
+- **No SQL password or runtime configuration changes:** Inspect deployment commands and their arguments. They should update the image only, not add a SQL password or replace ConnectionStrings__StoreDbContext, AZURE_CLIENT_ID, or ASPNETCORE_ENVIRONMENT.
+- **No infrastructure or scaling changes:** Inspect run commands for infrastructure deployments such as az deployment or azd up, and Container App arguments that change replicas or scaling. This workflow should release application code, not rebuild or resize the platform.
+- **Tests before deployment:** Find the build, test, container startup, and /health checks. Steps run in order within a job, but separate jobs can run in parallel unless linked by needs. Follow the deployment job's needs chain to confirm successful validation and image publishing are required first.
 
 If a setting is unfamiliar, you can ask Copilot to explain that specific YAML block. If you spot a problem, ask it to propose a correction and review the change.
 
@@ -442,26 +442,26 @@ permissions:
   contents: read
 ```
 
-Under `on`, look for `pull_request` and `push` events with `paths` filters covering the retail app, Dockerfile, and workflow. These filters tell GitHub which file changes should trigger validation.
+Under **on**, look for pull_request and push events with paths filters covering the retail app, Dockerfile, and workflow. These filters tell GitHub which file changes should trigger validation.
 
 > [!TIP]
-> **Optional exploration — learn what the YAML does.** You do not need to master these settings or complete a separate checklist here. If you would like to explore, find the validation job under `jobs` and follow its `steps` from top to bottom. Each step often has a readable `name`; `uses` runs a reusable action, while `run` contains commands. The explanations below connect those settings to their purpose. You can ask Copilot about an unfamiliar block or continue to **Challenge 3: Publish and Run**.
+> **Optional exploration — learn what the YAML does.** You do not need to master these settings or complete a separate checklist here. If you would like to explore, find the validation job under **jobs** and follow its steps from top to bottom. Each step often has a readable name; uses runs a reusable action, while run contains commands. The explanations below connect those settings to their purpose. You can ask Copilot about an unfamiliar block or continue to **Challenge 3: Publish and Run**.
 
 The validation job should:
 
-1. **Check out the commit.** Look for `uses: actions/checkout@...`. This downloads the version of the repository being validated onto the GitHub runner, the temporary machine that executes the job.
-2. **Set up .NET 10.** Look for `uses: actions/setup-dotnet@...` with `dotnet-version: '10.0.x'` (or an equivalent .NET 10 SDK selection). This makes the SDK available for the build commands.
-3. **Restore, build, and run available tests.** Look for `dotnet restore`, `dotnet build`, and, where test projects exist, `dotnet test` in `run` blocks. These download dependencies, compile the code, and check its behavior. A failed command should fail the job, not be ignored.
-4. **Build the Docker image locally.** Look for `docker build` with `-t` or `--tag`, which gives the image a local name for testing on the runner. This step should not push the image to a registry.
-5. **Start a test container.** Look for `docker run` using that image, a port mapping (`-p`), and a nonproduction dummy connection string supplied as an environment variable (`-e` or `--env`). The dummy value lets the app start for this check without exposing real database credentials; it does not verify Azure database access.
-6. **Poll `/health`.** Look for a loop using `curl`, `Invoke-WebRequest`, or an equivalent HTTP command against the container's local `/health` endpoint. It should allow time for startup, retry for a limited period, and fail the job if the app never becomes healthy.
-7. **Clean up even if the check fails.** Look for a cleanup step with `if: always()` and a command such as `docker stop` or `docker rm -f` targeting the test container. GitHub normally skips later steps after a failure; `always()` ensures cleanup still runs.
+1. **Check out the commit.** Look for **uses: actions/checkout@...**. This downloads the version of the repository being validated onto the GitHub runner, the temporary machine that executes the job.
+2. **Set up .NET 10.** Look for **uses: actions/setup-dotnet@...** with dotnet-version: '10.0.x' (or an equivalent .NET 10 SDK selection). This makes the SDK available for the build commands.
+3. **Restore, build, and run available tests.** Look for dotnet restore, dotnet build, and, where test projects exist, dotnet test in run blocks. These download dependencies, compile the code, and check its behavior. A failed command should fail the job, not be ignored.
+4. **Build the Docker image locally.** Look for docker build with -t or --tag, which gives the image a local name for testing on the runner. This step should not push the image to a registry.
+5. **Start a test container.** Look for docker run using that image, a port mapping (`-p`), and a nonproduction dummy connection string supplied as an environment variable (`-e` or `--env`). The dummy value lets the app start for this check without exposing real database credentials; it does not verify Azure database access.
+6. **Poll /health.** Look for a loop using curl, Invoke-WebRequest, or an equivalent HTTP command against the container's local /health endpoint. It should allow time for startup, retry for a limited period, and fail the job if the app never becomes healthy.
+7. **Clean up even if the check fails.** Look for a cleanup step with if: always() and a command such as docker stop or docker rm -f targeting the test container. GitHub normally skips later steps after a failure; always() ensures cleanup still runs.
 
 This job must **not** include Azure login. Forked pull requests must be able to validate without Azure access. If Azure login appears here, ask Copilot to move it to the deployment jobs.
 
 #### Explore build and push
 
-To see how image publishing differs from pull-request validation, look for a job that runs on pushes to `main`, uses the `lab06` GitHub environment, and has these job permissions:
+To see how image publishing differs from pull-request validation, look for a job that runs on pushes to main, uses the lab06 GitHub environment, and has these job permissions:
 
 ```yaml-nocode
 permissions:
@@ -469,7 +469,7 @@ permissions:
   id-token: write
 ```
 
-Unlike pull-request validation, this job needs Azure access to publish an image. Look for `azure/login`, followed by registry sign-in and push commands such as:
+Unlike pull-request validation, this job needs Azure access to publish an image. Look for **azure/login**, followed by registry sign-in and push commands such as:
 
 ```PowerShell-nocode
 az acr login --name "$ACR_NAME"
@@ -486,7 +486,7 @@ You can then follow how the job resolves the digest from ACR and passes the dige
 
 #### Explore deployment
 
-To understand the release stage, look for a separate job using the `lab06-deploy` environment. Its steps should show how it:
+To understand the release stage, look for a separate job using the lab06-deploy environment. Its steps should show how it:
 
 1. authenticates through the lab06-deploy federated credential
 2. verifies the target app and registry match Lab 04
@@ -508,7 +508,7 @@ It identifies endpoints and authentication mode but contains no credential. If y
 
 ## Challenge 3: Publish and Run
 
-Now publish your changes so GitHub Actions can run the workflow. The commands below set your Git commit identity, create a branch, save your changes in a commit, push that branch to GitHub, and open a pull request. Opening the pull request triggers validation without deploying; merging it into `main` triggers image publishing and deployment.
+Now publish your changes so GitHub Actions can run the workflow. The commands below set your Git commit identity, create a branch, save your changes in a commit, push that branch to GitHub, and open a pull request. Opening the pull request triggers validation without deploying; merging it into main triggers image publishing and deployment.
 
 From the repository root, replace the example email and name with your own. These identify your commits; they do not sign you in to GitHub.
 
@@ -522,7 +522,7 @@ git config --global user.email "your.email@example.com"
 git config --global user.name "Your Name"
 ```
 
-The next commands create `lab06-cicd`, stage all changes in the repository (`git add .`), commit them, and publish the branch. `gh pr create --fill` opens a pull request using the commit message for its title and description.
+The next commands create lab06-cicd, stage all changes in the repository (git add .), commit them, and publish the branch. gh pr create --fill opens a pull request using the commit message for its title and description.
 
 > 💻 **Run this in the terminal.**
 
@@ -545,12 +545,12 @@ Start in your GitHub repository's **Actions** tab. Open the run for the merged c
 
 Then open the [Azure portal](https://portal.azure.com), select the subscription used for this lab, and search for **Resource groups**. The Lab 04 resources are split across several groups; use your environment's matching suffix to avoid selecting another participant's resources.
 
-1. **Find the published image.** Open your `rg-caldova-lab04-primary-...` resource group and select the **Container registry**. Under **Repositories**, open the repository used by the workflow and select the `sha-<commit>` tag. Check that its manifest digest matches the one recorded by the publishing job. This confirms the image reached Azure Container Registry (ACR).
-2. **Check which image the app runs.** Return to **Resource groups**, open your `rg-caldova-lab04-secondary-...` group, and select the retail **Container App**. Open **Revisions and replicas**, select the new revision, and inspect its container image details. Its image reference should use the same registry, repository, and `sha256:...` digest as the published image.
+1. **Find the published image.** Open your **rg-caldova-lab04-primary-...** resource group and select the **Container registry**. Under **Repositories**, open the repository used by the workflow and select the sha-<commit> tag. Check that its manifest digest matches the one recorded by the publishing job. This confirms the image reached Azure Container Registry (ACR).
+2. **Check which image the app runs.** Return to **Resource groups**, open your rg-caldova-lab04-secondary-... group, and select the retail **Container App**. Open **Revisions and replicas**, select the new revision, and inspect its container image details. Its image reference should use the same registry, repository, and sha256:... digest as the published image.
 3. **Check revision health.** In **Revisions and replicas**, confirm the new revision is provisioned successfully, active, healthy, and receiving the intended traffic. Inspect its replicas and logs if it reports an error. A successful image push alone does not mean the application started successfully.
 4. **Check that scaling was preserved.** In the Container App's **Scale** settings, compare the minimum and maximum replica counts and scaling rules with the Lab 04 Bicep configuration. The release should change the image, not those settings. You are inspecting the configuration here; do not save changes.
-5. **Test the public endpoint.** Open your `rg-caldova-lab04-global-...` resource group and select the **Front Door and CDN profile**. Find the application's endpoint hostname in its endpoint details, then open `https://<endpoint-hostname>/health` in a browser. Expect a successful health response. Use this Front Door address, not just the Container App's direct URL, to check the public route.
-6. **Exercise the application.** Open the same Front Door address without `/health`.
+5. **Test the public endpoint.** Open your rg-caldova-lab04-global-... resource group and select the **Front Door and CDN profile**. Find the application's endpoint hostname in its endpoint details, then open `https://<endpoint-hostname>/health` in a browser. Expect a successful health response. Use this Front Door address, not just the Container App's direct URL, to check the public route.
+6. **Exercise the application.** Open the same Front Door address without /health.
 7. **Locate the rollback candidate.** Return to the Container App's **Revisions and replicas** list and confirm the previous revision is still listed. Record its revision name and image digest as rollback evidence. Do not activate it or change traffic during this check.
 
 If a check fails, use the relevant GitHub job logs or the Container App's logs to investigate before treating the release as complete.
