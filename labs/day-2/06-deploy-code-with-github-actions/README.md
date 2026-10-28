@@ -36,7 +36,7 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
 > This lab configures GitHub OIDC on your repository and runs a CI/CD workflow from it, so you need admin rights on your participant-specific fork in **Skillable-Events**. Run this module against **your own fork** rather than the workshop repository.
 
-**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser https://github.com/Skillable-Events/caldova-retail-modernized
+**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser `https://github.com/Skillable-Events/caldova-retail-modernized`
 
 1. On the Skillable Events single sign-on page, select **Continue**.
 
