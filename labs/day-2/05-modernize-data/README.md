@@ -15,6 +15,9 @@
 > - Blob folder: `eshop-@lab.LabInstance.Id`
 > - DMS: `caldova-lab05-sqlmig-@lab.LabInstance.Id`
 > - DMS SQL Instance: `caldovalab05sql@lab.LabInstance.Id`
+> 
+> <b>All resources created for this lab must be deployed in the same region and resource group where Azure SQL Managed Instance is provisioned.</b> 
+>
 
 
 An Azure policy in place enforces a certain naming convention for these resources.
@@ -184,11 +187,11 @@ In this part of the lab you will create the necessary Azure resources to perform
 
 ### Student tasks
 
-#### <u>Special Note:</u> 👉👉 Both the DMS and the Storage account needs to be in the same region as the target SQL MI 
+#### <u>Special Note:</u> 👉👉 Both the DMS and the Storage account needs to be in the same region and resource group as the target SQL MI 
 
 #### 1. Storage Account
 
-<b>1a.</b> Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region as the Azure SQL Managed Instance </b>
+<b>1a.</b> Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region and resource group as the Azure SQL Managed Instance </b>
 
 Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store source database backup. 
 
@@ -218,6 +221,8 @@ Use the images as an example of what the outcome should be.
 
 ![Storage11](./images/Storage_11.png)
 ![Storage12](./images/Storage_12_2.png)
+
+> [!NOTE] Once the container is refreshed, it will not list the folder. <b>This is OK<b>.  Once the backups are taken and specifying this folder as the location, the folder will show up in the portal.
 
 #### 2. Ensure Azure SQL MI System Assigned Managed Identity
 
@@ -257,8 +262,8 @@ Search for **"dms" in "Azure Services only".**
 
 - Resource provider is registered for data migrations.
 - SQL MI configured for System Assigned Managed Identity.
-- Storage account is created in the same region as MI, with a Blob container in it.
-- DMS is deployed in the same region as SQL MI.
+- Storage account is created in the same region and resource group as SQL MI, with a Blob container in it.
+- DMS is deployed in the same region and resource group as SQL MI.
 
 
 ## Challenge 4 — Online Migration from on-premises SQL Server to SQL Managed Instance
