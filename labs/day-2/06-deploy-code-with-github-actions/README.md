@@ -49,13 +49,17 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
 **2. Fork and clone the repository.**
 
-1. On the repository page, select **Fork**, then **Create fork** with the defaults left alone.
+1. On the repository page, select **Fork**, then **Create fork** with the defaults left alone. Don't change the repository name: GitHub adds a number to the end of it (for example, **caldova-retail-modernized-66704008**) so it doesn't clash with the original.
 
    ![Fork button](./images/fork-button.png)
 
    ![Create fork](./images/fork-creation.png)
 
-2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/caldova-retail-modernized.git`.
+   At the top of your new fork, you should see its name with the number at the end and **forked from Skillable-Events/caldova-retail-modernized** underneath. Note the full name, because it is also the name of the folder you clone in a later step.
+
+   ![Your new fork, named with a number at the end and forked from the original repository](./images/fork-result.png)
+
+2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/caldova-retail-modernized-66704008.git`.
 
    ![Code button](./images/code-button.png)
 
@@ -73,17 +77,17 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
    git clone <your-fork-url>
    ```
 
-   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in.
+   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in. It creates a folder with the same name as your fork, including the number at the end.
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, +++https://github.com/Skillable-Events/caldova-retail-modernized+++, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
-**3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
+**3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode, replacing **your-fork-folder** with the name of your fork (for example, **caldova-retail-modernized-66704008**) and deleting the angle brackets:
 
 ```powershell
-cd caldova-retail-modernized
+cd <your-fork-folder>
 code .
 ```
 
-If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the **caldova-retail-modernized folder**. If VSCode asks you to sign into GitHub again, authorize access there as well.
+If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick your cloned fork folder (the **caldova-retail-modernized** folder with the number at the end). If VSCode asks you to sign into GitHub again, authorize access there as well.
 
 If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
 
@@ -93,7 +97,7 @@ If VS Code opens the folder in **Restricted Mode**, select **Manage** in the ban
 
 You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
 
-> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **caldova-retail-modernized** folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd caldova-retail-modernized` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
+> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is your cloned fork folder (**caldova-retail-modernized** with the number at the end). The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd <your-fork-folder>` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
 
 ## 🔑 Authorize VS CODE
 
