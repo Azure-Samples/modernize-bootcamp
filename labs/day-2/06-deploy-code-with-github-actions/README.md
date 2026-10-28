@@ -557,10 +557,12 @@ Find the previous healthy revision and its image digest:
 
 > 💻 **Run this in the terminal.**
 
+
+
 ```powershell
 az containerapp revision list `
-  --name '<container-app-name>' `
-  --resource-group '<application-resource-group>' `
+  --name (gh variable get LAB06_CONTAINER_APP_NAME --env lab06-deploy) `
+  --resource-group (gh variable get LAB04_SECONDARY_RESOURCE_GROUP --env lab06-deploy) `
   --output table
 ```
 
