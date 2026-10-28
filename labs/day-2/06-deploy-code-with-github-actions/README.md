@@ -55,13 +55,14 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
    ![Create fork](./images/fork-creation.png)
 
+   At the top of your new fork, you should see its name with your instance ID at the end and **forked from Skillable-Events/caldova-retail-modernized** underneath. Note the full name, because it is also the name of the folder you clone in a later step.
+
+   ![Your new fork, named with your instance ID at the end and forked from the original repository](./images/fork-result.png)
+
 2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/Skillable-Events/caldova-retail-modernized-12345678.git`, with your own instance ID in the repository name.
+   ![Select Code, then copy the HTTPS URL](./images/copy-https-url.png)
 
-   ![Code button](./images/code-button.png)
-
-   ![Copy HTTPS URL](./images/copy-https.png)
-
-3. Enable GitHub Actions is the new repository
+3. Enable GitHub Actions in the new repository
 
 ![Enable GitHub Actions](./images/enable_github_actions1.png)
 
@@ -73,7 +74,7 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
    git clone <your-fork-url>
    ```
 
-   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in.
+   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in. It creates a folder with the same name as your fork, including your instance ID at the end.
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, +++https://github.com/Skillable-Events/caldova-retail-modernized+++, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
 **3. Open the storefront folder in VS Code.** Run these commands in PowerShell, replacing <your-skillable-instance-id> with the instance ID you used in the repository name:

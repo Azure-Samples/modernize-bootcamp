@@ -237,7 +237,11 @@ You'll also see a **Security** option, which identifies security issues using IS
 
 > ⚠️ **TROUBLESHOOTING: Assessment appearing blank?**
 >
-> Reinstall the **GitHub Copilot modernization** extension, then close and reopen VS Code. Re-run the assessment if it is still not appearing.
+> 1. Uninstall both the **GitHub Copilot modernization** and **GitHub Copilot upgrade** extensions.
+> 2. Restart VS Code.
+> 3. Install both extensions again and open the assessment report.
+>
+> Re-run the assessment if it is still not appearing.
 
 ![Target Service options, including Azure Container Apps](./images/target-service-options.png)
 
