@@ -61,9 +61,7 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
 2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like `https://github.com/User1-12345678_events/caldova-retail-modernized-66704008.git`.
 
-   ![Code button](./images/code-button.png)
-
-   ![Copy HTTPS URL](./images/copy-https.png)
+   ![Select Code, then copy the HTTPS URL](./images/copy-https-url.png)
 
 3. Enable GitHub Actions is the new repository
 
