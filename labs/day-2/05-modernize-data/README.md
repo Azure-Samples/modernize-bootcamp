@@ -90,7 +90,7 @@ DBCC CHECKDB (N'eShop') ;
 * SSMS connects to the source instance.
 * The student records the source version, edition, size etc.
 * You can explain at least four different authentication mechanisms and show at least two ways to connect.
-* You understand that logical backup (.bacpac) is an export of data structure and data that can be moved across OS/versions of SQL.It is also a point-in-time backup. Under the hood, a .bacpac file is simply a compressed ZIP package containing JSON/XML metadata definition files and data
+* You understand that logical backup (.bacpac) is an export of data structure and data that can be moved across OS/versions of SQL. It is also a point-in-time backup. Under the hood, a .bacpac file is simply a compressed ZIP package containing JSON/XML metadata definition files and data
 * A physical backup (.bak) by contrast is page-by-page physical copy of files. Along with transaction log backups, a physical backup can be used to restore database with minimal data loss - as you will do in this lab later.
 * You can explain recovery model and different types of backups.
 
@@ -120,7 +120,7 @@ Run a "Migration readiness assessment". An html file will open in your browser o
 
 4. ### Prepare to connect to the target SQL Managed Instance. Before you can connect to it, you need to open up the firewall to allow connection to the SQL MI first.
 
-#### Validate NSG inbound rules for SQL MI's subnet NSG before begining.
+#### Validate NSG inbound rules for SQL MI's subnet NSG before beginning.
 
 From the portal, find out the NSG for the subnet that Azure SQL Managed Instance is configured with.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04mi@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
  
@@ -142,7 +142,7 @@ Notice that there are several ways you can authenticate to SQL server using Entr
 
 The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used.  
 
-*Note* Ypur SQL entra login will be the same user as your <b>azure login </b>. 
+*Note* Your SQL entra login will be the same user as your <b>azure login </b>. 
 
 6. ### Retrieve the public endpoint FQDN and port number (3342) to use as part of the connection information
 
@@ -158,13 +158,13 @@ Use that Entra ID and password to login using SSMS. This is same as your azure l
 
 7. ### Connect to the target SQL MI using SSMS. 
 
-<b>Explore SQL MI:</b> 
+<b>Explore SQL MI on Azure portal:</b> 
 
-- Click on SQL Managed Instance and then expand --> "Data anagement" --> "Databases".
+- Click on SQL Managed Instance and then expand on the left panel --> "Data Management" --> "Databases".
 
 - Notice that there is a database called eshop_ai there. We will not use this in this lab.
 
-- You will restore the on=premises database to a new "eshop" database in this managed instance.
+- You will restore the on-premises database to a new "eshop" database in this managed instance.
 
 
 ## Success criteria
@@ -175,7 +175,7 @@ Use that Entra ID and password to login using SSMS. This is same as your azure l
 
 ## Challenge 3 — Create the required azure resources - Storage account and DMS
 
-In this part of the lab you will create the necesary Azure resources to perform the migration. Deploy the resources in the same region that Azure SQL MI is deployed.  You will:
+In this part of the lab you will create the necessary Azure resources to perform the migration. Deploy the resources in the same region that Azure SQL MI is deployed.  You will:
 
 - Create a resource provider (if it does not exist) in the subscription for DMS.
 - Deploy an Azure storage account and a blob container to store database and transaction log file backups.
@@ -204,7 +204,7 @@ Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store sourc
 ![Storage7](./images/Storage_7.png)
 ![Storage8](./images/Storage_8.png)
 
-<b>1c.</b> Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Bolb Data Reader" role assigned.
+<b>1c.</b> Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Blob Data Reader" role assigned.
 
  The identity has the same name as the SQL MI instance your lab subscription.
 
@@ -263,7 +263,7 @@ Search for **"dms" in "Azure Services only".**
 
 ## Challenge 4 — Online Migration from on-premises SQL Server to SQL Managed Instance
 
-In this challenge you will perform database backups to the Azure Storage account provisioned earlier.  You will then use DMS to perform an *Online* migration. To perform and online migration, DMS restores the full and any differntial backups before restoring and playing transaction logs to complete the migration. 
+In this challenge you will perform database backups to the Azure Storage account provisioned earlier.  You will then use DMS to perform an *Online* migration. To perform an online migration, DMS restores the full and any differential backups before restoring and playing transaction logs to complete the migration. 
 
 ### Student tasks
 
@@ -321,7 +321,7 @@ Choose <b>Blob</b> as backup location and <b>online</b> as backup mode.
 
 > [!Note]
 > 
-> DMS needs to configure a SQL Instance `caldovalab05sql@lab.LabInstance.Id` to > track progress of migration for restartability. 
+> DMS needs to configure a SQL Instance `caldovalab05sql@lab.LabInstance.Id` to track progress of migration for restartability. 
 > 
 > What you are entering here is information for that tracking database - not  your source or target database. You need not manage this instance for this lab. 
 
@@ -385,7 +385,7 @@ VALUES
 >
 > - When you take a backup of the source database, DMS may take a minute or two to see the backup.
 >
-> - Notice the order of restore operaion of DMS - first full, then differential, then logs - in the same order that the backup was taken. 
+> - Notice the order of restore operation of DMS - first full, then differential, then logs - in the same order that the backup was taken. 
 
 ![DMS_17](./images/DMS_17.png)
 
@@ -465,7 +465,7 @@ Use online migration when the source database must remain available while data i
 
 Before starting:
 
-1. Locate the Azure SQL Managed Instance already provisioned in your lab environnment's subscription.
+1. Locate the Azure SQL Managed Instance already provisioned in your lab environment's subscription.
 3. Establish connectivity by using SSMS 22 installed on the lab VM's desktop, use the Entra with Password account.
 
 ![SSMS22](./images/ssms_22.png).
@@ -518,7 +518,7 @@ GO
 
 Run the cmdlet below to start an assessment. 
 
-- The commamnd below assumes your source IP address, correct it if needed.
+- The command below assumes your source IP address, correct it if needed.
 - Put your password that you chose below within the double quote "" below. 
 
 #### SQL Server Authentication
