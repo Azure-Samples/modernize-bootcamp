@@ -184,6 +184,7 @@ In this part of the lab you will create the necesary Azure resources to perform 
 
 ### Student tasks
 
+#### <u>Special Note:</u> 👉👉 Both the DMS and the Storage account needs to be in the same region as the target SQL MI 
 
 #### 1. Storage Account
 
