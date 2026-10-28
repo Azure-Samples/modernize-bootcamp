@@ -511,16 +511,21 @@ ADD MEMBER [AdminUser];
 GO
 ```
 
-<b>4b.</b> Create a folder locally on the machine where the output will be generated ex. *C:\Migration\Assessment*.
-Connectivity to the SQL server will use SQL Server authentication.  The *AdminUser* account created above will be used.  
-Run the cmdlet below, replace all values with those of your lab environment.
+<b>4b.</b> Connectivity to the SQL server will use SQL Server authentication. 
+
+ The *AdminUser* account created above will be used.  
+
+Run the cmdlet below to start an assessment. 
+
+- The commamnd below assumes your source IP address, correct it if needed.
+- Put your password that you chose below within the double quote "" below. 
 
 #### SQL Server Authentication
 
 ```powershell
-$AssessmentFolder = "C:\Migration\Assessment"
+$AssessmentFolder = $HOME
 
-$AssessmentConnection = "Data Source=<put SQL Server IP here>;Initial Catalog=master;Integrated Security=False;User Id=<put user here>;Password=<put password here>"
+$AssessmentConnection = "Data Source=192.168.1.100;Initial Catalog=master;Integrated Security=False;User Id=AdminUser;Password=<put password here>"
 
 az datamigration get-assessment `
     --connection-string $AssessmentConnection `
@@ -591,10 +596,10 @@ Get the environment information.  Fill in all information for the variables acco
 
 ```powershell
 $StorageAccount = "caldovalab05st@lab.LabInstance.Id"
-$StorageResourceGroup = "<storage account resource group>"
-$MiResourceGroup = "<Azure SQL Managed Instance resource group>"
-$ManagedInstance = "<Azure SQL Managed Instance name>" 
-$MigrationResourceGroup = "<Database Migration Service Resource Group>"
+$StorageResourceGroup = az storage account list --query "[?name=='$StorageAccount'].resourceGroup | [0]" --output tsv
+$MiResourceGroup = "rg-caldova-lab04-secondary-@lab.LabInstance.Id"
+$ManagedInstance = "caldovalab04mi@lab.LabInstance.Id" 
+$MigrationResourceGroup = az resource list --name "caldova-lab05-sqlmig-@lab.LabInstance.Id" --resource-type "Microsoft.DataMigration/sqlMigrationServices" --query "[0].resourceGroup" --output tsv
 $MigrationService = "caldova-lab05-sqlmig-@lab.LabInstance.Id"
 
 $StorageAccountId = az storage account show `
