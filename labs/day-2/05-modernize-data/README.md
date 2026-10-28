@@ -15,6 +15,9 @@
 > - Blob folder: `eshop-@lab.LabInstance.Id`
 > - DMS: `caldova-lab05-sqlmig-@lab.LabInstance.Id`
 > - DMS SQL Instance: `caldovalab05sql@lab.LabInstance.Id`
+> 
+> <b>All resources created for this lab must be deployed in the same region and resource group where Azure SQL Managed Instance is provisioned.</b> 
+>
 
 
 An Azure policy in place enforces a certain naming convention for these resources.
@@ -90,7 +93,7 @@ DBCC CHECKDB (N'eShop') ;
 * SSMS connects to the source instance.
 * The student records the source version, edition, size etc.
 * You can explain at least four different authentication mechanisms and show at least two ways to connect.
-* You understand that logical backup (.bacpac) is an export of data structure and data that can be moved across OS/versions of SQL.It is also a point-in-time backup. Under the hood, a .bacpac file is simply a compressed ZIP package containing JSON/XML metadata definition files and data
+* You understand that logical backup (.bacpac) is an export of data structure and data that can be moved across OS/versions of SQL. It is also a point-in-time backup. Under the hood, a .bacpac file is simply a compressed ZIP package containing JSON/XML metadata definition files and data
 * A physical backup (.bak) by contrast is page-by-page physical copy of files. Along with transaction log backups, a physical backup can be used to restore database with minimal data loss - as you will do in this lab later.
 * You can explain recovery model and different types of backups.
 
@@ -120,7 +123,7 @@ Run a "Migration readiness assessment". An html file will open in your browser o
 
 4. ### Prepare to connect to the target SQL Managed Instance. Before you can connect to it, you need to open up the firewall to allow connection to the SQL MI first.
 
-#### Validate NSG inbound rules for SQL MI's subnet NSG before begining.
+#### Validate NSG inbound rules for SQL MI's subnet NSG before beginning.
 
 From the portal, find out the NSG for the subnet that Azure SQL Managed Instance is configured with.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04mi@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
  
@@ -142,7 +145,7 @@ Notice that there are several ways you can authenticate to SQL server using Entr
 
 The public endpoint is used to connect from the virtual lab environment therefore when connecting using SSMS, port 3342 needs to be used.  
 
-*Note* Ypur SQL entra login will be the same user as your <b>azure login </b>. 
+*Note* Your SQL entra login will be the same user as your <b>azure login </b>. 
 
 6. ### Retrieve the public endpoint FQDN and port number (3342) to use as part of the connection information
 
@@ -156,9 +159,15 @@ Use that Entra ID and password to login using SSMS. This is same as your azure l
 ![SSMS_LOGIN](./images/ssms_login.png)
 
 
-7. ### Connect to the target SQL MI using SSMS. Notice that there are no databases there yet. 
+7. ### Connect to the target SQL MI using SSMS. 
 
-As part of data migration you will restore the database in this managed instance.
+<b>Explore SQL MI on Azure portal:</b> 
+
+- Click on SQL Managed Instance and then expand on the left panel --> "Data Management" --> "Databases".
+
+- Notice that there is a database called eshop_ai there. We will not use this in this lab.
+
+- You will restore the on-premises database to a new "eshop" database in this managed instance.
 
 
 ## Success criteria
@@ -167,9 +176,9 @@ As part of data migration you will restore the database in this managed instance
 * Understand the assessment report and the compatibility issues.
 * You are able to connect to the SQL MI from the lab VM using Entra ID.
 
-## Challenge 3 — Create the required azure resources - DMS and Storage account
+## Challenge 3 — Create the required azure resources - Storage account and DMS
 
-In this part of the lab you will create the necesary Azure resources to perform the migration. Deploy the resources in the same region that Azure SQL MI is deployed.  You will:
+In this part of the lab you will create the necessary Azure resources to perform the migration. Deploy the resources in the same region that Azure SQL MI is deployed.  You will:
 
 - Create a resource provider (if it does not exist) in the subscription for DMS.
 - Deploy an Azure storage account and a blob container to store database and transaction log file backups.
@@ -178,42 +187,59 @@ In this part of the lab you will create the necesary Azure resources to perform 
 
 ### Student tasks
 
-#### 1. Resource provider
+#### <u>Special Note:</u> 👉👉 Both the DMS and the Storage account needs to be in the same region and resource group as the target SQL MI 
 
-From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Resource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
+#### 1. Storage Account
 
-![ResourceProvider](./images/dms_resource_provider.png)
+<b>1a.</b> Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region and resource group as the Azure SQL Managed Instance </b>
 
-#### 2. Azure SQL MI System Assigned Managed Identity
-
-You will need to validate that *System Assigned Managed Identity* is enabled for the server.  
-
-Locate the pre-deployed Azure SQL Managed instance in your lab subscription. Go to the *Identity* blade under Security and confirm that *System Assigned Managed Identity* is enabled.  If it is not then enable it.
-
-![SQLMI_SAMI](./images/SQLMI_SAMI.png)
-
-#### 3. Storage Account
-
-<b>3a.</b> Provision an Azure Storage Account `caldovalab05st@lab.LabInstance.Id` <b>in the same region as the Azure SQL Managed Instance </b>and create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store source database backup. 
+Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in it to store source database backup. 
 
 ![Storage1](./images/Storage_1.png)
 ![Storage3](./images/Storage_3.png)
 
-<b>3b.</b> Once the storage account is created, you will need to allow yourself the permission to manage Blob containers.  Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
+<b>1b.</b> Once the storage account is created, you will need to allow yourself the permission to manage Blob containers. 
+
+ Do this via IAM.  Assign the *Storage Blob Data Owner* (or Contributor) role to your own Entra ID.
 
 ![Storage5](./images/Storage_5.png)
 ![Storage6](./images/Storage_6.png)
 ![Storage7](./images/Storage_7.png)
 ![Storage8](./images/Storage_8.png)
 
-<b>3c.</b> Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Bolb Data Reader" role assigned. The identity has the same name as the SQL MI instance your lab subscription.
+<b>1c.</b> Similarly, you will need to grant permission so that the Managed Identity of the SQL MI can retrieve the backup, i.e. it has role "Storage Blob Data Reader" role assigned.
+
+ The identity has the same name as the SQL MI instance your lab subscription.
 
 ![Storage10](./images/Storage_10.png)
 
-<b>3d.</b> Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in the storage account and a folder `eshop-@lab.LabInstance.Id` within the container. Note that the container name and folder name are unique to your lab environment and are not reflected in the images below.  Use the images as an example of what the outcome should be.
+<b>1d.</b> Create a Blob container `sqlmi-backups-@lab.LabInstance.Id` in the storage account and a folder `eshop-@lab.LabInstance.Id` within the container. 
+
+Note that the container name and folder name are unique to your lab environment and are not reflected in the images below.  
+
+Use the images as an example of what the outcome should be.
 
 ![Storage11](./images/Storage_11.png)
 ![Storage12](./images/Storage_12_2.png)
+
+> [!NOTE] Once the container is refreshed, it will not list the folder. <b>This is OK<b>.  Once the backups are taken and specifying this folder as the location, the folder will show up in the portal.
+
+#### 2. Ensure Azure SQL MI System Assigned Managed Identity
+
+You will need to validate that *System Assigned Managed Identity* is enabled for the SQL Managed Instance.  
+
+Locate the pre-deployed Azure SQL Managed instance in your lab subscription. 
+
+Go to the *Identity* blade under Security and confirm that *System Assigned Managed Identity* is enabled.  If it is not then enable it.
+
+![SQLMI_SAMI](./images/SQLMI_SAMI.png)
+
+#### 3. Resource provider for DMS
+
+From the Azure portal, go to *Subscriptions*.  Expand on settings. Click on *Resource Providers* and confirm that *Microsoft.DataMigration* is registered.  If it is not, then register it.
+
+![ResourceProvider](./images/dms_resource_provider.png)
+
 
 #### 4. Database Migration Service (DMS)
 
@@ -236,13 +262,13 @@ Search for **"dms" in "Azure Services only".**
 
 - Resource provider is registered for data migrations.
 - SQL MI configured for System Assigned Managed Identity.
-- Storage account is created in the same region as MI, with a Blob container in it.
-- DMS is deployed in the same region as SQL MI.
+- Storage account is created in the same region and resource group as SQL MI, with a Blob container in it.
+- DMS is deployed in the same region and resource group as SQL MI.
 
 
 ## Challenge 4 — Online Migration from on-premises SQL Server to SQL Managed Instance
 
-In this challenge you will perform database backups to the Azure Storage account provisioned earlier.  You will then use DMS to perform an *Online* migration. To perform and online migration, DMS restores the full and any differntial backups before restoring and playing transaction logs to complete the migration. 
+In this challenge you will perform database backups to the Azure Storage account provisioned earlier.  You will then use DMS to perform an *Online* migration. To perform an online migration, DMS restores the full and any differential backups before restoring and playing transaction logs to complete the migration. 
 
 ### Student tasks
 
@@ -300,7 +326,7 @@ Choose <b>Blob</b> as backup location and <b>online</b> as backup mode.
 
 > [!Note]
 > 
-> DMS needs to configure a SQL Instance `caldovalab05sql@lab.LabInstance.Id` to > track progress of migration for restartability. 
+> DMS needs to configure a SQL Instance `caldovalab05sql@lab.LabInstance.Id` to track progress of migration for restartability. 
 > 
 > What you are entering here is information for that tracking database - not  your source or target database. You need not manage this instance for this lab. 
 
@@ -364,7 +390,7 @@ VALUES
 >
 > - When you take a backup of the source database, DMS may take a minute or two to see the backup.
 >
-> - Notice the order of restore operaion of DMS - first full, then differential, then logs - in the same order that the backup was taken. 
+> - Notice the order of restore operation of DMS - first full, then differential, then logs - in the same order that the backup was taken. 
 
 ![DMS_17](./images/DMS_17.png)
 
@@ -444,7 +470,7 @@ Use online migration when the source database must remain available while data i
 
 Before starting:
 
-1. Locate the Azure SQL Managed Instance already provisioned in your lab environnment's subscription.
+1. Locate the Azure SQL Managed Instance already provisioned in your lab environment's subscription.
 3. Establish connectivity by using SSMS 22 installed on the lab VM's desktop, use the Entra with Password account.
 
 ![SSMS22](./images/ssms_22.png).
@@ -491,16 +517,21 @@ ADD MEMBER [AdminUser];
 GO
 ```
 
-<b>4b.</b> Create a folder locally on the machine where the output will be generated ex. *C:\Migration\Assessment*.
-Connectivity to the SQL server will use SQL Server authentication.  The *AdminUser* account created above will be used.  
-Run the cmdlet below, replace all values with those of your lab environment.
+<b>4b.</b> Connectivity to the SQL server will use SQL Server authentication. 
+
+ The *AdminUser* account created above will be used.  
+
+Run the cmdlet below to start an assessment. 
+
+- The command below assumes your source IP address, correct it if needed.
+- Put your password that you chose below within the double quote "" below. 
 
 #### SQL Server Authentication
 
 ```powershell
-$AssessmentFolder = "C:\Migration\Assessment"
+$AssessmentFolder = $HOME
 
-$AssessmentConnection = "Data Source=<put SQL Server IP here>;Initial Catalog=master;Integrated Security=False;User Id=<put user here>;Password=<put password here>"
+$AssessmentConnection = "Data Source=192.168.1.100;Initial Catalog=master;Integrated Security=False;User Id=AdminUser;Password=<put password here>"
 
 az datamigration get-assessment `
     --connection-string $AssessmentConnection `
@@ -571,10 +602,10 @@ Get the environment information.  Fill in all information for the variables acco
 
 ```powershell
 $StorageAccount = "caldovalab05st@lab.LabInstance.Id"
-$StorageResourceGroup = "<storage account resource group>"
-$MiResourceGroup = "<Azure SQL Managed Instance resource group>"
-$ManagedInstance = "<Azure SQL Managed Instance name>" 
-$MigrationResourceGroup = "<Database Migration Service Resource Group>"
+$StorageResourceGroup = az storage account list --query "[?name=='$StorageAccount'].resourceGroup | [0]" --output tsv
+$MiResourceGroup = "rg-caldova-lab04-secondary-@lab.LabInstance.Id"
+$ManagedInstance = "caldovalab04mi@lab.LabInstance.Id" 
+$MigrationResourceGroup = az resource list --name "caldova-lab05-sqlmig-@lab.LabInstance.Id" --resource-type "Microsoft.DataMigration/sqlMigrationServices" --query "[0].resourceGroup" --output tsv
 $MigrationService = "caldova-lab05-sqlmig-@lab.LabInstance.Id"
 
 $StorageAccountId = az storage account show `
