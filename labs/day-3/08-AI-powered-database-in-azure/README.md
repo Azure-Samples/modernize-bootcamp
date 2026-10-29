@@ -22,6 +22,8 @@ All Azure control-plane commands use Azure CLI. Run them from PowerShell. The da
 
 ## 1. Add an NSG rule to connect to SQL MI. Connect to the SQL Managed Instance and find the product 
 
+Log on to Azure portal using your credentials. 
+
 Add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
 
  ![NSG1](../../day-2/05-modernize-data/images/NSG1.png)
@@ -64,10 +66,6 @@ $managedInstanceDetails = @(
         --output json |
         ConvertFrom-Json
 )
-if ($mnagedInstanceDetails.Count -ne 1)
-{
-    throw "Expected exactly one SQL managed instance in resource group '$resourceGroup', but found $($managedInstanceDetails.Count)."
-}
 $managedInstance = $managedInstanceDetails[0].SQLMI
 $managedInstanceDetails | Format-Table -AutoSize
 ```
@@ -97,7 +95,7 @@ $location
 - This lab assumes that the Foundry public data endpoint is enabled and that the SQL managed instance subnet can reach `*.openai.azure.com` over outbound HTTPS port 443. Enabling the SQL managed instance public data endpoint isn't required.
 - The sample query assumes the target database contains `dbo.Product` with the columns `ID`, `Name`, and `Description`, and that product ID `9` exists.
 
-## 3. Enable the required SQL MI update policy (if needed)
+## 3. Upgrade SQL MI ( only if needed )
 
 First inspect the current database version to see if we need an upgrade:
 
@@ -167,7 +165,7 @@ $modelJson = az cognitiveservices model list `
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to retrieve the model catalog for location '$location'."
 }
-$availableModels = @($modelJson | ConvertFrom-Json)
+$availableModels = @($modelJson | ConvertFrom-Json | ForEach-Object { $_ })
 if ($availableModels.Count -eq 0) {
     throw "Model '$modelName' is not available in '$location'."
 }
@@ -183,6 +181,7 @@ if (-not $selectedModel) {
 }
 Write-Host "Model validation succeeded:`n  Model:    $($selectedModel.Name)`n  Version:  $($selectedModel.Version)`n  Format:   $($selectedModel.Format)`n  SKU:      $modelSkuName`n  Capacity: $modelCapacity"
 ```
+
 
 Select the newest OpenAI model version that supports the standard deployment SKU:
 
@@ -200,7 +199,9 @@ $modelFormat = $selectedModel.Format
 $selectedModel | Format-List Name, Version, Format, SKUs
 ```
 
-If no matching model is available, don't run the deployment command. Set `$location` to a region where the model and SKU are offered, rerun the model availability and selection blocks, and then continue.
+If no matching model is available, don't run the deployment command. Set `$location` to a region where the model and SKU are offered.
+
+Alternately, while gpt-5-mini is a commonly avaialble model in foundry in most regions, if you want to find another model refer [here](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?tabs=az-americas&pivots=standard) for the right model for your region.  rerun the model availability and selection blocks, and then continue.
 
 ## 5. Create the Foundry resource and project in the MI resource group
 
@@ -501,7 +502,7 @@ IF @modelResponse IS NULL
 SELECT @modelResponse AS AdCopy;
 ```
 
-Copy the AdCopy column full text and paste it into a text file. 
+#### Copy the AdCopy column full text and paste it into a text file. 
 
 If you run the query again, see that you get a different text.
 
