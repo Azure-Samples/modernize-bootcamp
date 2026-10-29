@@ -915,7 +915,7 @@ An AI-generated recommendation does not authorize any of these decisions.
 
 ## 8️⃣ Create bounded draft plans
 
-Create plans only after the assessment findings have been reconciled. Keep each plan limited to one repository and one modernization slice.
+Create plans,Keep each plan limited to one repository and one modernization slice.
 
 ### 1. Locate assessment JSON files
 
