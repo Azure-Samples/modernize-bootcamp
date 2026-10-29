@@ -386,7 +386,7 @@ Use one Copilot Chat conversation in the multi-root workspace to assess **Portal
 > 🤖 **Paste this into Copilot Chat.**
 
 ```plaintext
-**#codebase** Assess all five Contoso Legacy Bank application repositories in this
+#codebase Assess all five Contoso Legacy Bank application repositories in this
 multi-root workspace: Portal, Accounts, Statements, Documents, and Batch.
 
 Treat this as one coordinated, read-only assessment. Do not require separate
@@ -400,7 +400,7 @@ Use the hub only for shared documentation, instructions, repository revisions,
 and orchestration context supplied through attached files; do not assess it
 as a sixth application. Analyze each component once and use one consistent
 path for its evidence links. If overlapping workspace paths expose the same
-component through both a named root and the hub's apps directory, treat them
+component through both a named root and the hubs apps directory, treat them
 as one repository and deduplicate findings, counts, and effort estimates.
 
 Evaluate modernization toward supported modern .NET and appropriate Azure
