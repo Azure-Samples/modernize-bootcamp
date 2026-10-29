@@ -760,7 +760,7 @@ Verify:
 
 Do not publish raw reports until they have been reviewed for source details, internal URLs, secrets, credentials, personal data, and unsupported claims.
 
-### 5. Optional: run the interactive CLI
+### 5.Run the interactive CLI
 
 The same CLI also provides a text user interface:
 
