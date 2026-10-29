@@ -360,14 +360,19 @@ Explicit attachment means "this evidence must be considered." It is useful
 for contracts, configuration, tests, and architecture decisions that a
 relevance search might otherwise omit.
 
-Example:
+Example: after attaching the files 
+> 🤖 **Paste this into Copilot Chat.**
+
+```plaintext
 
 > Using the attached WCF contract, all three attached consumer implementations,
 > architecture.md, and compatibility.json, build a producer/consumer matrix.
 > Identify operation, DTO, fault, endpoint, versioning, coexistence, and
 > migration-order requirements. Treat attached files as authoritative for the
 > recorded baseline revision.
+```
 
+** Remember to remove the root from the workspace if not completed already**
 
 Use one Copilot Chat conversation in the multi-root workspace to assess **Portal, Accounts, Statements, Documents, and Batch** as a connected system. You do not need to start five separate modernization UI assessments.
 
