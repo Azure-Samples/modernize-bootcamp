@@ -284,10 +284,12 @@ Here is how that context is gathered:
 
 For example: > 💻 **Run this in the terminal of the multi-repository workspace.**
 
-> **#codebase** Analyze the statement-generation workflow across the Portal,
-> Accounts, Statements, and Documents repositories. Trace the request from the
-> WinForms event through WCF and Web API 2 to the JSON job and generated PDF.
-> Remain read-only. Cite repository paths for every contract and consumer.
+```plaintext
+ #codebase Analyze the statement-generation workflow across the Portal,
+ Accounts, Statements, and Documents repositories. Trace the request from the
+ WinForms event through WCF and Web API 2 to the JSON job and generated PDF.
+ Remain read-only. Cite repository paths for every contract and consumer.
+```
 
 > [!NOTE]
 > **Review the output before continuing.** Look for a step-by-step explanation
@@ -383,7 +385,7 @@ Use one Copilot Chat conversation in the multi-root workspace to assess **Portal
 > 🤖 **Paste this into Copilot Chat.**
 
 ```plaintext
-#codebase Assess all five Contoso Legacy Bank application repositories in this
+**#codebase** Assess all five Contoso Legacy Bank application repositories in this
 multi-root workspace: Portal, Accounts, Statements, Documents, and Batch.
 
 Treat this as one coordinated, read-only assessment. Do not require separate
