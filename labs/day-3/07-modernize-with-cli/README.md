@@ -282,7 +282,8 @@ Here is how that context is gathered:
    Check its file references and ask for missing producer or consumer evidence
    before treating the answer as a complete assessment.
 
-For example: > 💻 **Run this in the terminal of the multi-repository workspace.**
+For example: 
+> 🤖 **Paste this into Copilot Chat.**
 
 ```plaintext
  #codebase Analyze the statement-generation workflow across the Portal,
