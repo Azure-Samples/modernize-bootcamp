@@ -2,7 +2,7 @@
 
 Contoso Legacy Bank is not one project in one repository. Its customer portal, account service, statement API, document worker, and nightly batch process are separate .NET Framework applications that collaborate at runtime.
 
-In this lab, you will use **GitHub Copilot modernization in Visual Studio Code** and the **GitHub Copilot Modernization CLI** to assess the five repositories as one application estate. You will compare interactive findings with repeatable CLI reports, reconcile the evidence, and create a dependency-aware modernization roadmap.
+In this lab, you will use **GitHub Copilot Chat in a multi-root Visual Studio Code workspace** and the **GitHub Copilot Modernization CLI** to assess the five repositories as one application estate. You will compare interactive findings with repeatable CLI reports, reconcile the evidence, and create a dependency-aware modernization roadmap. The modernization extension UI is an optional tool for deeper assessment of an individual repository.
 
 > [!IMPORTANT]
 > This is an **assessment and planning lab**. Remain read-only while assessing the application. You may generate draft plans, but do not run `modernize plan execute`, `modernize upgrade`, or ask an agent to change application code.
@@ -61,8 +61,8 @@ You will use two complementary workflows:
 
 | Workflow | Best use in this lab | Limitation to remember |
 | --- | --- | --- |
-| VS Code modernization assessment | Detailed, interactive findings for an individual project or repository | A repository-level result might not identify every external consumer |
-| VS Code multi-root Copilot Chat | Trace contracts, consumers, data flow, and migration order across all five repositories | Results depend on attached context and must be verified against code |
+| VS Code multi-root Copilot Chat | One coordinated assessment with per-repository findings, contracts, consumers, and migration order across all five repositories | Source-based analysis is not a tool-generated modernization assessment; coverage depends on accessible context and must be verified |
+| VS Code modernization assessment (optional) | Deeper, tool-generated findings for a selected project or repository | The UI workflow described here assesses one repository at a time, not the multi-repository application |
 | Modernization CLI | Repeatable per-repository and aggregated reports from one configuration | An aggregate report is evidence, not an approved architecture |
 
 Neither output is automatically authoritative. Repository code, build results, tests, runtime behavior, and owner decisions remain the evidence used to accept or reject a recommendation.
@@ -212,7 +212,9 @@ Running the complete application is not required for this assessment lab.
 git submodule status
 ```
 
-Keep this output with your final handoff. A branch name such as `main`
+**Expected outcome:** Five entries for Portal, Accounts, Statements, Documents,
+and Batch, each showing a commit SHA and repository path with no leading
+`-`, `+`, or `U`.
 
 ---
 
@@ -226,7 +228,7 @@ From the hub root, run:
 code .\contoso-legacy-bank-multi-repo.code-workspace
 ```
 
-The VS Code Explorer should show five named application roots under `apps`:
+The VS Code Explorer should show five named application roots:
 
 - Portal
 - Accounts
@@ -238,41 +240,183 @@ It may also show the hub for shared documentation and orchestration.
 
 Before starting an assessment:
 
-1. wait for VS Code workspace indexing to settle
+1. confirm all repository folders are visible and accessible in Explorer.
 2. trust the workspace only if you recognize the repository
 3. confirm all five roots contain source files
 4. review `.github\copilot-instructions.md` in the hub and each component repository
 5. keep the Source Control view clean so generated or accidental changes are obvious
 
 > [!IMPORTANT]
-> The folders under `apps\` are independent Git repositories. Do not treat them as ordinary hub files. Future code changes would be committed in the owning component repository first, followed by a separate hub submodule-pointer update.
+> The folders under are independent Git repositories. Do not treat them as ordinary hub files. Future code changes would be committed in the owning component repository first, followed by a separate hub submodule-pointer update.
 
 ---
 
-## 4️⃣ Assess each repository in VS Code
+## 4️⃣ Assess the application across repositories in VS Code
 
-The modernization extension produces the most useful project-level detail when each application is assessed deliberately. Repeat this workflow for **Portal, Accounts, Statements, Documents, and Batch**.
+### Build the agent context
 
-The extension UI can evolve. Labels might vary slightly, but the assessment choices and review goals remain the same.
+`#codebase` is a Copilot Chat reference to VS Code's **semantic code search**
+tool. Semantic search finds code related to the *meaning* of your question,
+not just files containing the exact words you typed. For example, a question
+about "statement generation" can help locate the request handler, service
+calls, and document worker that implement that workflow.
 
-### 1. Start an assessment
+In VS Code, type `#codebase` in the Chat input and select the matching
+suggestion, then describe what you want to investigate. In this lab, the open
+multi-root workspace makes the five application folders available as search
+context; you do not need to switch to a separate window for each repository.
 
-1. Select the **GitHub Copilot modernization** icon in the Activity Bar.
-2. Select **Start Assessment**.
-3. Select the project or solution from one component repository.
-4. Choose **Recommended Assessment** when offered.
-5. Choose **Cloud Readiness** as the target.
-6. Keep the run in assessment mode. Do not choose an upgrade or execution action.
+Here is how that context is gathered:
 
-If the extension cannot distinguish projects in the multi-root workspace, open the relevant component in a separate VS Code window:
+1. **Index:** VS Code uses an available workspace index to locate relevant
+   code snippets. Index coverage and exclusion rules affect what can be found.
+2. **Retrieve:** `#codebase` searches that index for code related to your prompt.
+   Naming the repositories, workflow, and contracts helps focus the search.
+3. **Investigate:** Copilot can use available file-reading, text-search, and
+   symbol tools to inspect results and follow relationships across files.
+4. **Respond:** Copilot uses the retrieved context to construct an answer.
+   Check its file references and ask for missing producer or consumer evidence
+   before treating the answer as a complete assessment.
 
-> 💻 **Run this in the terminal.**
+For example: > 💻 **Run this in the terminal of the multi-repository workspace.**
 
-```powershell
-code .\apps\contoso-legacy-bank-accounts
+> #codebase Analyze the statement-generation workflow across the Portal,
+> Accounts, Statements, and Documents repositories. Trace the request from the
+> WinForms event through WCF and Web API 2 to the JSON job and generated PDF.
+> Remain read-only. Cite repository paths for every contract and consumer.
+
+> [!NOTE]
+> **Review the output before continuing.** Look for a step-by-step explanation
+> of how a statement request moves between the Portal, Accounts, Statements,
+> and Documents repositories, from the WinForms event to the generated PDF.
+> Each handoff should identify the sending and receiving code, the contract
+> or message exchanged (WCF operation, HTTP request, or JSON job), and the
+> repository paths supporting that explanation. Open the cited files to check
+> the evidence. If a link in the workflow is missing or inferred, ask Copilot
+> to investigate it or label it as unknown rather than assuming the trace is
+> complete. This is a source-based explanation, not proof that the workflow
+> has been executed successfully.
+
+Think of `#codebase` as "find relevant code," not "read every repository in
+full." The model's context window is finite, and search can miss relevant
+files. It does not clone missing repositories, run modernization scans, or
+execute tests by itself. Agent mode can also discover context automatically;
+explicitly using `#codebase` directs it toward semantic workspace search.
+
+For more detail, see [How Copilot understands your workspace](https://code.visualstudio.com/docs/agents/reference/workspace-context).
+
+Use `#codebase` for:
+
+- discovering where a capability is implemented;
+- finding producers and consumers of a contract;
+- comparing patterns across repositories;
+- locating configuration, tests, and dependencies;
+- answering questions when you do not already know the important files.
+
+Do not rely on `#codebase` alone when a particular file must be considered.
+
+#### Add required evidence explicitly
+
+In the Chat view, select **Add Context**, then choose **Files & Folders**, or
+drag files and folders from Explorer into Chat.
+
+For an application-wide Contoso assessment, explicitly attach:
+
+| Purpose | Context to attach |
+|---|---|
+| Current architecture | Hub `docs\architecture.md` |
+| Verified repository revisions | Hub `compatibility.json` |
+| Modernization rules | Hub `docs\modernization-lab.md` and `.github\copilot-instructions.md` |
+| WCF producer contract | Accounts `src\Contoso.LegacyBank.Accounts.Contracts` |
+| WCF consumers | Portal `src\...\Services`; Statements `src\...\Services`; Batch `src\...` |
+| Statement file contract | Statements `docs\statement-job-schema.md`; Documents `Models` and `samples` |
+
+If the hub file is not visible as a workspace root, use **Add Context →
+Files & Folders** and browse to the hub path, or open the file first and attach
+the active editor tab.
+
+Explicit attachment means "this evidence must be considered." It is useful
+for contracts, configuration, tests, and architecture decisions that a
+relevance search might otherwise omit.
+
+Example:
+
+> Using the attached WCF contract, all three attached consumer implementations,
+> architecture.md, and compatibility.json, build a producer/consumer matrix.
+> Identify operation, DTO, fault, endpoint, versioning, coexistence, and
+> migration-order requirements. Treat attached files as authoritative for the
+> recorded baseline revision.
+
+
+Use one Copilot Chat conversation in the multi-root workspace to assess **Portal, Accounts, Statements, Documents, and Batch** as a connected system. You do not need to start five separate modernization UI assessments.
+
+> [!IMPORTANT]
+> This workflow uses Copilot's workspace-wide code analysis, not a native multi-repository assessment in the modernization extension UI. A consolidated Chat report does not prove that modernization scans, builds, tests, or runtime checks ran. Use the CLI in the next section for repeatable tool-generated reports, and optionally use the extension UI for a repository-specific deep dive.
+
+### 1. Submit the coordinated assessment prompt
+
+1. In `contoso-legacy-bank-multi-repo.code-workspace`, open **Copilot Chat** and click the **+** (**New Chat**) button at the top of the Chat view to start a fresh conversation.
+2. Select **Agent** mode and keep the assessment read-only as instructed in the prompt.
+3. If you attached evidence in an earlier conversation, attach it again in this new chat. Then paste the prompt below, starting with `#codebase` so VS Code searches the indexed workspace.
+
+> [!TIP]
+> **Review the prompt before running it.** Notice how it defines the scope (all five repositories), sets read-only boundaries, describes the modernization goal, and specifies the report structure. It asks for both repository-level findings and cross-repository dependencies, then requires code evidence and a clear separation of facts, assumptions, and unverified checks. Understanding these parts helps you recognize what the prompt is asking Copilot to do and whether the response actually meets those requirements.
+
+> 🤖 **Paste this into Copilot Chat.**
+
+```plaintext
+#codebase Assess all five Contoso Legacy Bank application repositories in this
+multi-root workspace: Portal, Accounts, Statements, Documents, and Batch.
+
+Treat this as one coordinated, read-only assessment. Do not require separate
+conversations for each repository. Do not edit files, create branches, create
+plans, or execute upgrades.
+
+First confirm which repository roots are accessible. Explicitly identify any
+inaccessible or insufficiently examined repositories.
+
+Evaluate modernization toward supported modern .NET and appropriate Azure
+services. Where an exact target version or architecture is needed, identify
+the decision rather than assuming it. Preserve observable behavior and do not
+assume all repositories can change in one release.
+
+Produce one consolidated Markdown report containing:
+
+1. A profile for each repository: languages, frameworks and declared/resolved
+   versions, project types, executables and entry points, direct and relevant
+   transitive dependencies, data and file stores, endpoints, startup
+   dependencies, external configuration, hosting, build pipelines, and tests.
+
+2. A finding register grouped by repository. Give every finding a stable ID,
+   mandatory/potential/optional classification, severity, confidence, affected
+   files and symbols with evidence links, why it matters for the proposed
+   target, remediation guidance and compatibility implications, effort range
+   in person-days with assumptions and dependencies, tests or runtime evidence
+   needed to accept the recommendation, and measurable acceptance criteria.
+   Mandatory means a demonstrated target requirement or blocker; potential
+   means a risk requiring validation; optional means an improvement not
+   required for the target.
+
+3. Cross-repository analysis: trace producers and consumers of WCF operations
+   and faults, HTTP routes and payloads, JSON, CSV, LocalDB, file-queue messages,
+   and generated PDFs. Identify breaking-change risks, coexistence requirements,
+   rollback needs, shared remediation work, and migration sequencing.
+
+4. A summary: finding counts by classification, highest-priority blockers,
+   a dependency-ordered modernization roadmap, overall effort without
+   double-counting, independently implementable repository work packages,
+   unresolved decisions, human decision gates, and validation gaps.
+
+For every conclusion, cite the repository, file, and symbol that support it.
+Separate observed facts, inferences, assumptions, and unknowns. Verify
+target-specific compatibility claims against authoritative documentation when
+available; otherwise mark them unverified. Missing evidence is not proof of
+incompatibility.
+
+Distinguish source-based observations from tool-generated assessment results.
+Do not claim modernization scans, builds, tests, or runtime checks ran unless
+they actually ran; distinguish executed checks from proposed validation.
 ```
-
-Replace the folder name and repeat for the other repositories.
 
 ### 2. Review the result
 
@@ -286,7 +430,7 @@ For each repository, inspect:
 - effort estimate and assumptions
 - test or runtime evidence needed before accepting the recommendation
 
-Do not select **Create Plan** yet. First complete all five assessments and the application-wide analysis.
+Confirm that the report covers all five repositories and their dependencies; a missing repository is a coverage gap, not a successful assessment. Do not create a plan yet. First review the consolidated findings and compare them with the CLI results.
 
 ### 3. Build the finding register
 
@@ -306,8 +450,8 @@ Findings are captured in this format (sample rows shown):
 
 | ID | Repository | Finding | Priority | File or symbol evidence | Consumer or dependency impact | Proposed direction | Confidence / unknowns |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| VS-01 | Accounts | Data access uses Entity Framework 6 against a local-only SQL LocalDB database, which cannot run in Azure as-is | High | `AccountsService` data layer and `App.config` connection string | Portal and Statements both read account data through this service, so any change must keep their calls working | Move to EF Core and Azure SQL, keeping the existing service operations unchanged at first | High confidence it must change; unknown how much data must be migrated |
-| VS-02 | Statements | Statement API (ASP.NET Web API 2) calls the Accounts service with no timeout or retry, so a slow account service can hang statement requests | Medium | `StatementsController` and its WCF client configuration | Portal depends on statement requests completing, so failures surface directly to customers | Add resilient client behavior (timeouts/retries) when moving to ASP.NET Core | Medium confidence; need runtime data on how often this fails today |
+| VS-01 | Accounts | Data access uses Entity Framework 6 against a local-only SQL LocalDB database, which cannot run in Azure as-is | High | AccountsService data layer and App.config connection string | Portal and Statements both read account data through this service, so any change must keep their calls working | Move to EF Core and Azure SQL, keeping the existing service operations unchanged at first | High confidence it must change; unknown how much data must be migrated |
+| VS-02 | Statements | Statement API (ASP.NET Web API 2) calls the Accounts service with no timeout or retry, so a slow account service can hang statement requests | Medium | StatementsController and its WCF client configuration | Portal depends on statement requests completing, so failures surface directly to customers | Add resilient client behavior (timeouts/retries) when moving to ASP.NET Core | Medium confidence; need runtime data on how often this fails today |
 
 At minimum, the assessment investigates these areas. (The jargon in the right
 column is the kind of detail a developer would examine — you do not need to
@@ -323,55 +467,29 @@ its own code and how it connects to the others.)
 | Batch | CSV schema, duplicate handling, reconciliation, scheduling, local paths, and partial failures |
 | All repositories | Configuration, secrets, logging, health, telemetry, package support, build/test coverage, and CI |
 
-### 4. Check that assessment did not change source
+### 4. Challenge the output
 
-From the hub root:
+An AI-generated assessment is a starting point, not an approval to migrate.
+Copilot can miss a consumer, infer behavior from incomplete context, or suggest
+a change that sounds reasonable but does not fit the application's constraints.
+Challenging the output means asking it to show evidence, trace dependencies,
+and explain uncertainty rather than simply asking whether its answer is correct.
 
-> 💻 **Run this in the terminal.**
+This helps you:
 
-```powershell
-git status --short
-git submodule foreach --recursive 'git status --short'
-```
+- **Catch missing dependencies** before a change in one repository breaks another.
+- **Separate facts from assumptions** so unsupported recommendations become
+  questions to investigate, not mandatory work.
+- **Improve scope and effort estimates** by exposing affected consumers,
+  compatibility work, and tests the first response might have missed.
+- **Make recommendations reviewable** by connecting them to source evidence,
+  acceptance checks, and decisions that need a human owner.
+- **Reduce migration risk** by identifying where runtime validation,
+  coexistence, or rollback evidence is still needed.
 
-Assessment dashboards or reports might create ignored local artifacts. Application source should remain unchanged.
-
----
-
-## 5️⃣ Analyze the application across repositories in VS Code
-
-Repository assessments do not automatically prove how a contract is consumed elsewhere. Use the multi-root workspace and Copilot Chat to investigate the application as a connected system.
-
-### 1. Open Copilot Chat
-
-Return to `contoso-legacy-bank-multi-repo.code-workspace`, open **Copilot Chat**, and use **Ask** or **Agent** mode in a read-only manner. Start with `#codebase` so VS Code searches the indexed workspace.
-
-### 2. Submit the application-wide assessment prompt
-
-> 🤖 **Paste this into Copilot Chat.**
-
-```plaintext
-#codebase Analyze all five Contoso Legacy Bank application repositories as one
-system. Remain read-only and do not edit files, create branches, or implement
-changes.
-
-Inventory each executable, project, framework, data store, file store, endpoint,
-startup dependency, and external configuration. Trace every runtime contract
-from producer to consumer, including WCF operations and faults, HTTP routes and
-payloads, JSON, CSV, LocalDB, file-queue messages, and generated PDF output.
-
-For every conclusion, cite the repository, file, and symbol that support it.
-Separate observed facts from inferred conclusions, assumptions, and unknowns.
-Identify unsupported dependencies, cloud-readiness blockers, test gaps,
-coexistence requirements, rollback needs, and cross-repository sequencing.
-
-Recommend a dependency-ordered modernization roadmap using supported modern
-.NET and appropriate Azure services. Preserve observable behavior and do not
-assume all repositories can change in one release. End with independently
-implementable repository work packages and human decision gates.
-```
-
-### 3. Challenge the output
+More confident wording is not stronger evidence. Follow-up answers still need
+verification against the source, tests, and runtime behavior; repeating a claim
+does not validate it.
 
 Ask focused follow-ups instead of accepting the first response:
 
@@ -397,7 +515,7 @@ Which recommendations are directly supported by code, which are inferred, and
 which require a product owner, security owner, data owner, or operations owner?
 ```
 
-### 4. Capture the contract matrix
+### 5. Capture the contract matrix
 
 A **contract** is the agreement about how one application talks to another — the
 messages they exchange and what each side expects. If you change one app, you
@@ -415,7 +533,7 @@ Sample contract matrix:
 
 | Producer | Consumer | Contract or data | Evidence | Current failure behavior | Modernization/coexistence concern |
 | --- | --- | --- | --- | --- | --- |
-| Accounts | Portal | WCF operations and faults | `IAccountService` operations called by the Portal client | Portal shows an error dialog and the action stops | Portal must keep working while Accounts moves to a new API, so the old operations need a compatibility path |
+| Accounts | Portal | WCF operations and faults | IAccountService operations called by the Portal client | Portal shows an error dialog and the action stops | Portal must keep working while Accounts moves to a new API, so the old operations need a compatibility path |
 | Accounts | Statements | WCF operations and DTOs | Statements' account client and shared data objects | Statement request fails if the account call fails | Statements and Accounts cannot both change in the same release without coordination |
 | Statements | Portal | HTTP routes and payloads | Web API 2 routes the Portal calls for statement status | Portal cannot show statement status | Keep the same routes/responses when moving Statements to ASP.NET Core |
 | Statements | Documents | File-queue message | Message dropped on the shared file queue | Document job is never produced; no error shown to the user | Replace the file queue with managed messaging without losing in-flight jobs |
@@ -423,11 +541,110 @@ Sample contract matrix:
 
 The output should make dependencies visible, not merely list technologies.
 
+### 6. Optional: deepen a repository assessment with the modernization UI
+
+> [!NOTE]
+> **This section is optional.** It is not a prerequisite for the
+> multi-repository workflow; you can skip to the CLI assessment in the next
+> section. To **deepen a repository assessment** means to move from the
+> application-wide overview to a focused investigation of one component.
+> For example, Chat might identify "Accounts uses WCF and EF6," while a
+> targeted modernization UI assessment can add tool-generated findings about
+> that project's APIs, packages, configuration, and migration requirements,
+> depending on the assessment selected and the tool's coverage. Select only
+> the repository that needs additional detail; you do not need to repeat
+> the UI assessment for all five repositories.
+
+Use this when you need to investigate a specific question, for example:
+
+- Which WCF features or bindings in Accounts need further compatibility review?
+- Which dependencies in Statements need changes for the proposed .NET target?
+- Which local file paths or hosting assumptions in Documents are flagged as
+  cloud-readiness concerns?
+
+Compare the tool's findings with the source evidence and the consolidated
+register. Record any new affected files, remediation guidance, or validation
+gaps, and check consumers in the other repositories before changing the
+recommended migration order. A deeper assessment adds evidence; it does not
+prove runtime compatibility or approve a migration.
+
+The extension UI can evolve. Labels might vary slightly:
+
+1. Select the **GitHub Copilot modernization** icon in the Activity Bar.
+2. Select **Start Assessment**.
+3. Select the project or solution from the repository you want to investigate.
+4. Choose **Recommended Assessment** when offered.
+5. Choose **Cloud Readiness** as the target.
+6. Keep the run in assessment mode. Do not choose **Create Plan**, an upgrade, or an execution action.
+
+If the extension cannot distinguish projects in the multi-root workspace, open only the selected component in a separate VS Code window, for example:
+
+> 💻 **Run this in the terminal.**
+
+```powershell
+code .\apps\contoso-legacy-bank-accounts
+```
+
+#### Reconcile the additional findings with Copilot
+
+**Use Copilot to propose the comparison, then review it yourself.** You do not
+need to merge findings manually row by row. Here, *reconcile* means deciding
+whether each additional finding is new, duplicates an existing finding, adds
+evidence to it, or conflicts with it.
+
+1. Return to the multi-root workspace and the Chat conversation containing
+   the consolidated assessment. A conversation in a separate repository
+   window should not be assumed to share that context.
+2. Attach the repository-level assessment report and the consolidated register
+   using **Add Context**. If the results exist only in a dashboard or another
+   conversation, paste the relevant findings, including their evidence and
+   the assessed repository revision.
+3. Ask Copilot to compare the findings and trace affected consumers across
+   the other repositories using the prompt below.
+4. Review the proposed changes against the cited source. Keep conflicting
+   evidence and unresolved questions visible rather than accepting whichever
+   report sounds more confident.
+5. After review, save the accepted register in your working document outside
+   the application repositories. In this read-only exercise, Copilot proposes
+   the revised content in Chat; you decide what to retain.
+
+> 🤖 **Paste this into Copilot Chat after attaching both assessments.**
+
+```plaintext
+#codebase Compare the attached repository-level assessment with the
+consolidated finding register for all five Contoso repositories. Remain
+read-only; propose revised register content in Chat without editing files.
+
+First confirm that both assessments are available and identify their assessed
+revisions. Flag missing or different revisions before combining conclusions.
+
+For each additional finding:
+- classify it as new, duplicate, supporting evidence, or conflicting evidence;
+- match it to an existing finding ID where appropriate and preserve that ID;
+- give genuinely new findings unique IDs without duplicating shared work;
+- cite the report evidence and verify the relevant source files and symbols;
+- trace affected contracts and consumers across the other repositories;
+- propose any changes to classification, severity, confidence, remediation,
+  effort, validation requirements, or migration order, explaining why.
+
+Return a comparison table and a proposed revised register. Preserve unresolved
+conflicts and unknowns. Separate source-confirmed impacts from risks that
+require tests or runtime evidence. Do not mark compatibility as verified
+solely because a repository-level assessment passed or found no issue.
+```
+
+For example, if the Accounts assessment recommends changing a WCF contract,
+Copilot should locate the Portal and Statements callers and explain whether
+they depend on the affected operations, data objects, or faults. You review
+those references and any proposed compatibility strategy. The agent helps
+organize and investigate the evidence; a human accepts the register changes,
+and tests or runtime checks are still needed to establish compatibility.
+
 ---
 
-## 6️⃣ Run the multi-repository Modernization CLI assessment
+## 5️⃣ Run the multi-repository Modernization CLI assessment
 
-The hub contains `.github\modernize\repos.json`. It lists the five application repositories and groups them as one logical application named `contoso-legacy-bank`. The hub itself is excluded because it contains orchestration and documentation rather than an application project.
+The hub contains `.github\modernize\repos.json`. It lists the five application repositories and groups them as one logical application named contoso-legacy-bank. The hub itself is excluded because it contains orchestration and documentation rather than an application project.
 
 ### 1. Confirm authentication and CLI availability
 
@@ -450,11 +667,11 @@ Get-Content .\.github\modernize\repos.json
 
 Confirm that it lists:
 
-- `contoso-legacy-bank-portal`
-- `contoso-legacy-bank-accounts`
-- `contoso-legacy-bank-statements`
-- `contoso-legacy-bank-documents`
-- `contoso-legacy-bank-batch`
+- contoso-legacy-bank-portal
+- contoso-legacy-bank-accounts
+- contoso-legacy-bank-statements
+- contoso-legacy-bank-documents
+- contoso-legacy-bank-batch
 
 ### 3. Run the supplied assessment-only wrapper
 
@@ -464,7 +681,7 @@ Confirm that it lists:
 .\scripts\Invoke-ModernizeAssessment.ps1
 ```
 
-The wrapper intentionally runs only `modernize assess`. It writes Markdown assessment output beneath:
+The wrapper intentionally runs only modernize assess. It writes Markdown assessment output beneath:
 
 ```text
 artifacts\modernize-assessment
@@ -483,7 +700,7 @@ modernize assess `
 The repository config allows the CLI to produce per-repository findings and an application-level aggregate without requiring you to type five URLs.
 
 > [!WARNING]
-> Do not substitute `modernize upgrade` and do not run `modernize plan execute`. Those commands can change source. This lab ends at reviewed assessment and draft planning.
+> Do not substitute modernize upgrade and do not run modernize plan execute. Those commands can change source. This lab ends at reviewed assessment and draft planning.
 
 ### 4. Review generated files
 
@@ -541,7 +758,7 @@ Do not continue into plan execution or upgrade.
 
 ---
 
-## 7️⃣ Compare and reconcile the results
+## 6️⃣ Compare and reconcile the results
 
 You ran two assessments: the interactive one in VS Code and the Modernization
 CLI. This step compares them. The goal is **not** to decide which tool "won" —
@@ -613,7 +830,7 @@ need a person who knows the business or operations:
 
 ---
 
-## 8️⃣ Prioritize the modernization portfolio
+## 7️⃣ Prioritize the modernization portfolio
 
 Score work by dependency and risk, not only by how old a framework is.
 
@@ -668,7 +885,7 @@ An AI-generated recommendation does not authorize any of these decisions.
 
 ---
 
-## 9️⃣ Create bounded draft plans
+## 8️⃣ Create bounded draft plans
 
 Create plans only after the assessment findings have been reconciled. Keep each plan limited to one repository and one modernization slice.
 
@@ -738,7 +955,7 @@ You may edit a draft plan for review. **Do not run it in this lab.**
 
 ---
 
-## 🔟 Final handoff
+## 9️⃣ Final handoff
 
 The final handoff is the short report you would give to an architect or
 repository owner who did not attend the lab. It gathers everything above into a
@@ -758,8 +975,8 @@ Sample (values are illustrative):
 
 | Item | Result |
 | --- | --- |
-| Hub commit SHA | `a1b2c3d` (recorded earlier in the lab) |
-| Component commit SHAs | Portal `1111111`, Accounts `2222222`, Statements `3333333`, Documents `4444444`, Batch `5555555` |
+| Hub commit SHA | a1b2c3d (recorded earlier in the lab) |
+| Component commit SHAs | Portal 1111111, Accounts 2222222, Statements 3333333, Documents 4444444, Batch 5555555 |
 | Baseline build | All five repositories built successfully before assessment |
 | VS Code assessments completed | 5 of 5 |
 | CLI repositories completed | 5 of 5, plus one application-level aggregate |
@@ -863,13 +1080,13 @@ Confirm the browser and VS Code use the same intended GitHub account and that th
 1. reopen `contoso-legacy-bank-multi-repo.code-workspace`
 2. confirm every root appears in Explorer
 3. wait for indexing to finish
-4. start the prompt with `#codebase`
+4. start the prompt with **#codebase**
 5. attach specific files or folders when asking about a contract
 6. split broad questions into a producer trace and a consumer trace
 
 ### The modernization extension does not offer the expected project
 
-Open that component repository in its own VS Code window:
+This applies only to the optional per-repository UI deep dive; it does not block the multi-root Copilot Chat workflow. Open the selected component repository in its own VS Code window:
 
 > 💻 **Run this in the terminal.**
 
