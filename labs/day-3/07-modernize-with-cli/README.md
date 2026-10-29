@@ -213,8 +213,7 @@ git submodule status
 ```
 
 **Expected outcome:** Five entries for Portal, Accounts, Statements, Documents,
-and Batch, each showing a commit SHA and repository path with no leading
-`-`, `+`, or `U`.
+and Batch, each showing a commit SHA and repository path.
 
 ---
 
@@ -236,7 +235,12 @@ The VS Code Explorer should show five named application roots:
 - Documents
 - Batch
 
-It may also show the hub for shared documentation and orchestration.
+The hub contains shared documentation and orchestration, but does not need to
+be a workspace root. Keep the five application roots as the assessment scope;
+attach the required hub files using **Add required evidence explicitly** below.
+If the hub is already listed in Explorer, right-click its workspace root and
+select **Remove Folder from Workspace**. This does not delete files or remove
+the five separately listed application roots.
 
 Before starting an assessment:
 
@@ -255,13 +259,13 @@ Before starting an assessment:
 
 ### Build the agent context
 
-`#codebase` is a Copilot Chat reference to VS Code's **semantic code search**
+**#codebase** is a Copilot Chat reference to VS Code's **semantic code search**
 tool. Semantic search finds code related to the *meaning* of your question,
 not just files containing the exact words you typed. For example, a question
 about "statement generation" can help locate the request handler, service
 calls, and document worker that implement that workflow.
 
-In VS Code, type `#codebase` in the Chat input and select the matching
+In VS Code, type **#codebase** in the Chat input and select the matching
 suggestion, then describe what you want to investigate. In this lab, the open
 multi-root workspace makes the five application folders available as search
 context; you do not need to switch to a separate window for each repository.
@@ -270,7 +274,7 @@ Here is how that context is gathered:
 
 1. **Index:** VS Code uses an available workspace index to locate relevant
    code snippets. Index coverage and exclusion rules affect what can be found.
-2. **Retrieve:** `#codebase` searches that index for code related to your prompt.
+2. **Retrieve:** **#codebase** searches that index for code related to your prompt.
    Naming the repositories, workflow, and contracts helps focus the search.
 3. **Investigate:** Copilot can use available file-reading, text-search, and
    symbol tools to inspect results and follow relationships across files.
@@ -297,15 +301,15 @@ For example: > 💻 **Run this in the terminal of the multi-repository workspace
 > complete. This is a source-based explanation, not proof that the workflow
 > has been executed successfully.
 
-Think of `#codebase` as "find relevant code," not "read every repository in
+Think of **#codebase** as "find relevant code," not "read every repository in
 full." The model's context window is finite, and search can miss relevant
 files. It does not clone missing repositories, run modernization scans, or
 execute tests by itself. Agent mode can also discover context automatically;
-explicitly using `#codebase` directs it toward semantic workspace search.
+explicitly using **#codebase** directs it toward semantic workspace search.
 
 For more detail, see [How Copilot understands your workspace](https://code.visualstudio.com/docs/agents/reference/workspace-context).
 
-Use `#codebase` for:
+Use **#codebase** for:
 
 - discovering where a capability is implemented;
 - finding producers and consumers of a contract;
@@ -313,7 +317,7 @@ Use `#codebase` for:
 - locating configuration, tests, and dependencies;
 - answering questions when you do not already know the important files.
 
-Do not rely on `#codebase` alone when a particular file must be considered.
+Do not rely on **#codebase** alone when a particular file must be considered.
 
 #### Add required evidence explicitly
 
@@ -324,16 +328,30 @@ For an application-wide Contoso assessment, explicitly attach:
 
 | Purpose | Context to attach |
 |---|---|
-| Current architecture | Hub `docs\architecture.md` |
-| Verified repository revisions | Hub `compatibility.json` |
-| Modernization rules | Hub `docs\modernization-lab.md` and `.github\copilot-instructions.md` |
-| WCF producer contract | Accounts `src\Contoso.LegacyBank.Accounts.Contracts` |
-| WCF consumers | Portal `src\...\Services`; Statements `src\...\Services`; Batch `src\...` |
-| Statement file contract | Statements `docs\statement-job-schema.md`; Documents `Models` and `samples` |
+| Current architecture | Hub docs\architecture.md |
+| Verified repository revisions | Hub compatibility.json |
+| Modernization rules | Hub docs\modernization-lab.md and .github\copilot-instructions.md |
+| WCF producer contract | Accounts src\Contoso.LegacyBank.Accounts.Contracts |
+| WCF consumers | Portal src\...\Services; Statements src\...\Services; Batch src\... |
+| Statement file contract | Statements docs\statement-job-schema.md; Documents Models and samples |
 
-If the hub file is not visible as a workspace root, use **Add Context →
-Files & Folders** and browse to the hub path, or open the file first and attach
-the active editor tab.
+The **Add Context → Files & Folders** picker can be limited to files in the
+current workspace. If the hub is not a workspace root, do not expect to browse
+to it through that picker. Temporarily add it to attach the required evidence:
+
+1. Select **File → Add Folder to Workspace**, choose the cloned
+   `modernize_sample_demo` root folder, and select **Add**.
+2. Attach only the required hub files from Explorer, not the entire hub or
+   its `apps` folder.
+3. Before submitting the assessment prompt, right-click the hub workspace
+   root in Explorer and select **Remove Folder from Workspace**. Confirm that
+   Portal, Accounts, Statements, Documents, and Batch remain listed.
+
+Removing the hub from the workspace does not delete files or erase context
+already attached to the current conversation. This avoids overlapping search
+roots: the hub's `apps` folders are the same repositories as the five named
+application roots, not additional copies. If you start a new chat, attach the
+required evidence again.
 
 Explicit attachment means "this evidence must be considered." It is useful
 for contracts, configuration, tests, and architecture decisions that a
@@ -374,6 +392,13 @@ plans, or execute upgrades.
 
 First confirm which repository roots are accessible. Explicitly identify any
 inaccessible or insufficiently examined repositories.
+
+Use the hub only for shared documentation, instructions, repository revisions,
+and orchestration context supplied through attached files; do not assess it
+as a sixth application. Analyze each component once and use one consistent
+path for its evidence links. If overlapping workspace paths expose the same
+component through both a named root and the hub's apps directory, treat them
+as one repository and deduplicate findings, counts, and effort estimates.
 
 Evaluate modernization toward supported modern .NET and appropriate Azure
 services. Where an exact target version or architecture is needed, identify
