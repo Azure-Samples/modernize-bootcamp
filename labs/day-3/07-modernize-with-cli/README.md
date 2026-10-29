@@ -284,7 +284,7 @@ Here is how that context is gathered:
 
 For example: > 💻 **Run this in the terminal of the multi-repository workspace.**
 
-> **codebase** Analyze the statement-generation workflow across the Portal,
+> **#codebase** Analyze the statement-generation workflow across the Portal,
 > Accounts, Statements, and Documents repositories. Trace the request from the
 > WinForms event through WCF and Web API 2 to the JSON job and generated PDF.
 > Remain read-only. Cite repository paths for every contract and consumer.
