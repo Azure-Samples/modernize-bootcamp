@@ -540,7 +540,7 @@ This auto-approves tool calls so the agent can work through the migration tasks 
 
 > 🧭 **IN A REAL CUSTOMER ENGAGEMENT**
 >
-> In production, most customers don't run fully on Autopilot. They keep a human in the loop for approvals, risk checks, and change oversight. Autopilot is used more confidently in proofs of concept (POCs), lower-risk workflows, and mature environments where governance is strong, with clear agent instructions, scoped skills, guardrails, and an aligned operating model. The usual pattern is staged adoption: start with supervised automation, then increase autonomy as controls and trust mature.
+> In production, most customers don't run fully on Autopilot. They keep a human in the loop for approvals, risk checks, and change oversight. Autopilot is used more confidently in proofs of concept (POCs), lower-risk workflows, and mature environments where governance is strong, with clear agent instructions, scoped skills, guardrails, and an aligned operating model. The usual pattern is staged adoption: start with supervised automation, then increase autonomy as controls and trust mature. In this lab, we speed things up with Autopilot because this is a safe proof of concept.
 
 **Observe and test while it runs:**
 
