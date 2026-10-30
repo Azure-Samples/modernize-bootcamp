@@ -550,7 +550,7 @@ Keep the dashboard and/or **tasks.md** open. As the agent works in Autopilot, mo
 
 > 💡 **NOTE**
 >
-> While the agent works, you may see odd, blank boxes or characters in Copilot Chat during the waits.It is a display (rendering) quirk in the chat window, and it does not affect the upgrade or its results. You can ignore these, it will still progress.
+> While the agent works, you may see odd, blank boxes or characters in Copilot Chat during the waits. It is a display (rendering) quirk in the chat window, and it does not affect the upgrade or its results. You can ignore these, it will still progress.
 
 Useful things to ask while it runs:
 
