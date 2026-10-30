@@ -18,6 +18,10 @@ In this module you'll use **GitHub Copilot Modernization** to make that move. Ra
 
 Caldova Retail runs on .NET Framework 4.8, the last version of a platform that is no longer being developed. It still gets security fixes, but no new features and no performance work. The app has to move onto current .NET before anything else can be modernized, which is why this comes first.
 
+> 🧭 **IN A REAL CUSTOMER ENGAGEMENT**
+>
+> The workshop makes modernization look fast and end to end. In a real engagement, the pace and structure depend on how large the app is and how the customer likes to work. Many teams modernize incrementally rather than asking Copilot to restructure everything at once. Depending on the app and the customer, you might agree a target end date and break the work into sprints with regular check-ins on progress.
+
 ## 📋 What You'll Do
 
 - 👀 See the storefront as it runs on-premises today, then get your own copy running on the VM
@@ -146,13 +150,16 @@ Select **Claude Sonnet 5.5** from the list (if you don't see it, look under **Ot
 
 ![Claude Sonnet 5.5 in the model picker list](./images/model-picker-sonnet.png)
 
-Then send this message in the chat, replacing the placeholders with your lab details:
+Next, tell the agent who you are, so it can make commits later without stopping to ask for your identity. In the message below, replace **your-name** and **your-lab-email** with your own details, and delete the angle brackets.
+
+- **Email:** use the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions. It looks like `user1-6614389@...`.
+- **Name:** use the part before the **@** in that email (for example, **user1-6614389**), or your own name. Either is fine.
+
+Then send this message in the chat:
 
 ```plaintext
-For the rest of this upgrade, use <your name> and <your lab email> as the Git commit identity.
+For the rest of this upgrade, use <your-name> and <your-lab-email> as the Git commit identity.
 ```
-
-Use the **Username** listed under **Azure portal** on the **Resources** tab as your email. For your name, use the part before **@** in that email (for example, **user1-6614389**) or your own name. Whichever is fine. This lets the agent make commits later without stopping to ask for your identity.
 
 ## ▶️ Run the App
 
@@ -397,6 +404,10 @@ Open **assessment.md** and read it. The report can be long, so start with the co
 
 The layout and section names can vary between .NET upgrade assessments, and some sections only appear when there is something to report. If your report looks different, look for equivalent findings rather than expecting these exact headings.
 
+> 🧭 **IN A REAL CUSTOMER ENGAGEMENT**
+>
+> Package compatibility is where dependencies on third-party libraries show up. This app has only a few, but a real customer may rely heavily on them, including components that aren't .NET at all. You don't have to change everything. Start by discussing with the customer what makes sense to **keep** as it is, what to **replace**, and what to **integrate** with, then build the plan around those decisions. Modernization can be a phased journey, not a full rewrite.
+
 ## 3️⃣ Review and Shape the Plan
 
 ### Confirm Upgrade Options
@@ -525,13 +536,21 @@ The dashboard shows the current phase and which tasks are running, pending, or c
 
    ![Switching to Autopilot permissions](./images/autopilot-mode.png)
 
-This auto-approves tool calls so the agent can work through the migration tasks continuously. (In real-world customer engagements, teams often stay on default permissions until stakeholders are comfortable with the agent's actions).
+This auto-approves tool calls so the agent can work through the migration tasks continuously.
+
+> 🧭 **IN A REAL CUSTOMER ENGAGEMENT**
+>
+> In production, most customers don't run fully on Autopilot. They keep a human in the loop for approvals, risk checks, and change oversight. Autopilot is used more confidently in proofs of concept (POCs), lower-risk workflows, and mature environments where governance is strong, with clear agent instructions, scoped skills, guardrails, and an aligned operating model. The usual pattern is staged adoption: start with supervised automation, then increase autonomy as controls and trust mature. In this lab, we speed things up with Autopilot because this is a safe proof of concept.
 
 **Observe and test while it runs:**
 
 Keep the dashboard and/or **tasks.md** open. As the agent works in Autopilot, monitor the chat box to observe its behavior. You can see how it approaches changes and which files it modifies. Copilot Chat is also available to answer your questions in real time:
 
 ![Chat execution dialogue](./images/chat-execution-dialogue.png)
+
+> 💡 **NOTE**
+>
+> While the agent works, you may see odd, blank boxes or characters in Copilot Chat during the waits. It is a display (rendering) quirk in the chat window, and it does not affect the upgrade or its results. You can ignore these, it will still progress.
 
 Useful things to ask while it runs:
 
