@@ -2,6 +2,12 @@
 
 Now that the database is migrated to Azure, let us use the power of AI for some easy applications out of the database. In this exercise, you will connect Azure AI to the SQL Managed Instance and create an advertisement for one of the product using AI.
 
+## Lab architecture
+
+![Lab architecture showing SQL MI calling the Azure Foundry Responses API using managed identity, with a Foundry project and model deployment](./images/lab8-architecture.svg)
+
+SQL MI reads product data, builds a JSON prompt, and calls the Foundry resource's model endpoint using `sys.sp_invoke_external_rest_endpoint` and a managed-identity database-scoped credential. The JSON response is parsed into advertisement text and returned to SSMS. The Foundry project organizes assets; it is not in the direct SQL request path.
+
 > [!NOTE] This lab requires additional Azure resources to be deployed.   
 > - Azure Foundry resource
 > - Foundry project
@@ -24,13 +30,18 @@ All Azure control-plane commands use Azure CLI. Run them from PowerShell. The da
 
 Log on to Azure portal using your credentials. 
 
-Add an inbound rule for port 3342. From the overview page of SQL MI, click on virtual network/subnet. On the subnet page, find the Network Security Group name. Pull up that NSG by name and add an imbound port rule like this:
+Select the secondary resource group - rg-caldova-lab04-secondary. 
+
+Find out the NSG in it.
+
+Add an inbound rule for port 3342. F
 
  ![NSG1](../../day-2/05-modernize-data/images/NSG1.png)
 
 
+Launch SSMS and connect to the SQL Managed instance using entra ID and password.
 
-Launch SSMS and connect to the SQL Managed instance.  You can browse for Azure SQL MI as shown here.
+ You can browse for Azure SQL MI as shown here.
 Remember to use the public endpoint on port 3342 and use Entra with password option.
 
 ![Picture](../08-AI-powered-database-in-azure/images/SSMS_easier_connect_SQL_MI.png)

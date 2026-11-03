@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title description">
+  <title id="title">Lab 08: AI-powered database architecture</title>
+  <desc id="description">SSMS runs T-SQL on Azure SQL Managed Instance. SQL reads product data, builds a JSON prompt, and invokes the Azure Foundry resource Responses API over HTTPS using a database-scoped managed identity credential. The deployed model returns JSON that SQL parses into advertisement text. A Foundry project organizes assets but is not in the SQL request path. Microsoft Entra ID supplies authentication, and the SQL identity has the Cognitive Services OpenAI User role at the Foundry resource scope.</desc>
+  <defs>
+    <marker id="blueArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#0078d4"/>
+    </marker>
+    <marker id="greenArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#107c41"/>
+    </marker>
+    <marker id="purpleArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#7553a6"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #172b4d; }
+      .heading { font-size: 23px; font-weight: 700; }
+      .label { font-size: 18px; font-weight: 600; }
+      .body { font-size: 17px; }
+      .small { font-size: 15px; }
+      .blue { fill: #005a9e; }
+      .green { fill: #107c41; }
+      .purple { fill: #654491; }
+      .request { fill: none; stroke: #0078d4; stroke-width: 3; marker-end: url(#blueArrow); }
+      .response { fill: none; stroke: #107c41; stroke-width: 3; marker-end: url(#greenArrow); }
+      .identity { fill: none; stroke: #7553a6; stroke-width: 2.5; stroke-dasharray: 7 5; marker-end: url(#purpleArrow); }
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="#ffffff"/>
+  <text x="35" y="48" font-size="30" font-weight="700">AI-generated product advertisements, directly from SQL</text>
+  <text x="35" y="80" class="body">Azure SQL MI + Azure Foundry | T-SQL REST call | Managed identity | JSON request and response</text>
+
+  <rect x="260" y="110" width="1110" height="610" rx="18" fill="#f7fafc" stroke="#98a8b9" stroke-width="2"/>
+  <text x="285" y="145" class="label">Azure resource group: existing SQL MI and new Foundry resources</text>
+
+  <rect x="25" y="295" width="205" height="200" rx="14" fill="#f3f5f7" stroke="#738396" stroke-width="2"/>
+  <text x="127" y="335" text-anchor="middle" class="heading">SSMS</text>
+  <text x="127" y="370" text-anchor="middle" class="body">Run the lab query</text>
+  <text x="127" y="400" text-anchor="middle" class="body">Read the AdCopy</text>
+  <text x="127" y="430" text-anchor="middle" class="body">result column</text>
+  <path d="M230 355 H290" class="request"/>
+  <path d="M290 460 H230" class="response"/>
+  <text x="127" y="527" text-anchor="middle" class="small">SQL connection</text>
+  <text x="127" y="550" text-anchor="middle" class="small">Public endpoint: port 3342</text>
+
+  <rect x="290" y="175" width="380" height="490" rx="14" fill="#eef7ff" stroke="#0078d4" stroke-width="2"/>
+  <text x="310" y="214" class="heading">Azure SQL Managed Instance</text>
+  <text x="310" y="241" class="small">SQL Server 2025 or Always-up-to-date</text>
+  <rect x="310" y="260" width="340" height="76" rx="9" fill="#ffffff" stroke="#b7d8f4"/>
+  <text x="328" y="288" class="label">Product data: dbo.Product</text>
+  <text x="328" y="314" class="body">Read product 9 name and description</text>
+  <rect x="310" y="350" width="340" height="145" rx="9" fill="#ffffff" stroke="#b7d8f4"/>
+  <text x="328" y="380" class="label">T-SQL query</text>
+  <text x="328" y="410" class="body">JSON_OBJECT: build the prompt payload</text>
+  <text x="328" y="439" class="small">sys.sp_invoke_external_rest_endpoint</text>
+  <text x="328" y="469" class="body">OPENJSON: extract advertisement text</text>
+  <rect x="310" y="510" width="340" height="128" rx="9" fill="#f7f2fc" stroke="#bca8d5"/>
+  <text x="328" y="540" class="label">Database-scoped credential</text>
+  <text x="328" y="568" class="body">Uses SQL MI system-assigned identity</text>
+  <text x="328" y="595" class="small">Token audience: https://ai.azure.com</text>
+  <text x="328" y="620" class="small">No API key stored in SQL</text>
+
+  <rect x="920" y="175" width="420" height="490" rx="14" fill="#f4f0fc" stroke="#7553a6" stroke-width="2"/>
+  <text x="940" y="214" class="heading">Azure Foundry resource</text>
+  <text x="940" y="241" class="small">Kind: AIServices | Custom OpenAI domain</text>
+  <rect x="940" y="260" width="380" height="107" rx="9" fill="#ffffff" stroke="#c9b8e2"/>
+  <text x="958" y="290" class="label">Foundry project</text>
+  <text x="958" y="317" class="body">Organizes Foundry assets and workflows</text>
+  <text x="958" y="345" class="small">Not in the direct SQL REST request path</text>
+  <rect x="940" y="390" width="380" height="248" rx="9" fill="#ffffff" stroke="#c9b8e2"/>
+  <text x="958" y="423" class="label">OpenAI-compatible Responses API</text>
+  <text x="958" y="451" class="body">POST /openai/v1/responses</text>
+  <path d="M1125 464 V492" class="request"/>
+  <rect x="958" y="503" width="344" height="112" rx="9" fill="#eef7ff" stroke="#b7d8f4"/>
+  <text x="976" y="533" class="label">Model deployment</text>
+  <text x="976" y="563" class="body">gpt-5-mini or first available fallback</text>
+  <text x="976" y="591" class="small">Generate advertisement from product data</text>
+
+  <text x="795" y="338" text-anchor="middle" class="label blue">External REST call</text>
+  <text x="795" y="365" text-anchor="middle" class="small blue">JSON prompt + deployment name</text>
+  <text x="795" y="389" text-anchor="middle" class="small blue">HTTPS 443 + Entra token</text>
+  <path d="M670 415 H920" class="request"/>
+  <path d="M920 480 H670" class="response"/>
+  <text x="795" y="510" text-anchor="middle" class="label green">JSON response</text>
+  <text x="795" y="537" text-anchor="middle" class="small green">output_text becomes AdCopy</text>
+  <text x="795" y="697" text-anchor="middle" class="small">The SQL call targets the resource endpoint, not the project endpoint.</text>
+
+  <rect x="770" y="750" width="570" height="115" rx="14" fill="#f7f2fc" stroke="#7553a6" stroke-width="2"/>
+  <text x="790" y="784" class="heading">Microsoft Entra ID + Azure RBAC</text>
+  <text x="790" y="815" class="body">Authenticate SQL MI with its managed identity</text>
+  <text x="790" y="844" class="small">Cognitive Services OpenAI User role at Foundry resource scope</text>
+  <path d="M480 665 V805 H770" class="identity"/>
+  <text x="490" y="780" class="small purple">Managed-identity authentication</text>
+  <path d="M1190 750 V665" class="identity"/>
+  <text x="1204" y="741" class="small purple">Authorize access</text>
+  <text x="35" y="851" class="small">Solid arrows: request and response</text>
+  <text x="35" y="875" class="small">Dashed arrows: identity and permissions</text>
+</svg>
