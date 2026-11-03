@@ -66,7 +66,21 @@ to host a Foundry resource.
 
 Also we will use the same location and the same respurce group.
 
+First launch powershell and then log into azure.
+
+```powershell
+az login
+```
+
+Once logged in it automatically sets your subscription.
+
+Next we will deploy AI resources in the "secondary" usegroup. 
+
+
+```powershell
 $resourceGroup="rg-caldova-lab04-secondary"
+
+```
 
 Get the SQL managed instance and its identity from that resource group. This guide expects the resource group to contain exactly one SQL managed instance:
 
@@ -186,7 +200,9 @@ do {
 Not every model is available in every region. This block tries `gpt-5-mini`, `gpt-4o-mini`, `gpt-4.1-mini`, `gpt-4o`, and `gpt-4.1`, in that order, and stops at the first model with a supported pay-as-you-go SKU. It prefers `GlobalStandard`, then `DataZoneStandard`, then `Standard`, using the newest OpenAI version for that SKU and its lowest advertised capacity. Regional availability does not guarantee that your subscription has sufficient deployment quota.
 
 ```powershell
-$modelCandidates = @("gpt-5-mini", "gpt-4o-mini", "gpt-4.1-mini", "gpt-4o", "gpt-4.1")
+$location = $location.Trim().ToLowerInvariant()
+$modelCandidates = @("gpt-5-mini", "gpt-4o-mini", "gpt-4.1-mini", "gpt-4o", "gpt-4.1", "gpt-5.4-mini")
+# Standard deployment options: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard
 $skuCandidates = @("GlobalStandard", "DataZoneStandard", "Standard")
 $selectedModel = $null
 $modelName = $modelVersion = $modelFormat = $modelSkuName = $modelCapacity = $null
@@ -203,22 +219,31 @@ foreach ($candidateName in $modelCandidates) {
     $candidateVersions = @($availableModels |
         Where-Object { $_.Name -eq $candidateName } |
         Sort-Object Version -Descending)
-    foreach ($candidateSku in $skuCandidates) {
-        foreach ($candidateModel in $candidateVersions) {
+    foreach ($candidateModel in $candidateVersions) {
+        foreach ($candidateSku in $skuCandidates) {
             $sku = $candidateModel.SKUs |
                 Where-Object { $_.name -eq $candidateSku } |
                 Select-Object -First 1
             if (-not $sku) {
                 continue
             }
-            $capacity = $sku.capacity.minimum
+            $capacity = $null
             if ($sku.capacity.allowedValues.Count -gt 0) {
                 $capacity = $sku.capacity.allowedValues |
+                    Where-Object { $_ -gt 0 } |
                     Sort-Object |
                     Select-Object -First 1
+            } elseif ($sku.capacity.minimum -gt 0) {
+                $capacity = $sku.capacity.minimum
+            } elseif ($sku.capacity.default -gt 0) {
+                $capacity = $sku.capacity.default
             }
             if ($null -eq $capacity -or $capacity -le 0) {
-                Write-Warning "Skipping '$candidateName' SKU '$candidateSku': no positive minimum capacity was advertised."
+                Write-Warning "Skipping '$candidateName' version '$($candidateModel.Version)' SKU '$candidateSku': no positive allowed, minimum, or default capacity was advertised."
+                continue
+            }
+            if ($null -ne $sku.capacity.maximum -and $capacity -gt $sku.capacity.maximum) {
+                Write-Warning "Skipping '$candidateName' version '$($candidateModel.Version)' SKU '$candidateSku': advertised capacity exceeds the maximum."
                 continue
             }
             $selectedModel = $candidateModel
@@ -237,7 +262,14 @@ if (-not $selectedModel) {
 $modelName = $selectedModel.Name
 $modelVersion = $selectedModel.Version
 $modelFormat = $selectedModel.Format
-Write-Host "Model selection succeeded:`n  Model:    $modelName`n  Version:  $modelVersion`n  Format:   $modelFormat`n  SKU:      $modelSkuName`n  Capacity: $modelCapacity"
+Write-Host "Regional catalog selection succeeded:`n  Location: $location`n  Model:    $modelName`n  Version:  $modelVersion`n  Format:   $modelFormat`n  Deployment SKU: $modelSkuName`n  Capacity: $modelCapacity"
+Write-Host "Catalog availability does not guarantee deployment: subscription quota, model access, and service capacity must also permit it."
+if ($modelSkuName -eq "GlobalStandard") {
+    Write-Host "GlobalStandard inference can run in other Azure regions, even though the resource is in '$location'."
+} elseif ($modelSkuName -eq "DataZoneStandard") {
+    Write-Host "DataZoneStandard inference stays within the deployment's data zone, not necessarily '$location'."
+}
+
 ```
 
 If no matching model is available, don't continue to deployment. Change `$location` to another region and rerun the same code block. Refer to [model region availability](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?tabs=az-americas&pivots=standard) when choosing a region.
