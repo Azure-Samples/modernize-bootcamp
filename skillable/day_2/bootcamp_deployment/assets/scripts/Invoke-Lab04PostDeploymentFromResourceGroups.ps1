@@ -31,6 +31,10 @@ param(
 
     [string]$BacpacPath,
 
+    [ValidateLength(1, 128)]
+    [ValidatePattern('^[a-zA-Z0-9_][a-zA-Z0-9_.-]*$')]
+    [string]$DatabaseName = 'eshop_ai',
+
     [switch]$ReplaceExistingDatabase,
 
     [switch]$DiscoveryOnly
@@ -619,12 +623,12 @@ $sqlMiDeployment = $null
 $managedInstanceName = [string]$secondaryOutputs.managedInstanceName
 $databaseFqdn = [string]$secondaryOutputs.databaseFqdn
 $sqlMiPublicEndpoint = [string]$secondaryOutputs.sqlMiPublicEndpoint
-$databaseName = [string]$secondaryOutputs.databaseName
+$deployedDatabaseName = [string]$secondaryOutputs.databaseName
 if (
     [string]::IsNullOrWhiteSpace($managedInstanceName) -or
     [string]::IsNullOrWhiteSpace($databaseFqdn) -or
     [string]::IsNullOrWhiteSpace($sqlMiPublicEndpoint) -or
-    [string]::IsNullOrWhiteSpace($databaseName)
+    [string]::IsNullOrWhiteSpace($deployedDatabaseName)
 ) {
     $sqlMiDeployment = Get-ResourceGroupDeployment `
         -Role SqlMi `
@@ -636,10 +640,10 @@ if (
     $managedInstanceName = [string]$sqlMiOutputs.managedInstanceName
     $databaseFqdn = [string]$sqlMiOutputs.managedInstanceFqdn
     $sqlMiPublicEndpoint = [string]$sqlMiOutputs.managedInstancePublicEndpoint
-    $databaseName = [string]$sqlMiOutputs.managedDatabaseName
+    $deployedDatabaseName = [string]$sqlMiOutputs.managedDatabaseName
 }
-if ($databaseName -cne 'eshop_ai') {
-    throw "Expected database name 'eshop_ai', but the selected deployment returned '$databaseName'."
+if ($deployedDatabaseName -cne 'eshop_ai') {
+    throw "Expected deployment database name 'eshop_ai', but the selected deployment returned '$deployedDatabaseName'."
 }
 
 $selectedDeployments = [ordered]@{
@@ -702,7 +706,7 @@ $discovery = [ordered]@{
 if ($DiscoveryOnly -or $WhatIfPreference) {
     $discovery | ConvertTo-Json -Depth 5
     if ($WhatIfPreference) {
-        Write-Host 'WhatIf: would approve Front Door Private Link, verify Front Door health, import or preserve eshop_ai, and configure the Container App database settings.'
+        Write-Host "WhatIf: would approve Front Door Private Link, verify Front Door health, import or preserve '$DatabaseName', and configure the Container App database settings."
     }
     return
 }

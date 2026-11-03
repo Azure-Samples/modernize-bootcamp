@@ -11,6 +11,10 @@ param(
 
     [string]$BacpacPath,
 
+    [ValidateLength(1, 128)]
+    [ValidatePattern('^[a-zA-Z0-9_][a-zA-Z0-9_.-]*$')]
+    [string]$DatabaseName = 'eshop_ai',
+
     [switch]$ReplaceExistingDatabase
 )
 
@@ -101,9 +105,9 @@ $databaseMode = [string]$values['LAB04_DATABASE_MODE']
 if ($databaseMode -notin @('azureSql', 'sqlMi')) {
     throw "Unsupported database mode '$databaseMode'."
 }
-$databaseName = [string]$values['LAB04_DATABASE_NAME']
-if ($databaseName -cne 'eshop_ai') {
-    throw "Expected database name 'eshop_ai', but the deployment returned '$databaseName'."
+$deployedDatabaseName = [string]$values['LAB04_DATABASE_NAME']
+if ($deployedDatabaseName -cne 'eshop_ai') {
+    throw "Expected deployment database name 'eshop_ai', but the deployment returned '$deployedDatabaseName'."
 }
 
 function Set-Lab04ContainerAppDatabaseConfiguration {
