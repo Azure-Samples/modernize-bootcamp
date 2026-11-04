@@ -97,7 +97,9 @@ $managedInstanceDetails | Format-Table -AutoSize
 
 ```
 
-You will deploy a foundry resource in the same region as the managed instance. Determine the region.
+Our first attempt is to deploy a Foundry resource in the same region as the managed instance. 
+
+But given that there are far more regions that support SQL MI than Foundry, we may want to choose a different region.
 
 ```powershell
 $location = az sql mi show `
@@ -113,17 +115,12 @@ $location
 ## Important corrections and assumptions
 
 - All Foundry and OpenAI resources created by this guide use the same resource group as the SQL managed instance.
-- `sp_invoke_external_rest_endpoint` requires the SQL Managed Instance **SQL Server 2025** or **Always-up-to-date** update policy. Changing from SQL Server 2022 permanently upgrades the internal database format.
-- The documented Azure CLI value is `SqlServer2025`. `AlwaysUpToDate` also supports this feature but can't later be changed back to a version-aligned policy.
-- The OpenAI-compatible v1 endpoint is `https://caldova-lab08-ai-@lab.LabInstance.Id.openai.azure.com/openai/v1/responses`. It doesn't use an `api-version` query parameter.
-- The `model` property in the request must contain the **deployment name**, not merely the underlying model name.
-- The v1 API uses the `https://ai.azure.com` token audience. In a database scoped credential, use `{"resourceid":"https://ai.azure.com"}`. The `/.default` suffix used by SDK token scopes isn't included in this credential value.
+- `sp_invoke_external_rest_endpoint` requires the SQL Managed Instance **SQL Server 2025** version or **Always-up-to-date** update policy. 
 - The SQL managed identity needs the **Cognitive Services OpenAI User** role on the Foundry resource.
 - The credential name must match the request URL's scheme and fully qualified domain name.
-- This lab assumes that the Foundry public data endpoint is enabled and that the SQL managed instance subnet can reach `*.openai.azure.com` over outbound HTTPS port 443. Enabling the SQL managed instance public data endpoint isn't required.
-- The sample query assumes the target database contains `dbo.Product` with the columns `ID`, `Name`, and `Description`, and that product ID `9` exists.
+- This lab assumes that the Foundry public data endpoint is enabled and that the SQL managed instance subnet can reach `*.openai.azure.com` over outbound HTTPS port 443. 
 
-## 3. Upgrade SQL MI ( only if needed )
+## 3. Upgrade SQL MI ( `only if needed` )
 
 First inspect the current database version to see if we need an upgrade:
 
@@ -176,7 +173,9 @@ az provider register `
     --namespace Microsoft.CognitiveServices
 ```
 
-*It may take a few minutes to get it registered. Wait until the provider state is `Registered`.*
+*It may take a minute or so to get it registered. 
+
+Wait until the provider state is `Registered`.*
 
 
 
@@ -189,7 +188,7 @@ do {
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to retrieve the Microsoft.CognitiveServices provider registration state."
     }
-    Write-Host "Provider registration state: $registrationState"
+    Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') Provider registration state: $registrationState"
     if ($registrationState -ne "Registered") {
         Start-Sleep -Seconds 30
     }
@@ -197,22 +196,60 @@ do {
 ```
 #### Now that we can create an AI service in azure, we can deploy an AI service using a model
 
-Not every model is available in every region. This block tries `gpt-5-mini`, `gpt-4o-mini`, `gpt-4.1-mini`, `gpt-4o`, and `gpt-4.1`, in that order, and stops at the first model with a supported pay-as-you-go SKU. It prefers `GlobalStandard`, then `DataZoneStandard`, then `Standard`, using the newest OpenAI version for that SKU and its lowest advertised capacity. Regional availability does not guarantee that your subscription has sufficient deployment quota.
+Not every model is available in every region. This block tries `gpt-5-mini`, `gpt-4o-mini`, `gpt-4.1-mini`, `gpt-4o`, and `gpt-4.1`, in that order, and stops at the first model with a supported pay-as-you-go SKU. 
+
+As of this writing, there are `13 regions` where your SQL MI can be hosted, but no Foundry resource.
+
+If your SQL MI location is one of the regions listed below, use `eastus2` as the Foundry location.
 
 ```powershell
-$location = $location.Trim().ToLowerInvariant()
+$foundrylocation = $location.Trim().ToLowerInvariant()
+if ($foundrylocation -in @(
+    "chilecentral",
+    "mexicocentral",
+    "eastasia",
+    "centralindia",
+    "australiasoutheast",
+    "australiacentral",
+    "indonesiacentral",
+    "malaysiawest",
+    "newzealandnorth",
+    "austriaeast",
+    "belgiumcentral",
+    "israelcentral",
+    "qatarcentral"
+)) {
+    $foundrylocation = "eastus2"
+}
+
+$foundrylocation
+```
+
+Now we have finalized the `foundry location`.
+
+We need to figure out a few more things 
+
+- Model
+- SKU
+- Model Format
+- Model Version
+
+***Note*** Regional availability does not guarantee that your subscription has sufficient deployment quota.
+
+```powershell
+$foundrylocation = $foundrylocation.Trim().ToLowerInvariant()
 $modelCandidates = @("gpt-5-mini", "gpt-4o-mini", "gpt-4.1-mini", "gpt-4o", "gpt-4.1", "gpt-5.4-mini")
 # Standard deployment options: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard
 $skuCandidates = @("GlobalStandard", "DataZoneStandard", "Standard")
 $selectedModel = $null
 $modelName = $modelVersion = $modelFormat = $modelSkuName = $modelCapacity = $null
 $modelJson = az cognitiveservices model list `
-    --location $location `
+    --location $foundrylocation `
     --query "[?model.format=='OpenAI'].{Name:model.name, Version:model.version, Format:model.format, SKUs:model.skus}" `
     --output json `
     --only-show-errors
 if ($LASTEXITCODE -ne 0) {
-    throw "Failed to retrieve the model catalog for location '$location'."
+    throw "Failed to retrieve the model catalog for location '$foundrylocation'."
 }
 $availableModels = @($modelJson | ConvertFrom-Json | ForEach-Object { $_ })
 foreach ($candidateName in $modelCandidates) {
@@ -254,29 +291,29 @@ foreach ($candidateName in $modelCandidates) {
         if ($selectedModel) { break }
     }
     if ($selectedModel) { break }
-    Write-Host "No supported deployment found for '$candidateName' in '$location'; trying the next model."
+    Write-Host "No supported deployment found for '$candidateName' in '$foundrylocation'; trying the next model."
 }
 if (-not $selectedModel) {
-    throw "None of the candidate models has a supported deployment in '$location'. Change `$location to another Azure region and rerun this code block before continuing."
+    throw "None of the candidate models has a supported deployment in '$foundrylocation'. Change `$foundrylocation to another Azure region and rerun this code block before continuing."
 }
 $modelName = $selectedModel.Name
 $modelVersion = $selectedModel.Version
 $modelFormat = $selectedModel.Format
-Write-Host "Regional catalog selection succeeded:`n  Location: $location`n  Model:    $modelName`n  Version:  $modelVersion`n  Format:   $modelFormat`n  Deployment SKU: $modelSkuName`n  Capacity: $modelCapacity"
+Write-Host "Regional catalog selection succeeded:`n  Location: $foundrylocation`n  Model:    $modelName`n  Version:  $modelVersion`n  Format:   $modelFormat`n  Deployment SKU: $modelSkuName`n  Capacity: $modelCapacity"
 Write-Host "Catalog availability does not guarantee deployment: subscription quota, model access, and service capacity must also permit it."
 if ($modelSkuName -eq "GlobalStandard") {
-    Write-Host "GlobalStandard inference can run in other Azure regions, even though the resource is in '$location'."
+    Write-Host "GlobalStandard inference can run in other Azure regions, even though the resource is in '$foundrylocation'."
 } elseif ($modelSkuName -eq "DataZoneStandard") {
-    Write-Host "DataZoneStandard inference stays within the deployment's data zone, not necessarily '$location'."
+    Write-Host "DataZoneStandard inference stays within the deployment's data zone, not necessarily '$foundrylocation'."
 }
 
 ```
 
-If no matching model is available, don't continue to deployment. Change `$location` to another region and rerun the same code block. Refer to [model region availability](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?tabs=az-americas&pivots=standard) when choosing a region.
+#### At this point, we have enough data to proceed creating the foundry resource.
 
 ## 5. Create the Foundry resource and project in the MI resource group
 
-All Foundry and OpenAI resources in the remaining steps use `$resourceGroup`. Set the deployment name using the selected model:
+First, set the deployment name using the selected model:
 
 ```powershell
 $modelDeployment = "$modelName-@lab.LabInstance.Id"
@@ -296,7 +333,7 @@ az cognitiveservices account create `
     -g $resourceGroup `
     --kind AIServices `
     --sku S0 `
-    --location $location `
+    --location $foundrylocation `
     --custom-domain $foundryResource `
     --assign-identity `
     --allow-project-management true `
@@ -330,7 +367,7 @@ az cognitiveservices account project create `
     -n $foundryResource `
     -g $resourceGroup `
     --project-name $foundryProject `
-    --location $location `
+    --location $foundrylocation `
     --output table
 
 ```
