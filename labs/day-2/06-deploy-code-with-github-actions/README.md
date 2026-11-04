@@ -70,7 +70,7 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
 
 **2. Fork and clone the repository.**
 
-1. On the repository page, select **Fork**. On the **Create a new fork** page, select **Skillable-Events** as the **Owner** and append your **Skillable instance ID (@lab.LabInstance.Id)** to the **Repository name**, using the format `**caldova-retail-modernized-@lab.LabInstance.Id**`. Confirm both values before selecting **Create fork**.
+1. On the repository page, select **Fork**. On the **Create a new fork** page, select **Skillable-Events** as the **Owner** and append your **Skillable instance ID (@lab.LabInstance.Id)** to the **Repository name**, using the format `caldova-retail-modernized-@lab.LabInstance.Id`. Confirm both values before selecting **Create fork**.
 
    ![Fork button](./images/fork-button.png)
 
@@ -99,8 +99,9 @@ That is the Module 3 end state: the storefront on .NET 10, rendered with Blazor,
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, +++https://github.com/Skillable-Events/caldova-retail-modernized+++, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
 **3. Open the storefront folder in VS Code.** Run these commands in PowerShell.
+
 ```powershell
-cd "caldova-retail-modernized-https://github.com/Skillable-Events/caldova-retail-modernized-@lab.LabInstance.Id.git"
+cd "caldova-retail-modernized-@lab.LabInstance.Id"
 code .
 ```
 
@@ -114,7 +115,7 @@ If VS Code opens the folder in **Restricted Mode**, select **Manage** in the ban
 
 You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
 
-> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **caldova-retail-modernized folder with your instance ID appended**. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, first run `cd "caldova-retail-modernized-<your-skillable-instance-id>"`, replacing the placeholder with your instance ID. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
+> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **caldova-retail-modernized folder with your instance ID appended**. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, first run `cd "caldova-retail-modernized-@lab.LabInstance.Id"`, replacing the placeholder with your instance ID. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
 
 ## 🔑 Authorize VS CODE
 
@@ -391,7 +392,7 @@ The deployed Container App uses its SYSTEM-ASSIGNED identity for ACR pulls.
 The application separately uses the attached USER-ASSIGNED retail runtime
 identity, selected by its AZURE_CLIENT_ID environment variable.
 LAB06_RUNTIME_IDENTITY_RESOURCE_ID identifies that user-assigned identity.
-Do not compare it with the registry's "system" identity setting or replace it
+Do not compare it with the registrys "system" identity setting or replace it
 with a system-assigned principal ID.
 
 Workflow requirements:
@@ -432,7 +433,7 @@ Include exactly two short, readable preflight gates before the image update:
 2. Confirm only that the names ConnectionStrings__StoreDbContext,
    AZURE_CLIENT_ID, and ASPNETCORE_ENVIRONMENT are present. Never print values.
 
-Update only the existing retail container's image. Do not create or modify
+Update only the existing retail containers image. Do not create or modify
 infrastructure, identities, role assignments, registry authentication, runtime
 settings, secrets, ingress, replica limits, or autoscale rules.
 
