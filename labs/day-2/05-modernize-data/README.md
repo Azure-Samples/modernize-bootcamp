@@ -125,9 +125,7 @@ Run a "Migration readiness assessment". An html file will open in your browser o
 
 #### Validate NSG inbound rules for SQL MI's subnet NSG before beginning.
 
-From the portal, find out the NSG for the subnet that Azure SQL Managed Instance is configured with.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary-@lab.LabInstance.Id*.  The managed instance is called *caldovalab04mi@lab.LabInstance.Id*.  The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
- 
- ![NSG2](./images/NSG2.png)
+From the portal, find out the NSG for the subnet that Azure SQL Managed Instance is configured with.  The preprovisioned Azure SQL Managed instance is pre-provisioned in the resource group called *rg-caldova-lab04-secondary*. You will   The associated NSG is called *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. 
  
  Click on *caldova-lab04-sqlmi-@lab.LabInstance.Id-nsg*. Navigate to the Inbound rules:
 
