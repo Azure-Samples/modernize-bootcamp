@@ -220,9 +220,9 @@ Use the images as an example of what the outcome should be.
 ![Storage11](./images/Storage_11.png)
 ![Storage12](./images/Storage_12_2.png)
 
-> [!NOTE] Once the container is refreshed, it will not list the folder. <b>This is OK<b>.  Once the backups are taken and specifying this folder as the location, the folder will show up in the portal.
+> [!NOTE] Once the container is refreshed, it will not list the folder. <b>This is OK</b>.  Once the backups are taken and specifying this folder as the location, the folder will show up in the portal.
 
-#### 2. Ensure Azure SQL MI System Assigned Managed Identity
+#### 2. Ensure Azure SQL MI System Assigned Managed Identity #### 
 
 You will need to validate that *System Assigned Managed Identity* is enabled for the SQL Managed Instance.  
 
@@ -406,7 +406,7 @@ VALUES
 
 ![DMS_19](./images/DMS_19.png)
 
-<b>2l.</b> Go back to SSMS 22.  Connect to the Azure SQL Managed Instance and eShop database using Entra. Explore the tables and make sure they are all there.  Confirm the row you added above is also present. 
+<b>2l.</b> Go back to SSMS 22.  Connect to the Azure SQL Managed Instance and eShop database using Entra. Explore the tables and make sure they are all there.  Confirm the row you added above is also present.
 
 Run this following query to confirm the new row(s) you added
 
@@ -419,7 +419,33 @@ WHERE
  name like 'Test%' ;
 ```
 
-<b>Congratulations - you have migrated to Azure SQL</b>
+<b>Congratulations - you have migrated to Azure SQL.</b>
+
+Now let us create an entra-id user for the application to connect to it. The application identity is `caldova-lab04-runtime-@lab.LabInstance.Id]`.
+
+Launch SSMS to connect to `eshop` database in SQL MI.  You will
+
+- Create a login in the master database. 
+- In eshop database create  a user from that login
+- Give that user read and write access to the eshop database
+
+
+```sql
+USE [master];
+
+CREATE LOGIN [caldova-lab04-runtime-@lab.LabInstance.Id] FROM EXTERNAL PROVIDER;
+
+ 
+USE [eshop];
+
+CREATE USER [caldova-lab04-runtime-@lab.LabInstance.Id]
+    FROM LOGIN [caldova-lab04-runtime-@lab.LabInstance.Id];
+
+ 
+ALTER ROLE db_datareader ADD MEMBER [caldova-lab04-runtime-@lab.LabInstance.Id];
+ALTER ROLE db_datawriter ADD MEMBER [caldova-lab04-runtime-@lab.LabInstance.Id];
+
+```
 
 ## Challenge 5 - Perform online migration using CLI (Optional)
 
