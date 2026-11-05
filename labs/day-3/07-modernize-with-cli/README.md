@@ -4,6 +4,21 @@ Contoso Legacy Bank is not one project in one repository. Its customer portal, a
 
 In this lab, you will use **GitHub Copilot Chat in a multi-root Visual Studio Code workspace** and the **GitHub Copilot Modernization CLI** to assess the five repositories as one application estate. You will compare interactive findings with repeatable CLI reports, reconcile the evidence, and create a dependency-aware modernization roadmap. The modernization extension UI is an optional tool for deeper assessment of an individual repository.
 
+## 🏦 Customer scenario: Five repositories, one banking experience
+
+Imagine you are advising Contoso Legacy Bank. The bank wants to modernize its legacy applications and move toward Azure without disrupting account access, customer statements, or nightly transaction processing. Each component has its own repository, so the teams initially propose assessing and upgrading their applications independently.
+
+The challenge is that **repository boundaries are not business-process boundaries**. A customer statement request crosses the Portal, Accounts, Statements, and Documents repositories. An account-service contract change could break callers in another repository, while a change to the document worker's file queue could interrupt statement generation even if both projects build successfully on their own.
+
+Before approving the first modernization wave, the bank needs a **multi-repository assessment** to answer:
+
+- **What depends on what?** Identify shared contracts, service callers, data assumptions, and file-based handoffs across all five repositories.
+- **What must move together, and what can move separately?** Find changes that require coordination and components that can coexist with their legacy counterparts.
+- **Where should investment start?** Combine per-repository findings with application-wide risks to prioritize work by business impact and dependency, not just framework age.
+- **What still needs proof?** Record gaps that require tests, runtime checks, or an owner's decision before implementation.
+
+Your role in this lab is to help the bank turn five separate sets of findings into one evidence-backed modernization roadmap. The assessment informs that roadmap; it does not, by itself, prove runtime compatibility or authorize changes.
+
 > [!IMPORTANT]
 > This is an **assessment and planning lab**. Remain read-only while assessing the application. You may generate draft plans, but do not run `modernize plan execute`, `modernize upgrade`, or ask an agent to change application code.
 
@@ -131,39 +146,17 @@ Set-Location .\modernize_sample_demo
    If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **"Authorize git-ecosystem"**), then return to PowerShell. The clone starts once you are signed in.
    > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type in the original repo link, `https://github.com/Skillable-Events/modernize_sample_demo`, follow the sign in, click the button to stay signed in, and then run the Powershell command again.
 
-**3. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
+## 2️⃣ initialize the application estate
+
+### 1. Confirm authentication and CLI availability
+
+From the hub root:
+
+> 💻 **Run this in the terminal.**
 
 ```powershell
-cd modernize_sample_demo
-code .
+gh auth status
 ```
-
-If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the **modernize_sample_demo**. If VSCode asks you to sign into GitHub again, authorize access there as well.
-
-If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
-
-![Restricted Mode banner](./images/restricted-mode-banner.png)
-
-![VS Code showing the folder is trusted](./images/trusted-folder.png)
-
-You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
-
-> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **modernize_sample_demo** folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd modernize_sample_demo` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
-
-## 🔑 Authorize VS CODE
-
-In VSCODE select the agent in the bottom right, and click the "Use AI Features" button.
-![Select Agent Icon](./images/vscode_auth.1.png)
-
-The **Sign in to use GitHub Copilot** prompt opens and select Continue with GitHub
-
-![Select Agent Icon](./images/vscode_auth.2.png)
-
-The browser opens displaying an "Authorize with Visual Stusio Code" prompt. Select Continue
-![Select Agent Icon](./images/vscode_auth.3.png)
-
-Finally select **Authorize Visual Stusio Code** on the next prompt.
-![Select Agent Icon](./images/vscode_auth.4.png)
 
 If it is not authenticated, run:
 
@@ -188,9 +181,6 @@ gh auth status
 ```
 
 The signed-in account must have GitHub Copilot access and read access to the hub and all five component repositories.
-
-
-## 2️⃣ initialize the application estate
 
 ### 2. Initialize the demo
 
@@ -226,6 +216,33 @@ From the hub root, run:
 ```powershell
 code .\contoso-legacy-bank-multi-repo.code-workspace
 ```
+
+If **code** is not recognized, start VS Code from your applications and use **File → Open Folder…**, then pick the **modernize_sample_demo**. If VSCode asks you to sign into GitHub again, authorize access there as well.
+
+If VS Code opens the folder in **Restricted Mode**, select **Manage** in the banner at the top of the window, then select **Trust**. Once the page shows **In a Trusted Folder**, close that tab.
+
+![Restricted Mode banner](./images/restricted-mode-banner.png)
+
+![VS Code showing the folder is trusted](./images/trusted-folder.png)
+
+You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
+
+> 📂 **Where to run commands:** Every PowerShell command in this lab assumes your current folder is the cloned **modernize_sample_demo** folder. The simplest option is the VS Code integrated terminal (**Terminal → New Terminal**), which already opens in that folder. If you use a standalone PowerShell window instead, run `cd modernize_sample_demo` first. Throughout this lab, blocks marked **💻 Run this in the terminal** are commands you run yourself, while blocks marked **🤖 Paste this into Copilot Chat** are prompts you send to Copilot — not terminal commands.
+
+## 🔑 Authorize VS CODE
+
+In VSCODE select the agent in the bottom right, and click the "Use AI Features" button.
+![Select Agent Icon](./images/vscode_auth.1.png)
+
+The **Sign in to use GitHub Copilot** prompt opens and select Continue with GitHub
+
+![Select Agent Icon](./images/vscode_auth.2.png)
+
+The browser opens displaying an "Authorize with Visual Stusio Code" prompt. Select Continue
+![Select Agent Icon](./images/vscode_auth.3.png)
+
+Finally select **Authorize Visual Stusio Code** on the next prompt.
+![Select Agent Icon](./images/vscode_auth.4.png)
 
 The VS Code Explorer should show six named workspace roots:
 
@@ -707,17 +724,6 @@ and tests or runtime checks are still needed to establish compatibility.
 ## 5️⃣ Run the multi-repository Modernization CLI assessment
 
 The hub contains `.github\modernize\repos.json`. It lists the five application repositories and groups them as one logical application named contoso-legacy-bank. The hub itself is excluded because it contains orchestration and documentation rather than an application project.
-
-### 1. Confirm authentication and CLI availability
-
-From the hub root:
-
-> 💻 **Run this in the terminal.**
-
-```powershell
-gh auth status
-modernize --help
-```
 
 ### 2. Inspect the repository configuration
 
