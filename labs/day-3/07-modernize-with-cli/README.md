@@ -32,7 +32,7 @@ Save your results in a location provided by your instructor or in a local workin
 7. assumptions, unknowns, and decisions that require human owners
 
 > [!NOTE]
-> **You are not expected to be a developer, and you do not have to fill in these
+> 💡 **You are not expected to be a developer, and you do not have to fill in these
 > tables by hand.** Throughout this lab, each register and matrix is shown as a
 > completed **worked sample** so you can see what the assessment produces and how
 > that information is used to plan a migration. Your goal is to understand the
@@ -227,31 +227,36 @@ From the hub root, run:
 code .\contoso-legacy-bank-multi-repo.code-workspace
 ```
 
-The VS Code Explorer should show five named application roots:
+The VS Code Explorer should show six named workspace roots:
 
-- Portal
-- Accounts
-- Statements
-- Documents
-- Batch
+- Hub - Workshop and Orchestration
+- Portal - WinForms
+- Accounts - WCF and LocalDB
+- Statements - Web API 2
+- Documents - PDF Worker
+- Batch - CSV Importer
 
-The hub contains shared documentation and orchestration, but does not need to
-be a workspace root. Keep the five application roots as the assessment scope;
-attach the required hub files using **Add required evidence explicitly** below.
-If the hub is already listed in Explorer, right-click its workspace root and
-select **Remove Folder from Workspace**. This does not delete files or remove
-the five separately listed application roots.
+Keep this workspace layout throughout the lab. The **Hub** root provides shared
+documentation and orchestration; the other five roots contain the applications
+you will assess. The hub is not a sixth application.
+
+The hub's `.vscode\settings.json` hides its nested `apps` folder in Explorer
+and excludes `apps/**` from search under that root. Those folders are the same
+repositories exposed through the five named application roots, where their
+source remains available. This avoids duplicate paths without deleting files.
+Use the **Hub** root for shared evidence and the named application roots for
+component evidence.
 
 Before starting an assessment:
 
 1. confirm all repository folders are visible and accessible in Explorer.
 2. trust the workspace only if you recognize the repository
-3. confirm all five roots contain source files
+3. confirm all five application roots contain source files
 4. review `.github\copilot-instructions.md` in the hub and each component repository
 5. keep the Source Control view clean so generated or accidental changes are obvious
 
 > [!IMPORTANT]
-> The folders under are independent Git repositories. Do not treat them as ordinary hub files. Future code changes would be committed in the owning component repository first, followed by a separate hub submodule-pointer update.
+> The five application roots are independent Git repositories. Do not treat them as ordinary hub files. Future code changes would be committed in the owning component repository first, followed by a separate hub submodule-pointer update.
 
 ---
 
@@ -267,8 +272,9 @@ calls, and document worker that implement that workflow.
 
 In VS Code, type **#codebase** in the Chat input and select the matching
 suggestion, then describe what you want to investigate. In this lab, the open
-multi-root workspace makes the five application folders available as search
-context; you do not need to switch to a separate window for each repository.
+multi-root workspace makes shared hub documentation and the five application
+folders available as search context; you do not need to switch to a separate
+window for each repository.
 
 Here is how that context is gathered:
 
@@ -293,7 +299,7 @@ For example:
 ```
 
 > [!NOTE]
-> **Review the output before continuing.** Look for a step-by-step explanation
+> 💡 **Review the output before continuing.** Look for a step-by-step explanation
 > of how a statement request moves between the Portal, Accounts, Statements,
 > and Documents repositories, from the WinForms event to the generated PDF.
 > Each handoff should identify the sending and receiving code, the contract
@@ -324,55 +330,79 @@ Do not rely on **#codebase** alone when a particular file must be considered.
 
 #### Add required evidence explicitly
 
-In the Chat view, select **Add Context**, then choose **Files & Folders**, or
-drag files and folders from Explorer into Chat.
+The workspace is already open to Copilot. **Add Context** is how you point a
+particular message at specific evidence; it is not a step for opening or adding
+repositories. Use it for contracts, configuration, and architecture decisions
+that a relevance search might otherwise omit.
 
-For an application-wide Contoso assessment, explicitly attach:
+**Why attach evidence if Copilot can already search the workspace?** Having a
+repository open makes its files available; it does not mean Copilot reads every
+file for every question. **#codebase** retrieves code relevant to your prompt,
+but an important design document, configuration file, or consumer in another
+repository may not be among those results. Explicitly selecting evidence tells
+Copilot which sources you expect it to consider when answering.
 
-| Purpose | Context to attach |
-|---|---|
-| Current architecture | Hub docs\architecture.md |
-| Verified repository revisions | Hub compatibility.json |
-| Modernization rules | Hub docs\modernization-lab.md and .github\copilot-instructions.md |
-| WCF producer contract | Accounts src\Contoso.LegacyBank.Accounts.Contracts |
-| WCF consumers | Portal src\...\Services; Statements src\...\Services; Batch src\... |
-| Statement file contract | Statements docs\statement-job-schema.md; Documents Models and samples |
+This is especially useful when you need to:
 
-The **Add Context → Files & Folders** picker can be limited to files in the
-current workspace. If the hub is not a workspace root, do not expect to browse
-to it through that picker. Temporarily add it to attach the required evidence:
+- **Check both sides of a dependency.** Select the WCF contract and its consumers
+  so a proposed Accounts change is reviewed against what Portal, Statements,
+  and Batch actually call, not just the service implementation.
+- **Ground the assessment in the recorded baseline.** Select the architecture
+  document and `compatibility.json` so Copilot can compare the intended system
+  and recorded revisions with the checked-out code, and flag discrepancies.
+- **Check an exact requirement or example.** Select the statement-job schema
+  and worker sample so Copilot can compare the producer's output with the
+  consumer's expected fields rather than infer the format from names alone.
 
-1. Select **File → Add Folder to Workspace**, choose the cloned
-   `modernize_sample_demo` root folder, and select **Add**.
-2. Attach only the required hub files from Explorer, not the entire hub or
-   its `apps` folder.
-3. Before submitting the assessment prompt, right-click the hub workspace
-   root in Explorer and select **Remove Folder from Workspace**. Confirm that
-   Portal, Accounts, Statements, Documents, and Batch remain listed.
+Think of workspace search as **"find what is relevant"** and explicit evidence
+as **"make sure you consider these sources."** You do not need to attach every
+file for every question. Choose the small set needed for the task, explain how
+to use it in your prompt, and check the answer's citations. Attachments focus
+the investigation; they do not make a file automatically correct or prove
+that Copilot examined every dependency.
 
-Removing the hub from the workspace does not delete files or erase context
-already attached to the current conversation. This avoids overlapping search
-roots: the hub's `apps` folders are the same repositories as the five named
-application roots, not additional copies. If you start a new chat, attach the
-required evidence again.
+For an application-wide Contoso assessment, use the evidence below. **Workspace
+root** is the named top-level folder in Explorer (shortened here to Hub, Portal,
+and so on). Each path is relative to that root, not to the hub's `apps` folder.
 
-Explicit attachment means "this evidence must be considered." It is useful
-for contracts, configuration, tests, and architecture decisions that a
-relevance search might otherwise omit.
+| Purpose | Workspace root | File or folder to select |
+|---|---|---|
+| Current architecture | Hub | `docs\architecture.md` |
+| Recorded repository revisions | Hub | `compatibility.json` |
+| Modernization rules | Hub | `docs\modernization-lab.md` and `.github\copilot-instructions.md` |
+| WCF producer contract | Accounts | `src\Contoso.LegacyBank.Accounts.Contracts` |
+| WCF consumer in the desktop app | Portal | `src\Contoso.LegacyBank.Portal\Services` |
+| WCF consumer in the statement API | Statements | `src\Contoso.LegacyBank.Statements.Api\Services` |
+| WCF consumer in the batch importer | Batch | `src\Contoso.LegacyBank.Batch\AccountService.cs` |
+| Statement file contract | Statements | `docs\statement-job-schema.md` |
+| Statement worker models and sample | Documents | `src\Contoso.LegacyBank.Documents\Models` and `samples\statement-job.v1.json` |
 
-Example: after attaching the files 
+1. In the current **Copilot Chat** conversation, select **Add Context**, then
+   **Files & Folders**, and choose the specific files or folders from the table.
+   Alternatively, expand the named roots in Explorer and drag those files or
+   folders into the Chat input.
+2. Check that the selected files or folders appear as context items beside
+   your message before sending it. Select the specific evidence, not an entire
+   repository root.
+3. Send a prompt that explains what Copilot should do with that evidence, then
+   review its cited files. Selecting context directs attention; it does not
+   guarantee that every relevant file was read or that the analysis is complete.
+
+These selections apply to the current conversation. In a new chat, select the
+evidence needed for that prompt again; the workspace layout stays unchanged.
+
+Example: with the table's evidence selected in the current chat:
 > 🤖 **Paste this into Copilot Chat.**
 
 ```plaintext
 
-> Using the attached WCF contract, all three attached consumer implementations,
-> architecture.md, and compatibility.json, build a producer/consumer matrix.
-> Identify operation, DTO, fault, endpoint, versioning, coexistence, and
-> migration-order requirements. Treat attached files as authoritative for the
-> recorded baseline revision.
+Using the selected WCF contract, all three consumer implementations,
+architecture.md, and compatibility.json, build a producer/consumer matrix.
+Remain read-only. Identify operation, DTO, fault, endpoint, versioning,
+coexistence, and migration-order requirements. Cite repository paths and
+flag missing evidence. Check that the recorded revisions match the checked-out
+repositories before treating the evidence as the recorded baseline.
 ```
-
-** Remember to remove the root from the workspace if not completed already**
 
 Use one Copilot Chat conversation in the multi-root workspace to assess **Portal, Accounts, Statements, Documents, and Batch** as a connected system. You do not need to start five separate modernization UI assessments.
 
@@ -383,7 +413,7 @@ Use one Copilot Chat conversation in the multi-root workspace to assess **Portal
 
 1. In `contoso-legacy-bank-multi-repo.code-workspace`, open **Copilot Chat** and click the **+** (**New Chat**) button at the top of the Chat view to start a fresh conversation.
 2. Select **Agent** mode and keep the assessment read-only as instructed in the prompt.
-3. If you attached evidence in an earlier conversation, attach it again in this new chat. Then paste the prompt below, starting with `#codebase` so VS Code searches the indexed workspace.
+3. In this new chat, select the evidence from **Add required evidence explicitly** above using **Add Context** or Explorer drag-and-drop. Check the context items beside your message, then paste the prompt below, starting with `#codebase` so VS Code searches the indexed workspace. Keep all six workspace roots open.
 
 > [!TIP]
 > **Review the prompt before running it.** Notice how it defines the scope (all five repositories), sets read-only boundaries, describes the modernization goal, and specifies the report structure. It asks for both repository-level findings and cross-repository dependencies, then requires code evidence and a clear separation of facts, assumptions, and unverified checks. Understanding these parts helps you recognize what the prompt is asking Copilot to do and whether the response actually meets those requirements.
@@ -402,11 +432,10 @@ First confirm which repository roots are accessible. Explicitly identify any
 inaccessible or insufficiently examined repositories.
 
 Use the hub only for shared documentation, instructions, repository revisions,
-and orchestration context supplied through attached files; do not assess it
-as a sixth application. Analyze each component once and use one consistent
-path for its evidence links. If overlapping workspace paths expose the same
-component through both a named root and the hubs apps directory, treat them
-as one repository and deduplicate findings, counts, and effort estimates.
+and orchestration context available in the workspace and selected evidence;
+do not assess it as a sixth application. Access application code through the
+five named component roots, not the hub's excluded apps folder. Analyze each
+component once and use one consistent path for its evidence links.
 
 Evaluate modernization toward supported modern .NET and appropriate Azure
 services. Where an exact target version or architecture is needed, identify
@@ -472,7 +501,7 @@ discovered, with enough detail that someone could act on each one later. In a
 real project your team fills this in as you review each repository.
 
 > [!NOTE]
-> **For non-developers:** You do **not** need to complete this table yourself in
+> 💡 **For non-developers:** You do **not** need to complete this table yourself in
 > the lab. The rows below are a **worked sample** so you can see what a good
 > finding looks like. Each column answers a question an owner will ask before
 > funding the work: *What is wrong? Where is the proof? How risky is it? What
@@ -555,7 +584,7 @@ messages they exchange and what each side expects. If you change one app, you
 must not break the "contract" the other apps rely on.
 
 > [!NOTE]
-> **For non-developers:** The table below is a **worked sample**, not an exercise
+> 💡 **For non-developers:** The table below is a **worked sample**, not an exercise
 > to complete. Think of each row as "App A hands something to App B." This matrix
 > matters because it shows the **hidden connections** between repositories — the
 > things most likely to break during a migration. The migration order and the
@@ -577,7 +606,7 @@ The output should make dependencies visible, not merely list technologies.
 ### 6. Optional: deepen a repository assessment with the modernization UI
 
 > [!NOTE]
-> **This section is optional.** It is not a prerequisite for the
+> 💡 **This section is optional.** It is not a prerequisite for the
 > multi-repository workflow; you can skip to the CLI assessment in the next
 > section. To **deepen a repository assessment** means to move from the
 > application-wide overview to a focused investigation of one component.
@@ -708,6 +737,9 @@ Confirm that it lists:
 
 ### 3. Run the supplied assessment-only wrapper
 
+> [!NOTE]
+> 💡 **Choose one CLI assessment route: this wrapper or the interactive CLI in step 5, not both.** Both produce the same assessment reports when run against the same repositories with equivalent settings. The wrapper uses preset command-line options for a repeatable, assessment-only run; the interactive CLI prompts you to choose the assessment settings and output directory.
+
 > 💻 **Run this in the terminal.**
 
 ```powershell
@@ -765,9 +797,12 @@ Verify:
 
 Do not publish raw reports until they have been reviewed for source details, internal URLs, secrets, credentials, personal data, and unsupported claims.
 
-### 5.Run the interactive CLI
+### 5. Run the interactive CLI (alternative to step 3)
 
-The same CLI also provides a text user interface:
+> [!NOTE]
+> 💡 **Skip this run if you already used the wrapper in step 3.** This is a menu-driven alternative for producing the same assessment output, not an additional required assessment. Unlike the assessment-only wrapper, the interactive CLI also exposes planning and upgrade actions; stay within **Assess** for this lab.
+
+The same CLI also provides a text user interface. If you choose this route, run it instead of step 3, then review the generated files using step 4:
 
 > 💻 **Run this in the terminal.**
 
@@ -784,7 +819,7 @@ In the menu:
 5. select the .NET **Upgrade** and **Cloud Readiness** assessment domains
 6. choose **Full analysis** when codebase insights are offered
 7. choose **Assess locally**
-8. select an output directory
+8. select `artifacts\modernize-assessment` as the output directory so the review commands in step 4 work unchanged
 9. review the results, then return to the main menu
 
 Do not continue into plan execution or upgrade.
@@ -801,7 +836,7 @@ closer look), and what neither tool could know (gaps for a human to decide).
 ### 1. Compare coverage
 
 > [!NOTE]
-> **For non-developers:** The table below is a **worked sample** showing how a
+> 💡 **For non-developers:** The table below is a **worked sample** showing how a
 > reviewer records whether each assessment answered an important question. You do
 > not need to fill it in. The value here is the habit: when two tools agree you
 > can trust the finding more; when they disagree, you go look at the actual code
@@ -828,7 +863,7 @@ Sample coverage comparison:
 the code or build output, then write down the decision and who owns it.
 
 > [!NOTE]
-> **For non-developers:** The row below is a **sample** of how a disagreement is
+> 💡 **For non-developers:** The row below is a **sample** of how a disagreement is
 > resolved. Notice the last column: the final call belongs to a **human owner**,
 > not to either tool. AI assessments suggest; people decide.
 
@@ -870,7 +905,7 @@ Score work by dependency and risk, not only by how old a framework is.
 ### 1. Build the prioritization matrix
 
 > [!NOTE]
-> **For non-developers:** This is a **worked sample**, not a task to complete.
+> 💡 **For non-developers:** This is a **worked sample**, not a task to complete.
 > Prioritization is how a team decides **what to modernize first**. A dependency
 > that many apps rely on (like the account service) usually goes early, because
 > everything else waits on it. The ratings below (High/Medium/Low) are a sample
@@ -995,7 +1030,7 @@ repository owner who did not attend the lab. It gathers everything above into a
 few summary tables they can act on.
 
 > [!NOTE]
-> **For non-developers:** The three tables below are **worked samples** of that
+> 💡 **For non-developers:** The three tables below are **worked samples** of that
 > report — you do not need to produce them yourself in the lab. Together they
 > answer an owner's three questions: *What did we learn?* (assessment summary),
 > *In what order will we modernize?* (roadmap summary), and *What is the first
