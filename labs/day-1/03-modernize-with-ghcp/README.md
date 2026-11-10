@@ -16,17 +16,14 @@ In Module 2, you observed how GitHub Copilot Modernization assesses and begins a
 
 Follow these steps to fork, clone, and configure the .NET 10 repository (like you did in the previous module):
 
-1. In Microsoft Edge, open this link: +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++. (Sign in with your lab credentials if prompted).
+1. In Microsoft Edge, open this link: [https://github.com/Azure-Samples/caldova-retail-dotnet10](https://github.com/Azure-Samples/caldova-retail-dotnet10). (Sign in with your lab credentials if prompted).
 2. Select **Fork**, then **Create fork** with the defaults left alone.
 3. In your new fork, select **Code**, then copy the **HTTPS** URL.
-4. Open PowerShell from your applications and clone your fork. Run this from the default location, **C:\Users\Admin**. If you still have PowerShell open from the previous module, make sure you are in the **C:\Users\Admin** folder first (run `cd ..` as needed until you are). In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail-dotnet10.git
+4. Open PowerShell from your applications and clone your fork. Run this from the directory of your choice. In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail-dotnet10.git
 
    ```powershell
    git clone <your-fork-url>
    ```
-
-   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization, then return to PowerShell. The clone starts once you are signed in.
-   > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type the original repo link, +++https://github.com/Skillable-Events/caldova-retail-dotnet10+++, into the browser, follow the sign in, click the button to stay signed in, and then run the PowerShell command again.
 
 5. Open the storefront folder in VS Code. Run these commands in PowerShell:
 
@@ -38,18 +35,10 @@ Follow these steps to fork, clone, and configure the .NET 10 repository (like yo
 6. Check for a notification in the banner at the top of VS Code. If the folder opens in **Restricted Mode**, select **Manage**, then **Trust**. Once VS Code shows **In a Trusted Folder**, close that tab.
 
    ![Restricted Mode banner](./images/restricted-mode-banner.png)
-7. Open **src\eShopLite.StoreFx\appsettings.json** and replace the placeholder password in the **StoreDbContext** connection string with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user as they are.
+7. Open **src\eShopLite.StoreFx\appsettings.json** and replace the placeholder password.
 8. Ask Copilot Chat to **Run the app** (and approve any tool call commands), then verify the product catalog loads in your browser by selecting the **Products** tab before continuing.
 
    > 💡 Notice how this is different from Module 2. The legacy .NET Framework app needed MSBuild and IIS Express to run. Now that the app is upgraded to .NET 10, it starts with the standard **dotnet run** command, with no IIS Express or Windows Server required.
-
-9. **Set your Git commit identity in Copilot Chat.** Do this again for this new copy of the repository, since Git may save the identity per repository. Send this message, replacing the placeholders with your lab details:
-
-   ```plaintext
-   Use <your name> and <your lab email> as my Git commit identity.
-   ```
-
-   Use the **Username** listed under **Azure portal** on the **Resources** tab as your email. For your name, use the part before **@** in that email (for example, **user1-6614389**) or your own name. Whichever is fine. This lets the agent make commits later without stopping to ask for your identity.
 
 ## 📋 What you'll do
 
@@ -160,7 +149,7 @@ Now push your branch to your fork so you can see your changes on GitHub. Ask Cop
 Push the blazor-ui-refresh branch to my fork on GitHub and give me the link to view it.
 ```
 
-Select the link Copilot gives you, or open your fork in the browser yourself. It's the same address you cloned from and includes your account name (for example, **https://github.com/user1-58494_events/caldova-retail-dotnet10**). If you are asked to sign in, choose **Sign in with your browser** and approve the authorization, like you did for the clone.
+Select the link Copilot gives you, or open your fork in the browser yourself. It's the same address you cloned from and includes your account name (for example, **https://github.com/my-gh-username/caldova-retail-dotnet10**). If you are asked to sign in, choose **Sign in with your browser** and approve the authorization, like you did for the clone.
 
 You should see a banner like this:
 
