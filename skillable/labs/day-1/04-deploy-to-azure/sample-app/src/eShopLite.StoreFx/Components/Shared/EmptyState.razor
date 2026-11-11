@@ -1,0 +1,29 @@
+<div class="empty-state">
+    <div class="glyph"><AppIcon Name="@Icon" Size="26" /></div>
+    <h3>@Title</h3>
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <p>@Message</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(ActionText) && !string.IsNullOrWhiteSpace(ActionHref))
+    {
+        <a href="@ActionHref" class="btn-app">@ActionText <AppIcon Name="arrow-right" Size="16" /></a>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string Message { get; set; }
+
+    [Parameter]
+    public string Icon { get; set; } = "package";
+
+    [Parameter]
+    public string ActionText { get; set; }
+
+    [Parameter]
+    public string ActionHref { get; set; }
+}

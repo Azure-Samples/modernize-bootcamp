@@ -1,0 +1,66 @@
+@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <base href="/" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/lib/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/app.css" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+<body>
+    <Routes @rendermode="InteractiveServer" CartKey="@_cartKey" />
+
+    <div id="blazor-error-ui" class="blazor-error-ui">
+        Something went wrong. Reload the page to continue.
+        <a href="." class="dismiss">Reload</a>
+    </div>
+
+    <script src="_framework/blazor.web.js"></script>
+</body>
+</html>
+
+@code {
+    // App is always rendered statically as the root of the HTTP response, so this is the one place
+    // left that can read and write cookies. The key is handed to the interactive subtree as a
+    // parameter because cascading values do not cross the render-mode boundary.
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; }
+
+    private string _cartKey;
+
+    protected override void OnInitialized()
+    {
+        _cartKey = ResolveCartKey();
+    }
+
+    private string ResolveCartKey()
+    {
+        if (HttpContext is null)
+        {
+            return null;
+        }
+
+        if (HttpContext.Request.Cookies.TryGetValue(CartState.CookieName, out var existing) &&
+            Guid.TryParseExact(existing, "N", out _))
+        {
+            return existing;
+        }
+
+        var key = Guid.NewGuid().ToString("N");
+
+        HttpContext.Response.Cookies.Append(CartState.CookieName, key, new CookieOptions
+        {
+            HttpOnly = true,
+            IsEssential = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = HttpContext.Request.IsHttps,
+            MaxAge = TimeSpan.FromDays(30)
+        });
+
+        return key;
+    }
+}

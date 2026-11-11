@@ -1,0 +1,96 @@
+@page "/orders/{Id:int}"
+@page "/cart/confirmation/{Id:int}"
+@attribute [Authorize]
+@inject IOrderService OrderService
+
+<PageTitle>Order #@Id - eShopLite</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        @if (_loading)
+        {
+            <div class="skeleton" style="height: 90px; margin-bottom: 1.75rem;"></div>
+            <div class="skeleton" style="height: 260px;"></div>
+        }
+        else if (_order is null)
+        {
+            <EmptyState Icon="receipt"
+                        Title="Receipt not found"
+                        Message="That order does not exist, or it belongs to another account."
+                        ActionText="Back to my orders"
+                        ActionHref="/orders" />
+        }
+        else
+        {
+            <div class="receipt-banner">
+                <span class="glyph"><AppIcon Name="check" Size="24" StrokeWidth="2.5" /></span>
+                <div>
+                    <h1 class="h4 mb-1">Order #@_order.Id confirmed</h1>
+                    <p class="mb-0 text-muted">
+                        Thanks, <strong>@context.User.Identity?.Name</strong> &mdash; placed on
+                        @_order.PlacedUtc.ToString("dd MMM yyyy, HH:mm") UTC.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">Receipt</div>
+                <table class="table-app">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="mid">Qty</th>
+                            <th class="num">Unit price</th>
+                            <th class="num">Line total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in _order.Lines)
+                        {
+                            <tr @key="line.Id">
+                                <td>@line.ProductName</td>
+                                <td class="mid">@line.Quantity</td>
+                                <td class="num">USD @line.UnitPrice.ToString("N2")</td>
+                                <td class="num">USD @((line.UnitPrice * line.Quantity).ToString("N2"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="num">Total</th>
+                            <th class="num">USD @_order.Total.ToString("N2")</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a href="/products" class="btn-app">Continue shopping <AppIcon Name="arrow-right" Size="16" /></a>
+                <a href="/orders" class="btn-ghost">All my orders</a>
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private Order _order;
+    private bool _loading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+
+        var state = await AuthenticationState;
+
+        // Scoped to the signed-in user, so one customer can never read another's receipt.
+        _order = await OrderService.GetOrderAsync(Id, state.User.Identity?.Name);
+
+        _loading = false;
+    }
+}

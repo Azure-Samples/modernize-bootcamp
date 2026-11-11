@@ -1,0 +1,20 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <NavBar />
+
+    <main class="app-main">
+        <div class="container">
+            @Body
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="container d-flex flex-wrap justify-content-between gap-3">
+            <span>&copy; @DateTime.Now.Year eShopLite</span>
+            <span>Built with Blazor on .NET 10</span>
+        </div>
+    </footer>
+
+    <ToastHost />
+</div>

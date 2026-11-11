@@ -1,0 +1,32 @@
+# Secrets — legacy .NET Framework connection string file. Superseded by
+# appsettings.json + `dotnet user-secrets set "ConnectionStrings:StoreDbContext"`.
+# Kept ignored so a stale local copy can never be committed.
+src/eShopLite.StoreFx/connectionStrings.config
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.dll
+*.pdb
+
+# NuGet (packages.config restore target)
+packages/
+*.nupkg
+!packages/repositories.config
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.cache
+
+# IIS Express
+*.vs/config/applicationhost.config
+
+# Logs and test output
+*.log
+TestResults/

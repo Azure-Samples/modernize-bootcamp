@@ -1,0 +1,69 @@
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        <div class="user-menu">
+            <button type="button" class="user-trigger" @onclick="Toggle"
+                    aria-haspopup="true" aria-expanded="@_open">
+                <span class="avatar">@Initial(context.User.Identity?.Name)</span>
+                <span class="d-none d-md-inline">@context.User.Identity?.Name</span>
+                <AppIcon Name="chevron-down" Size="15" />
+            </button>
+
+            @if (_open)
+            {
+                <div class="menu-backdrop" @onclick="Close"></div>
+                <div class="menu-panel" role="menu">
+                    <div class="menu-head">
+                        <strong>@context.User.Identity?.Name</strong>
+                        <span>Signed in</span>
+                    </div>
+                    <a href="/orders" class="menu-item" role="menuitem" @onclick="Close">
+                        <AppIcon Name="receipt" Size="16" /> My orders
+                    </a>
+                    <a href="/cart" class="menu-item" role="menuitem" @onclick="Close">
+                        <AppIcon Name="cart" Size="16" /> My cart
+                    </a>
+                    @* Signing out clears an HTTP-only cookie, which a circuit cannot touch: this
+                       posts natively so the browser reloads with the new identity. *@
+                    <form method="post" action="/auth/logout">
+                        <AntiforgeryToken />
+                        <button type="submit" class="menu-item" role="menuitem">
+                            <AppIcon Name="logout" Size="16" /> Sign out
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <a href="@LoginUrl" class="btn-app btn-sm">
+            <AppIcon Name="user" Size="16" /> Sign in
+        </a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool _open;
+
+    private string LoginUrl
+    {
+        get
+        {
+            var current = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+
+            return current.StartsWith("/account/login", StringComparison.OrdinalIgnoreCase)
+                ? "/account/login"
+                : $"/account/login?returnUrl={Uri.EscapeDataString(current)}";
+        }
+    }
+
+    private void Toggle() => _open = !_open;
+
+    private void Close() => _open = false;
+
+    private static string Initial(string userName)
+    {
+        return string.IsNullOrWhiteSpace(userName) ? "?" : userName.Substring(0, 1);
+    }
+}

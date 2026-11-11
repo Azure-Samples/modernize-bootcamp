@@ -1,0 +1,42 @@
+@using eShopLite.StoreFx.Models
+@model Cart
+@{
+  ViewBag.Title = "Checkout";
+}
+<main aria-labelledby="title">
+  <h2 id="title">@ViewBag.Title</h2>
+  <p>Signed in as <strong>@User.Identity.Name</strong></p>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th class="text-center">Qty</th>
+        <th class="text-end">Line total</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach (var item in Model.Items)
+      {
+        <tr>
+          <td>@item.Name</td>
+          <td class="text-center">@item.Quantity</td>
+          <td class="text-end">USD @item.LineTotal.ToString("N2")</td>
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="2" class="text-end">Order total</th>
+        <th class="text-end">USD @Model.Total.ToString("N2")</th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <form asp-controller="Cart" asp-action="PlaceOrder" method="post">
+    <div class="d-flex justify-content-between">
+      <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">Back to cart</a>
+      <button type="submit" class="btn btn-success">Place order</button>
+    </div>
+  </form>
+</main>

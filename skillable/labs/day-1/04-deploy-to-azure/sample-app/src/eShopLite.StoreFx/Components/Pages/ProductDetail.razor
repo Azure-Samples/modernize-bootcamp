@@ -1,0 +1,75 @@
+@page "/products/{Id:int}"
+@page "/home/product/{Id:int}"
+@inject IStoreService StoreService
+@inject CartState Cart
+@inject ToastService Toasts
+
+<PageTitle>@(_product?.Name ?? "Product") - eShopLite</PageTitle>
+
+<p class="mb-3">
+    <a href="/products" class="btn-quiet btn-sm">&larr; Back to products</a>
+</p>
+
+@if (_loading)
+{
+    <div class="row g-4">
+        <div class="col-md-5"><div class="skeleton" style="height: 340px;"></div></div>
+        <div class="col-md-7"><div class="skeleton" style="height: 240px;"></div></div>
+    </div>
+}
+else if (_product is null)
+{
+    <EmptyState Title="That product no longer exists"
+                Message="It may have been removed from the catalogue."
+                ActionText="Browse the catalogue"
+                ActionHref="/products" />
+}
+else
+{
+    <div class="panel p-4 p-md-5">
+        <div class="row g-4 g-md-5 align-items-center">
+            <div class="col-md-5">
+                <div class="product-media rounded" style="aspect-ratio: 1;">
+                    <img src="@ProductImage.UrlFor(_product.ImageUrl)" alt="@_product.Name" width="480" height="480" />
+                </div>
+            </div>
+            <div class="col-md-7">
+                <span class="badge-soft mb-3">SKU @_product.Id</span>
+                <h1 class="mb-2">@_product.Name</h1>
+                <div class="price mb-3" style="font-size: 1.7rem;"><small>USD</small>@_product.Price.ToString("N2")</div>
+                <p class="text-muted">@_product.Description</p>
+
+                <div class="d-flex flex-wrap align-items-center gap-3 mt-4">
+                    <QuantityStepper @bind-Value="_quantity" />
+                    <button type="button" class="btn-app" @onclick="AddToCart">
+                        <AppIcon Name="cart" Size="17" /> Add to cart
+                    </button>
+                    <a href="/cart" class="btn-ghost">View cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Product _product;
+    private bool _loading = true;
+    private int _quantity = 1;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _product = await StoreService.GetProductAsync(Id);
+        _loading = false;
+    }
+
+    private void AddToCart()
+    {
+        Cart.Add(_product, _quantity);
+        Toasts.Show($"Added {_quantity} \u00d7 \"{_product.Name}\" to your cart.");
+        _quantity = 1;
+    }
+}

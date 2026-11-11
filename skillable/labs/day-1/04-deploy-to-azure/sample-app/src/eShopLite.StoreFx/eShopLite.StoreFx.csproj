@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UserSecretsId>2f1a6c94-8b3d-4e57-9a02-7c6d5e1f8b40</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Holds the live SQL password. The Web SDK's **/*.config glob would otherwise copy it into
+         build and publish output; the connection string now comes from user-secrets or the
+         ConnectionStrings__StoreDbContext environment variable. -->
+    <Content Remove="connectionStrings.config" />
+    <None Remove="connectionStrings.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.4" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.6.4" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
+    <PackageReference Include="EntityFramework" Version="6.5.2" />
+    <PackageReference Include="Microsoft.Azure.SignalR" Version="1.33.1" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <!-- EF6 provider built on Microsoft.Data.SqlClient. The in-box EntityFramework.SqlServer
+         provider binds to the legacy System.Data.SqlClient, and Web.config's
+         <entityFramework><providers> registration is gone, so the provider is registered in code
+         via DbConfiguration instead. -->
+    <PackageReference Include="Microsoft.EntityFramework.SqlServer" Version="6.5.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.11" />
+  </ItemGroup>
+</Project>
