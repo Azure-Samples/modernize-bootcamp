@@ -1,0 +1,70 @@
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<header class="app-header">
+    <div class="container">
+        <a href="/" class="brand">
+            <span class="brand-mark"><AppIcon Name="package" Size="19" StrokeWidth="2" /></span>
+            eShopLite
+        </a>
+
+        <button type="button" class="nav-toggle" @onclick="ToggleNav"
+                aria-expanded="@_navOpen" aria-label="Toggle navigation">
+            <AppIcon Name="@(_navOpen ? "close" : "menu")" Size="20" />
+        </button>
+
+        <ul class="nav-links @(_navOpen ? "open" : null)">
+            <li>
+                <NavLink href="/products" @onclick="CloseNav">
+                    <AppIcon Name="package" Size="16" /> Products
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/stores" @onclick="CloseNav">
+                    <AppIcon Name="store" Size="16" /> Stores
+                </NavLink>
+            </li>
+            <AuthorizeView>
+                <Authorized>
+                    <li>
+                        <NavLink href="/orders" Match="NavLinkMatch.All" @onclick="CloseNav">
+                            <AppIcon Name="receipt" Size="16" /> Orders
+                        </NavLink>
+                    </li>
+                </Authorized>
+            </AuthorizeView>
+        </ul>
+
+        <div class="header-actions">
+            <CartBadge />
+            <UserMenu />
+        </div>
+    </div>
+</header>
+
+@code {
+    private bool _navOpen;
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void ToggleNav() => _navOpen = !_navOpen;
+
+    private void CloseNav() => _navOpen = false;
+
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        if (_navOpen)
+        {
+            _navOpen = false;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}

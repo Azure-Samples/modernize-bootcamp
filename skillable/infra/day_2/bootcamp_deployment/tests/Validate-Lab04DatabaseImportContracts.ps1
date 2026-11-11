@@ -1,0 +1,266 @@
+[CmdletBinding()]
+param()
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+$projectRoot = Split-Path -Parent $PSScriptRoot
+$repositoryRoot = Resolve-Path (Join-Path $projectRoot '..\..\..\..')
+$helperPath = Join-Path $projectRoot 'assets\scripts\Lab04DatabaseImport.ps1'
+$importScriptPath = Join-Path $projectRoot 'assets\scripts\Import-Lab04Database.ps1'
+$postprovisionPath = Join-Path $projectRoot 'infra\hooks\postprovision.ps1'
+$deployScriptPath = Join-Path $projectRoot 'infra\Deploy-Lab04.ps1'
+$azureYamlPath = Join-Path $projectRoot 'azure.yaml'
+$mainBicepPath = Join-Path $projectRoot 'infra\main.bicep'
+$sqlDatabaseModulePath = Join-Path `
+    $projectRoot `
+    'infra\lab04\complete\modules\sql-database.bicep'
+$sqlManagedInstanceModulePath = Join-Path `
+    $projectRoot `
+    'infra\lab04\complete\modules\sql-managed-instance.bicep'
+$bacpacPath = Join-Path $repositoryRoot 'data\eshop.bacpac'
+
+. $helperPath
+
+$failures = [System.Collections.Generic.List[string]]::new()
+
+function Assert-Contract {
+    param(
+        [Parameter(Mandatory)][bool]$Condition,
+        [Parameter(Mandatory)][string]$Message
+    )
+
+    if (-not $Condition) {
+        $failures.Add($Message)
+    }
+}
+
+foreach ($path in @(
+    $helperPath,
+    $importScriptPath,
+    $postprovisionPath,
+    $deployScriptPath
+)) {
+    $tokens = $null
+    $parseErrors = $null
+    [void][System.Management.Automation.Language.Parser]::ParseFile(
+        $path,
+        [ref]$tokens,
+        [ref]$parseErrors
+    )
+    foreach ($parseError in $parseErrors) {
+        $failures.Add("$path failed PowerShell parsing: $($parseError.Message)")
+    }
+}
+
+Assert-Contract (Test-Path -LiteralPath $bacpacPath -PathType Leaf) `
+    "The repository BACPAC is missing at '$bacpacPath'."
+Assert-Contract (Test-Lab04PublicIPv4Address -IpAddress '203.0.113.10') `
+    'A canonical public IPv4 address must be accepted.'
+foreach ($invalidAddress in @(
+    '203.0.113.010',
+    '2001:db8::1',
+    '203.0.113.10/32',
+    'not-an-address'
+)) {
+    Assert-Contract (
+        -not (Test-Lab04PublicIPv4Address -IpAddress $invalidAddress)
+    ) "Invalid IPv4 input '$invalidAddress' must be rejected."
+}
+
+$ruleParameters = @{
+    SubscriptionId = '11111111-1111-1111-1111-111111111111'
+    EnvironmentName = 'lab04'
+    DatabaseMode = 'sqlMi'
+}
+$ruleName = New-Lab04DatabaseImportRuleName @ruleParameters
+Assert-Contract (
+    $ruleName -eq (New-Lab04DatabaseImportRuleName @ruleParameters)
+) 'Database import rule names must be deterministic.'
+Assert-Contract ($ruleName -match '^AllowBacpacImport-[0-9a-f]{24}$') `
+    'Database import rule names must use the bounded expected format.'
+Assert-Contract (
+    $ruleName -ne (
+        New-Lab04DatabaseImportRuleName `
+            -SubscriptionId $ruleParameters.SubscriptionId `
+            -EnvironmentName $ruleParameters.EnvironmentName `
+            -DatabaseMode azureSql
+    )
+) 'Azure SQL and SQL MI imports must use different rule names.'
+
+Assert-Contract (
+    (Get-Lab04SqlPackageVersion) -eq '170.5.96'
+) 'SqlPackage must remain pinned to version 170.5.96.'
+Assert-Contract (
+    (Get-Lab04SqlPackageFeed) -eq 'https://api.nuget.org/v3/index.json'
+) 'SqlPackage installation must use the expected explicit NuGet v3 feed.'
+$expectedExecutableName = $IsWindows ? 'sqlpackage.exe' : 'sqlpackage'
+Assert-Contract (
+    (Get-Lab04SqlPackageExecutableName) -eq $expectedExecutableName
+) 'SqlPackage executable resolution must match the current platform.'
+$testProjectRoot = Join-Path ([IO.Path]::GetTempPath()) 'lab04-contract-root'
+$expectedCachePath = Join-Path `
+    $testProjectRoot `
+    '.azure' `
+    'tools' `
+    'sqlpackage' `
+    '170.5.96'
+Assert-Contract (
+    (Get-Lab04SqlPackageCachePath -ProjectRoot $testProjectRoot) -eq
+        $expectedCachePath
+) 'SqlPackage must use the versioned project-local .azure tools cache.'
+
+$importCommand = Get-Command -Name $importScriptPath
+$parameterSetNames = @($importCommand.ParameterSets.Name)
+Assert-Contract ('Azd' -in $parameterSetNames) `
+    'The importer must expose an Azd parameter set.'
+Assert-Contract ('Arm' -in $parameterSetNames) `
+    'The importer must expose an Arm parameter set.'
+Assert-Contract (
+    'ReplaceExistingDatabase' -in $importCommand.Parameters.Keys
+) 'The importer must expose an explicit failed-import recovery switch.'
+
+$azureYaml = Get-Content -LiteralPath $azureYamlPath -Raw
+$postprovision = Get-Content -LiteralPath $postprovisionPath -Raw
+$deployScript = Get-Content -LiteralPath $deployScriptPath -Raw
+$helperScript = Get-Content -LiteralPath $helperPath -Raw
+$importScript = Get-Content -LiteralPath $importScriptPath -Raw
+$postprovisionApprovalCall = $postprovision.LastIndexOf(
+    'Approve-FrontDoorPrivateLink `'
+)
+$postprovisionImportCall = $postprovision.LastIndexOf('& $importScriptPath')
+$deployTokens = $null
+$deployParseErrors = $null
+$deployAst = [System.Management.Automation.Language.Parser]::ParseInput(
+    $deployScript,
+    [ref]$deployTokens,
+    [ref]$deployParseErrors
+)
+$httpStatusFunction = $deployAst.Find(
+    {
+        param($ast)
+
+        $ast -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+            $ast.Name -eq 'Get-HttpStatusSummary'
+    },
+    $true
+)
+Assert-Contract ($null -ne $httpStatusFunction) `
+    'The Front Door HTTP status formatter must be defined.'
+if ($httpStatusFunction) {
+    Invoke-Expression $httpStatusFunction.Extent.Text
+    Assert-Contract (
+        (Get-HttpStatusSummary -Response ([pscustomobject]@{
+            StatusCode = 503
+            StatusDescription = 'Service Unavailable'
+        })) -eq 'HTTP 503 Service Unavailable'
+    ) 'The HTTP status formatter must support Windows PowerShell responses.'
+    Assert-Contract (
+        (Get-HttpStatusSummary -Response ([pscustomobject]@{
+            StatusCode = 503
+            ReasonPhrase = 'Service Unavailable'
+        })) -eq 'HTTP 503 Service Unavailable'
+    ) 'The HTTP status formatter must support PowerShell 7 responses.'
+}
+Assert-Contract (
+    $helperScript -notmatch '\$IsWindows\s*\?' -and
+    $helperScript -notmatch '\[Convert\]::ToHexString' -and
+    $helperScript -notmatch 'SHA256\]::HashData' -and
+    $importScript -notmatch 'ConvertFrom-Json\s+-AsHashtable'
+) 'Database import scripts must avoid PowerShell 7 and newer .NET-only syntax and APIs.'
+Assert-Contract (
+    $azureYaml -match '(?m)^\s*postprovision:\s*$' -and
+    $azureYaml -match 'infra/hooks/postprovision\.ps1'
+) 'azure.yaml must invoke the database import postprovision hook.'
+Assert-Contract (
+    $postprovision -match 'Import-Lab04Database\.ps1' -and
+    $postprovision -match '-AzdEnvironment'
+) 'The postprovision hook must invoke the shared importer with AZD outputs.'
+Assert-Contract (
+    $postprovision -match 'LAB04_CONTAINER_APPS_ENVIRONMENT_ID' -and
+    $postprovision -match 'FRONT_DOOR_ORIGIN_ID' -and
+    $postprovision -match 'FRONT_DOOR_PRIVATE_LINK_REQUEST_MESSAGE' -and
+    $postprovision -match 'FRONT_DOOR_ENDPOINT' -and
+    $postprovision -match 'Unknown pending private endpoint connection' -and
+    $postprovision -match 'Multiple private endpoint connections' -and
+    $postprovisionApprovalCall -ge 0 -and
+    $postprovisionImportCall -gt $postprovisionApprovalCall
+) 'The AZD hook must approve only the expected Front Door connection before database import.'
+Assert-Contract (
+    $deployScript -match 'Import-Lab04Database\.ps1' -and
+    $deployScript -match '-DeploymentName\s+\$armDeploymentName'
+) 'The direct Deploy action must invoke the shared importer with ARM outputs.'
+Assert-Contract (
+    $deployScript -match '\.IndexOf\(\s*\$VmAdminUsername,\s*\[StringComparison\]::OrdinalIgnoreCase\s*\)\s+-ge 0' -and
+    $deployScript -notmatch '\.Contains\(\s*\$VmAdminUsername,\s*\[StringComparison\]'
+) 'VM password validation must remain compatible with Windows PowerShell and .NET Framework.'
+Assert-Contract (
+    $deployScript -notmatch '-SkipHttpErrorCheck' -and
+    $deployScript -match 'Invoke-WebRequest[\s\S]*?-UseBasicParsing' -and
+    $deployScript -match 'function Get-HttpStatusSummary' -and
+    $deployScript -match '''StatusDescription'', ''ReasonPhrase''' -and
+    $deployScript -notmatch '\$webResponse\.StatusDescription' -and
+    $deployScript -match 'Last probe: \$lastProbeFailure' -and
+    $deployScript -notmatch 'if \(\$attempt -eq \d+\) \{\s*throw'
+) 'Front Door verification must support Windows PowerShell and PowerShell 7 HTTP responses and report the final failure.'
+Assert-Contract (
+    $deployScript -match 'az account set[\s\S]*?\$LASTEXITCODE' -and
+    $deployScript -match '\$sqlAdminJson\s*=\s*az ad user show[\s\S]*?\$LASTEXITCODE[\s\S]*?ConvertFrom-Json' -and
+    $deployScript -match '\$sqlAdminJson\s*=\s*az ad signed-in-user show[\s\S]*?\$LASTEXITCODE[\s\S]*?ConvertFrom-Json' -and
+    $deployScript -match 'az login --tenant \$tenantId'
+) 'Direct deployment must surface Azure CLI authentication failures before reading Microsoft Entra user properties.'
+Assert-Contract (
+    $helperScript -match 'dotnet tool install Microsoft\.SqlPackage' -and
+    $helperScript -match '--tool-path\s+\$temporaryPath' -and
+    $helperScript -match '--add-source\s+\$script:Lab04SqlPackageFeed' -and
+    $helperScript -notmatch '(?m)(?:^|\s)(?:-g|--global)(?:\s|$)'
+) 'SqlPackage must install into the local cache without global tool mutation.'
+Assert-Contract (
+    $importScript -notmatch 'Get-Command\s+[''"]?SqlPackage' -and
+    $importScript -match 'Resolve-Lab04SqlPackage\s+-ProjectRoot\s+\$projectRoot' -and
+    $importScript -match '&\s+\$sqlPackagePath\s+@sqlPackageArguments'
+) 'The importer must resolve and invoke the project-local SqlPackage executable.'
+Assert-Contract (
+    $importScript -match 'if \(-not \$ReplaceExistingDatabase\)' -and
+    $importScript -match 'az sql midb delete' -and
+    $importScript -match 'az sql db delete' -and
+    $importScript -match 'Deleting existing database'
+) 'Existing databases must only be deleted through the explicit recovery switch.'
+Assert-Contract (
+    $importScript -match 'function Set-Lab04ContainerAppDatabaseConfiguration' -and
+    $importScript -match 'az containerapp update' -and
+    $importScript -match 'ConnectionStrings__StoreDbContext=\$connectionString' -and
+    $importScript -match 'LAB06_RUNTIME_IDENTITY_CLIENT_ID'
+) 'Post-provision automation must finalize the Container App database connection after SQL MI exposes its FQDN.'
+$existingDatabaseCheckIndex = $importScript.IndexOf(
+    'if ([int]$existingDatabaseCount -gt 0)'
+)
+$sqlPackageResolutionIndex = $importScript.IndexOf(
+    '$sqlPackagePath = Resolve-Lab04SqlPackage'
+)
+Assert-Contract (
+    $existingDatabaseCheckIndex -ge 0 -and
+    $sqlPackageResolutionIndex -gt $existingDatabaseCheckIndex
+) 'Existing databases must short-circuit before SqlPackage installation.'
+
+$mainBicep = Get-Content -LiteralPath $mainBicepPath -Raw
+$sqlDatabaseModule = Get-Content -LiteralPath $sqlDatabaseModulePath -Raw
+$sqlManagedInstanceModule = Get-Content `
+    -LiteralPath $sqlManagedInstanceModulePath `
+    -Raw
+Assert-Contract (
+    $mainBicep -match "(?m)^var databaseName = 'eshop_ai'\r?$" -and
+    $mainBicep -match '(?m)^output LAB04_DATABASE_NAME string = databaseName\r?$'
+) 'The deployment database output must resolve to exact lowercase eshop_ai.'
+Assert-Contract (
+    $sqlDatabaseModule -notmatch "Microsoft\.Sql/servers/databases@"
+) 'The Azure SQL module must not deploy an empty database resource.'
+Assert-Contract (
+    $sqlManagedInstanceModule -notmatch "Microsoft\.Sql/managedInstances/databases@"
+) 'The SQL MI module must not deploy an empty managed database resource.'
+
+if ($failures.Count -gt 0) {
+    throw "Lab 04 database import validation failed:`n- $($failures -join "`n- ")"
+}
+
+Write-Host 'Lab 04 database import contracts are valid.'

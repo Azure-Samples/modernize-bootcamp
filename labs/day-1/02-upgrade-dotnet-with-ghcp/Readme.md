@@ -4,15 +4,33 @@ The Caldova Retail storefront is built on **.NET Framework 4.8**, an older versi
 
 In this module you'll use **GitHub Copilot Modernization** to make that move. Rather than finding and fixing every piece of code that no longer works by hand, you'll guide an AI agent that reviews the code, writes a plan you can check and edit, and then carries it out one task at a time.
 
+## ✅ Prerequisites
+
+Use a Windows 10 or 11 computer with the following tools:
+
+- **Visual Studio Code**
+- **Git CLI**
+- **GitHub account**
+- **GitHub Copilot license**
+- VS Code extensions: **GitHub Copilot modernization** and **GitHub Copilot upgrade**
+- **MSBuild** (Can be installed through Visual Studio Build Tools)
+- **NuGet CLI** (`nuget.exe`) to build and run the legacy app
+- **IIS Express***
+- **.NET Framework 4.8**
+- **.NET 10 SDK**
+- **PowerShell**
+
+For the take-home option using a local database, also install:
+
+- **SQL Server Express LocalDB**
+- **SqlPackage** to import the BACPAC database
+- **sqlcmd** to run SQL commands against the local database
+
 > ⚠️ **IMPORTANT: EXPECT AN AGENTIC WORKFLOW**
 >
 > The rest of today's labs use AI agents. The modernization tools provide a structured process where they can, but agents may still take a different path or show options that don't match the screenshots or instructions exactly. Use your best judgment: review what an agent is asking to do, and choose the option that makes sense. The choices you make here won't prevent you from continuing to the next section.
->
-> Learning to navigate this variation is part of the workshop—and part of real-world modernization work. If you're unsure what an agent is doing, what an approval means, or whether it seems stuck, ask it to explain or ask your instructor for help.
 
 > 🧭 New to GitHub Copilot Chat? [Copilot Essentials](https://github.com/Azure-Samples/modernize-bootcamp/blob/main/docs/copilot-essentials.md) is a short reference on modes, models, context, cost, and course-correcting.
-
-> 🖥️ **Where you work.** You do this whole lab on the **W11-Workstation** virtual machine in your Skillable lab environment. Its sign-in credentials are on the **Resources** tab of your lab instructions. Everything you need, including VS Code, the GitHub Copilot extensions, and the build tools, is already installed on the VM. At no point do you need to leave the VM or use your own computer.
 
 ## 💼 Business case
 
@@ -36,43 +54,11 @@ Caldova Retail runs on .NET Framework 4.8, the last version of a platform that i
 >
 > Keeping the scope tight is what makes the upgrade verifiable: if the app behaves the same afterwards, the framework change is sound.
 
-## 👀 See the app as it runs today
-
-Caldova Retail is already running on-premises, on a Windows Server behind IIS. Check it out:
-
-1. Open **Edge** from the taskbar:
-
-   ![Open Edge](./images/open-edge.png)
-
-2. In the browser type this link: +++https://app01+++. It may take a few seconds to load.
-
-Walk around the storefront for a minute and notice how it behaves:
-
-- The product catalog loads, with images
-- Sign-in works for both accounts — use the demo logins below
-- Adding an item to the cart works
-
-| Username | Password | Role | Notes |
-| --- | --- | --- | --- |
-| `alice` | `Password1!` | Admin, Manager | Has existing order history |
-| `bob` | `Password1!` | Employee | Has existing order history |
-
 ## 🛠️ Setup: Load the Legacy App Repository
-
-> **How the pieces fit.** The app you just looked at, **https://app01**, is the running app on the app server, which is a VM. Its source code lives in a GitHub repository. In this setup you make your own copy of that repository (a **fork**), then download it to this workstation (a **clone**). That puts the code on your machine, so you can assess and upgrade it here.
 >
 > The upgrade agent saves its changes in Git as it works. Working in your own fork means your changes don't affect the workshop repository or anyone else.
 
-**1. Sign in to the workshop repository.** Open a new tab in Microsoft Edge and type this link in your browser +++https://github.com/Skillable-Events/caldova-retail+++
-
-1. On the Skillable Events single sign-on page, select **Continue**.
-
-   ![Skillable Events single sign-on](./images/sso-skillable.png)
-
-   > ⚠️ **Sign-in may take a few tries.** If it keeps reloading or shows an error, wait a few minutes, then try again.
-
-2. In the **Sign in** box, enter the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions, then select **Next**.
-3. Enter the **Password** from the same **Azure portal** section. If you are asked for a **Temporary Access Pass**, enter the **TAP** value instead. If it prompts you to stay signed in, hit **Yes**.
+**1. Sign in to your personal GitHub profile.**
 
 **2. Fork and clone the repository.**
 
@@ -82,30 +68,19 @@ Walk around the storefront for a minute and notice how it behaves:
 
    ![Create fork](./images/fork-creation.png)
 
-2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like **https://github.com/User1-12345678_events/caldova-retail.git**.
+2. In your new fork, select **Code**, then copy the **HTTPS** URL. It should look something like **https://github.com/<your-personal-github>/caldova-retail.git**.
 
    ![Code button](./images/code-button.png)
 
    ![Copy HTTPS URL](./images/copy-https.png)
 
-3. Open PowerShell from your applications and clone your fork (run this from the default location, **C:\Users\Admin**). In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail.git
+3. Open PowerShell from your applications and clone your fork into a directory of your choice. In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too).
 
    ```powershell
    git clone <your-fork-url>
    ```
 
-   If you are asked to sign in, choose **Sign in with your browser**, approve the authorization (select **Authorize git-ecosystem**), then return to PowerShell. The clone starts once you are signed in.
-   > 💡 If you face any errors here, the sign in may not have persisted. If that is the case, re-type the original repo link, +++https://github.com/Skillable-Events/caldova-retail+++, into the browser, follow the sign in, click the button to stay signed in, and then run the PowerShell command again.
-
-**3. Set the build tools path (one time).** Copilot can usually work this out on its own, but we include this step to prevent an error, or Copilot getting stuck, when the upgrade starts. It points the build at the files the legacy web project needs. In the same PowerShell window, run:
-
-```powershell
-$vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -property installationPath; [Environment]::SetEnvironmentVariable("VSToolsPath", "$vs\MSBuild\Microsoft\VisualStudio\v17.0", "User"); $env:VSToolsPath = "$vs\MSBuild\Microsoft\VisualStudio\v17.0"
-```
-
-This command prints nothing, which is expected. The setting is saved for your user, so you only need to do this once on your VM.
-
-> 💡 If VS Code is already open, close every VS Code window before the next step, so it picks up the new setting when it starts.
+   If you are asked to sign in, please do so and then re-run the command.
 
 **4. Open the storefront folder in VS Code.** Run this command in PowerShell to open the application in VSCode:
 
@@ -126,11 +101,11 @@ Check for any notification near the top banner like shown below. If VS Code open
 
 You are in the right place when the Explorer shows **eShopLiteFx.sln** next to a **src** folder.
 
-**5. Give the app its database password.** The app reads its connection string from **src\eShopLite.StoreFx\connectionStrings.config**. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions (+++Pa$$w0rd+++). Leave the server, database, and user exactly as they are.
+**5. Give the app its database password.** The app reads its connection string from **src\eShopLite.StoreFx\connectionStrings.config**. Open that file (navigate under the src folder) and replace the placeholder password with the **W11-Workstation** password from the **Resources** tab of your lab instructions (Pa$$w0rd). Leave the server, database, and user exactly as they are.
 
 ![Replace the database password in connectionStrings.config](./images/db-password.png)
 
-**6. Open Copilot Chat, pick a model, and set your Git commit identity.** The upgrade agent saves its changes as Git commits, so it needs to know who you are before it starts. Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
+**6. Set up Copilot Chat pick a model.** Open Copilot Chat by selecting the chat icon in the top menu bar, to the right of the search bar:
 
 ![Open chat](./images/open-chat.png)
 
@@ -146,26 +121,15 @@ Next, open the model picker, the dropdown under the chat box that shows the curr
 
 ![The model picker under the chat box, showing Auto](./images/model-picker.png)
 
-Select **Claude Sonnet 5.5** from the list (if you don't see it, look under **Other Models**). We use it to keep results more consistent, and because it balances strong code analysis with speed and cost. The default works too, so if it isn't available, keep the default.
+Select **Claude Sonnet 5.5** from the list (if you don't see it, look under **Other Models**). We use it to keep results more consistent, and because it balances strong code analysis with speed and cost. The default or any model you prefer works too.
 
 ![Claude Sonnet 5.5 in the model picker list](./images/model-picker-sonnet.png)
-
-Next, tell the agent who you are, so it can make commits later without stopping to ask for your identity. In the message below, replace **your-name** and **your-lab-email** with your own details, and delete the angle brackets.
-
-- **Email:** use the **Username** listed under **Azure portal** on the **Resources** tab of your lab instructions. It looks like `user1-6614389@...`.
-- **Name:** use the part before the **@** in that email (for example, **user1-6614389**), or your own name. Either is fine.
-
-Then send this message in the chat:
-
-```plaintext
-For the rest of this upgrade, use <your-name> and <your-lab-email> as the Git commit identity.
-```
 
 ## ▶️ Run the App
 
 To make sure the setup was completed correctly, ask Copilot Chat to build and launch the legacy app for you.
 
-> 💡 Running this .NET Framework app outside a server requires **MSBuild** (the tool that builds the app) and **IIS Express** (a small web server for testing), because legacy ASP.NET apps like this one can't be started with the usual **dotnet run**. Both tools are already installed on the VM, so there is nothing to set up. Keep it in mind for future customer scenarios where you need to run a legacy app yourself.
+> 💡 Running this .NET Framework app requires **MSBuild** (the tool that builds the app) and **IIS Express** (a small web server for testing), because legacy ASP.NET apps like this one can't be started with the usual command, **dotnet run**. Both tools are listed as pre-requisities. If they are not installed, approve the Copilot commands or follow the steps to install them. Keep this in mind for future customer scenarios where you need to run a legacy app yourself.
 
 In Copilot Chat, which you opened and signed in to in the Setup section, submit this prompt:
 
@@ -246,7 +210,7 @@ You'll also see a **Security** option, which identifies security issues using IS
 >
 > 1. Uninstall both the **GitHub Copilot modernization** and **GitHub Copilot upgrade** extensions.
 > 2. Restart VS Code.
-> 3. Install both extensions again and open the assessment report.
+> 3. Install both extensions again (make sure they are updated) and open the assessment report.
 >
 > Re-run the assessment if it is still not appearing.
 
@@ -489,7 +453,7 @@ Once you approve the plan, the agent begins upgrading the application.
 
 > ‼️ ⏱️ **IMPORTANT: WORKSHOP NOTE ON PACING. YOU DON'T NEED TO WAIT FOR THE UPGRADE TO FINISH**
 >
-> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, you will watch the agent work through its first task and then move on to a pre-upgraded repository.
+> An end-to-end framework upgrade is an iterative, agent-driven process where the AI analyzes code, edits files, builds, fixes compiler errors, and verifies functionality. In real-world scenarios, this takes a variable amount of time depending on the size of the application, the complexity of the upgrade, and the model used. In our testing, this specific storefront upgrade usually takes **45–60+ minutes**. For the sake of time in this workshop, you do not have to wait for the whole upgade to complete (next module provides a repo already upgraded to .NET 10).
 >
 > **You can stop and go to Step 5️⃣ once both of these are true:**
 >

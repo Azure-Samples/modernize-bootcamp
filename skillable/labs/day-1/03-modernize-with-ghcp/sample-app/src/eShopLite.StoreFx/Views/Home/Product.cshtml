@@ -1,0 +1,29 @@
+@using eShopLite.StoreFx.Models
+@model Product
+@{
+  ViewBag.Title = Model.Name;
+  var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<main aria-labelledby="title">
+  <p><a asp-controller="Home" asp-action="Products">← Back to products</a></p>
+
+  <div class="row">
+    @* Replaces [OutputCache(Duration = 300)] on the former ProductDetails child action. *@
+    <cache expires-after="@TimeSpan.FromSeconds(300)" vary-by="@Model.Id">
+      @await Component.InvokeAsync("ProductDetails", new { id = Model.Id })
+    </cache>
+  </div>
+
+  <div class="row">
+    <div class="col-md-7 offset-md-5">
+      <form asp-controller="Cart" asp-action="Add" method="post" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="productId" value="@Model.Id" />
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <label class="visually-hidden" for="qty">Quantity</label>
+        <input type="number" id="qty" name="quantity" value="1" min="1"
+               class="form-control" style="width: 6rem;" />
+        <button type="submit" class="btn btn-primary">Add to cart</button>
+      </form>
+    </div>
+  </div>
+</main>
