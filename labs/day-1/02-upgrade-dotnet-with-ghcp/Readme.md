@@ -6,25 +6,7 @@ In this module you'll use **GitHub Copilot Modernization** to make that move. Ra
 
 ## ✅ Prerequisites
 
-Use a Windows 10 or 11 computer with the following tools:
-
-- **Visual Studio Code**
-- **Git CLI**
-- **GitHub account**
-- **GitHub Copilot license**
-- VS Code extensions: **GitHub Copilot modernization** and **GitHub Copilot upgrade**
-- **MSBuild** (Can be installed through Visual Studio Build Tools)
-- **NuGet CLI** (`nuget.exe`) to build and run the legacy app
-- **IIS Express***
-- **.NET Framework 4.8**
-- **.NET 10 SDK**
-- **PowerShell**
-
-For the take-home option using a local database, also install:
-
-- **SQL Server Express LocalDB**
-- **SqlPackage** to import the BACPAC database
-- **sqlcmd** to run SQL commands against the local database
+Before you start, complete the [bootcamp prerequisites](../../README.md#-prerequisites).
 
 > ⚠️ **IMPORTANT: EXPECT AN AGENTIC WORKFLOW**
 >
@@ -233,8 +215,6 @@ In the top right corner of the assessment there is an option to **Create Plan**,
 ## 🚀 Upgrading to .NET 10
 
 The rest of this module is the upgrade itself, in five steps.
-
-> 💡 **Can't see everything on your screen?** If you aren't using a monitor or a larger screen, the Copilot Chat can be hard to see. Press **Ctrl** and **-** (minus) to zoom out and fit more on screen, or select the full screen button on Skillable ![Full screen button](./images/full-screen-button.png).
 
 ## 1️⃣ Initiate the Upgrade
 
