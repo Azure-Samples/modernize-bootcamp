@@ -45,3 +45,26 @@ The labs follow the progression of a real modernization engagement:
 6. Capture decisions and reusable patterns for the next modernization wave.
 
 The emphasis is not on finding a single "correct" Azure service. It is on developing a defensible decision process that balances business continuity, modernization value, delivery risk, and the customer's capacity for change.
+
+## ✅ Prerequisites
+
+Set these up once before you start. Each lab's **Setup** section still covers the steps you do during that lab, such as forking and cloning a repository.
+
+Use a **Windows 10 or 11** computer. The commands below use [winget](https://learn.microsoft.com/windows/package-manager/winget/), which is included with current versions of Windows. Run them in PowerShell, then close and reopen PowerShell so new tools are on your `PATH`.
+
+| Requirement | Needed for | How to install |
+| --- | --- | --- |
+| **GitHub account** | All labs | [Sign up at github.com](https://github.com/signup). |
+| **GitHub Copilot license** | All labs | [Choose a Copilot plan](https://github.com/features/copilot) on the account above. |
+| **Visual Studio Code** | All labs | `winget install Microsoft.VisualStudioCode` |
+| **GitHub Copilot modernization** extension | All labs | `code --install-extension vscjava.migrate-java-to-azure` |
+| **GitHub Copilot upgrade** extension | Lab 02 | `code --install-extension ms-dotnettools.upgrade-agent` |
+| **Git CLI** | All labs | `winget install Git.Git` |
+| **PowerShell** | All labs | Included with Windows. For the latest version, run `winget install Microsoft.PowerShell`. |
+| **.NET 10 SDK** | Labs 02 and later | `winget install Microsoft.DotNet.SDK.10` |
+| **.NET Framework 4.8** | Lab 02 (legacy app) | The runtime is included with Windows 10 (version 1903 or later) and Windows 11. The targeting pack is added by the Build Tools command in the next row. |
+| **MSBuild** (Visual Studio Build Tools) | Lab 02 (legacy app) | `winget install Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.WebBuildTools --add Microsoft.Net.Component.4.8.TargetingPack"` |
+| **NuGet CLI** (`nuget.exe`) | Lab 02 (legacy app) | `winget install Microsoft.NuGet` |
+| **IIS Express** | Lab 02 (legacy app) | Download and run the 64-bit installer from [IIS 10.0 Express](https://www.microsoft.com/download/details.aspx?id=48264). |
+| **GitHub CLI** (`gh`) | Lab 07 | `winget install GitHub.cli`, then run `gh auth login`. |
+| **Modernization CLI** (`modernize`) | Lab 07 | `winget install GitHub.Copilot.modernization.agent`, then run `modernize --help` in a new terminal to confirm. |
