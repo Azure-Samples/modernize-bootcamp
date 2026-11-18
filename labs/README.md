@@ -57,8 +57,8 @@ Use a **Windows 10 or 11** computer. The commands below use [winget](https://lea
 | **GitHub account** | All labs | [Sign up at github.com](https://github.com/signup). |
 | **GitHub Copilot license** | All labs | [Choose a Copilot plan](https://github.com/features/copilot) on the account above. |
 | **Visual Studio Code** | All labs | `winget install Microsoft.VisualStudioCode` |
-| **GitHub Copilot modernization** extension | All labs | `code --install-extension vscjava.migrate-java-to-azure` |
-| **GitHub Copilot upgrade** extension | Lab 02 | `code --install-extension ms-dotnettools.upgrade-agent` |
+| **GitHub Copilot modernization** extension | All labs | `code --install-extension vscjava.migrate-java-to-azure`, or open the **Extensions** tab in VS Code and search for it. |
+| **GitHub Copilot upgrade** extension | Lab 02 | `code --install-extension ms-dotnettools.upgrade-agent`, or open the **Extensions** tab in VS Code and search for it. |
 | **Git CLI** | All labs | `winget install Git.Git` |
 | **PowerShell** | All labs | Included with Windows. For the latest version, run `winget install Microsoft.PowerShell`. |
 | **.NET 10 SDK** | Labs 02 and later | `winget install Microsoft.DotNet.SDK.10` |
