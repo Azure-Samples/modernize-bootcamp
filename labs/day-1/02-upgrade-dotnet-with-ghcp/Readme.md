@@ -44,7 +44,7 @@ Caldova Retail runs on .NET Framework 4.8, the last version of a platform that i
 
 **2. Fork and clone the repository.**
 
-1. On the repository page, select **Fork**, then **Create fork** with the defaults left alone.
+1. Open the legacy app repository, [**Azure-Samples/caldova-retail**](https://github.com/Azure-Samples/caldova-retail). On the repository page, select **Fork**, then **Create fork** with the defaults left alone.
 
    ![Fork button](./images/fork-button.png)
 
