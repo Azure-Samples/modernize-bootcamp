@@ -54,8 +54,9 @@ Use a **Windows 10 or 11** computer. The commands below use [winget](https://lea
 
 | Requirement | Needed for | How to install |
 | --- | --- | --- |
-| **GitHub account** | All labs | [Sign up at github.com](https://github.com/signup). |
+| **Personal GitHub account** | All labs | [Sign up at github.com](https://github.com/signup). |
 | **GitHub Copilot license** | All labs | [Choose a Copilot plan](https://github.com/features/copilot) on the account above. |
+| **Azure subscription and permissions** | Labs 04-08 | Use a subscription capable of deploying the required resources. Your profile must provide either subscription Owner or the appropriate resource-group-level Owner/Contributor permissions for the lab. Some labs also require SQL and data-plane permissions described in their instructions. |
 | **Visual Studio Code** | All labs | `winget install Microsoft.VisualStudioCode` |
 | **GitHub Copilot modernization** extension | All labs | `code --install-extension vscjava.migrate-java-to-azure`, or open the **Extensions** tab in VS Code and search for it. |
 | **GitHub Copilot upgrade** extension | Lab 02 | `code --install-extension ms-dotnettools.upgrade-agent`, or open the **Extensions** tab in VS Code and search for it. |

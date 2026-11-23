@@ -40,11 +40,11 @@ Caldova Retail runs on .NET Framework 4.8, the last version of a platform that i
 >
 > The upgrade agent saves its changes in Git as it works. Working in your own fork means your changes don't affect the workshop repository or anyone else.
 
-**1. Sign in to your personal GitHub profile.**
+**1. Sign in to your personal GitHub profile.** Use the personal GitHub account where you want to keep your fork.
 
 **2. Fork and clone the repository.**
 
-1. Open the legacy app repository, [**Azure-Samples/caldova-retail**](https://github.com/Azure-Samples/caldova-retail). On the repository page, select **Fork**, then **Create fork** with the defaults left alone.
+1. Open the legacy app repository, [**Azure-Samples/caldova-retail**](https://github.com/Azure-Samples/caldova-retail). On the repository page, select **Fork**, choose **your personal GitHub account** as the owner, then select **Create fork** with the defaults left alone.
 
    ![Fork button](./images/fork-button.png)
 
