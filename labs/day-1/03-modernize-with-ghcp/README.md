@@ -14,10 +14,10 @@ You work in **GitHub Copilot Chat** for the whole module, switching modes as you
 
 In Module 2, you observed how GitHub Copilot Modernization assesses and begins an upgrade. Because this full agentic framework upgrade may take an hour, we pick up this module using a prepared copy of the storefront that is already upgraded to **.NET 10**.
 
-Follow these steps to fork, clone, and configure the .NET 10 repository (like you did in the previous module):
+Follow these steps to fork, clone, and configure the .NET 10 repository (like you did in the previous module). Use your **personal GitHub account** as the fork owner.
 
 1. In Microsoft Edge, open this link: [https://github.com/Azure-Samples/caldova-retail-dotnet10](https://github.com/Azure-Samples/caldova-retail-dotnet10). (Sign in with your lab credentials if prompted).
-2. Select **Fork**, then **Create fork** with the defaults left alone.
+2. Select **Fork**, choose **your personal GitHub account** as the owner, then select **Create fork** with the defaults left alone.
 3. In your new fork, select **Code**, then copy the **HTTPS** URL.
 4. Open PowerShell from your applications and clone your fork. Run this from the directory of your choice. In the command below, replace **your-fork-url** with the HTTPS URL you copied in the previous step (delete the angle brackets too). The finished command looks like this: git clone https://github.com/your-account/caldova-retail-dotnet10.git
 
